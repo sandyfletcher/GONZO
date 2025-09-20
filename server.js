@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
     const sender = rooms[roomId]?.participants.find(p => p.id === socket.id);
     if (sender) {
         io.to(roomId).emit('receive_message', {
-            sender: sender, // Now sending { id: '...', username: '...' }
+            sender: sender, // Send the entire sender object
             message: message
         });
     }
