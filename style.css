@@ -73,7 +73,7 @@ a {
     border: 1px solid var(--border-color);
 }
 .sidebar {
-    flex: 0 0 280px; /* Fixed width for the sidebar */
+    flex: 0 0 250px; /* slightly smaller for a sleeker look */
     padding: 15px;
     border-right: 1px solid var(--border-color);
     display: flex;
@@ -82,6 +82,13 @@ a {
 .sidebar-section {
     margin-bottom: 20px;
 }
+/* --- Centering for Share Info --- */
+.share-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
 .share-info .link {
     background-color: #2a2a2a;
     padding: 5px;
@@ -89,6 +96,7 @@ a {
     font-size: 0.9em;
     margin-top: 5px;
     display: block;
+    width: 100%; /* Ensure it takes full width of the centered container */
 }
 .qr-code {
     width: 128px;
@@ -96,7 +104,6 @@ a {
     background-color: white; /* QR codes need a light background */
     margin: 10px 0;
     padding: 5px;
-    /* placeholder styling */
     border: 1px dashed var(--terminal-fg-dark);
     display: flex;
     align-items: center;
@@ -122,6 +129,7 @@ a {
     display: flex;
     flex-direction: column;
     padding: 15px;
+    min-width: 0; /* Prevents flex items from overflowing their container */
 }
 .messages {
     flex: 1;
@@ -141,6 +149,7 @@ a {
     padding: 10px;
     font-family: inherit;
     font-size: 1em;
+    min-width: 0; /* Prevents input from overflowing its flex container */
 }
 .message-input input:focus {
     outline: 1px solid var(--terminal-fg);
@@ -156,4 +165,28 @@ a {
 .message-input button:hover {
     background-color: var(--terminal-fg);
     color: var(--terminal-bg);
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 5px; /* Reduce padding on small screens */
+    }
+    .room-container {
+        flex-direction: column; /* Stack sidebar and chat vertically */
+        height: calc(100vh - 10px); /* Adjust for new body padding */
+    }
+    .sidebar {
+        flex: 0 1 auto; /* Allow sidebar to shrink but not grow, with an automatic height */
+        width: 100%;
+        border-right: none; /* Remove side border */
+        border-bottom: 1px solid var(--border-color); /* Add bottom border */
+        order: 2; /* Make the sidebar appear AFTER the chat area */
+        overflow-y: auto; /* Allow sidebar to scroll if it has too much content for the screen */
+    }
+    .chat-area {
+        order: 1; /* Make the chat area appear BEFORE the sidebar */
+    }
+    .sidebar-footer {
+        margin-top: 15px; /* Adjust spacing for column layout */
+    }
 }
