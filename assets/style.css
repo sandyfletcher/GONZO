@@ -1,0 +1,159 @@
+:root {
+    --terminal-bg: #1a1a1a;
+    --terminal-fg: #00ff41;
+    --terminal-fg-dark: #00a32a;
+    --border-color: #005f18;
+}
+* {
+    box-sizing: border-box;
+}
+body {
+    background-color: var(--terminal-bg);
+    color: var(--terminal-fg);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 16px;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+h1, h2 {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 5px;
+    margin-top: 0;
+}
+a {
+    color: var(--terminal-fg);
+    text-decoration: none;
+}
+/* --- Blinking Cursor Effect --- */
+@keyframes blink {
+    50% { opacity: 0; }
+}
+.cursor {
+    display: inline-block;
+    background-color: var(--terminal-fg);
+    width: 10px;
+    height: 1.2em;
+    animation: blink 1s step-end infinite;
+    margin-left: 5px;
+    vertical-align: bottom;
+}
+/* --- Main Menu / Centered Content --- */
+.main-container {
+    text-align: center;
+    border: 1px solid var(--border-color);
+    padding: 40px;
+}
+.main-container h1 {
+    margin-bottom: 30px;
+}
+.menu-button {
+    display: block;
+    border: 1px solid var(--terminal-fg);
+    padding: 10px 20px;
+    margin: 15px auto;
+    width: 200px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+.menu-button:hover {
+    background-color: var(--terminal-fg);
+    color: var(--terminal-bg);
+}
+/* --- Room Page Layout --- */
+.room-container {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 40px); /* Full viewport height minus body padding */
+    border: 1px solid var(--border-color);
+}
+.sidebar {
+    flex: 0 0 280px; /* Fixed width for the sidebar */
+    padding: 15px;
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+.sidebar-section {
+    margin-bottom: 20px;
+}
+.share-info .link {
+    background-color: #2a2a2a;
+    padding: 5px;
+    word-break: break-all;
+    font-size: 0.9em;
+    margin-top: 5px;
+    display: block;
+}
+.qr-code {
+    width: 128px;
+    height: 128px;
+    background-color: white; /* QR codes need a light background */
+    margin: 10px 0;
+    padding: 5px;
+    /* placeholder styling */
+    border: 1px dashed var(--terminal-fg-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    color: var(--terminal-bg);
+}
+.member-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+.member-list li {
+    margin-bottom: 5px;
+}
+.sidebar-footer {
+    margin-top: auto; /* pushes footer to the bottom */
+    font-size: 0.8em;
+    color: var(--terminal-fg-dark);
+}
+.chat-area {
+    flex: 1; /* takes up remaining space */
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+}
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+.message-input {
+    display: flex;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+}
+.message-input input {
+    flex: 1;
+    background: none;
+    border: 1px solid var(--terminal-fg-dark);
+    color: var(--terminal-fg);
+    padding: 10px;
+    font-family: inherit;
+    font-size: 1em;
+}
+.message-input input:focus {
+    outline: 1px solid var(--terminal-fg);
+}
+.message-input button {
+    background: none;
+    border: 1px solid var(--terminal-fg);
+    color: var(--terminal-fg);
+    padding: 10px 20px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+.message-input button:hover {
+    background-color: var(--terminal-fg);
+    color: var(--terminal-bg);
+}

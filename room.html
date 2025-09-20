@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FASTCHAT — room [hexhere]</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="room-container">
+        <aside class="sidebar">
+            <h1>FASTCHAT</h1>
+            <div class="sidebar-section share-info">
+                <h2>Share Room</h2>
+                <span class="link" id="room-link">fastchat.url/link/...</span>
+                <div class="qr-code"></div>
+            </div>
+            <div class="sidebar-section">
+                <h2>Owner:</h2>
+                <span class="owner-name">...</span>
+            </div>
+            <div class="sidebar-section">
+                <h2>MEMBERS</h2>
+                <ul class="member-list">
+                    <!-- This will be populated by JavaScript -->
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                (c) FASTCHAT <br> open-source + license
+            </div>
+        </aside>
+        <main class="chat-area"> <!-- Main chat area -->
+            <div class="messages">
+                <p>Connecting...</p>
+            </div>
+            <form class="message-input" id="message-form">
+                <input type="text" placeholder="Type a message..." autocomplete="off">
+                <button type="submit">> SEND</button>
+            </form>
+        </main>
+    </div>
+    <script src="assets/main.js"></script>
+</body>
+</html>
