@@ -27,7 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const roomLinkElement = document.getElementById('room-link');
             roomLinkElement.textContent = window.location.href; // Use the full URL for easy sharing
             const qrElement = document.querySelector('.qr-code');
-            qrElement.textContent = `QR for ${roomId}`; // Placeholder
+            qrElement.innerHTML = ''; // Clear placeholder text
+            const qr = qrcode(0, 'L'); // type 0, error correction 'L'
+            qr.addData(window.location.href);
+            qr.make();
+            qrElement.innerHTML = qr.createImgTag(4, 4); // (cellSize, margin)
             // Message form logic
             const messageForm = document.getElementById('message-form');
             const messageInput = messageForm.querySelector('input');
