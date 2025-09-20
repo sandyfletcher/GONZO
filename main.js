@@ -1,4 +1,21 @@
+/**
+ * Generates a consistent, readable color from a string (like a username).
+ * Uses HSL color model to ensure good saturation and lightness.
+ * @param {string} str The input string.
+ * @returns {string} An HSL color string (e.g., "hsl(120, 80%, 55%)").
+ */
+function getUsernameColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = hash % 360; // Get a hue value between 0 and 360
+    return `hsl(${hue}, 80%, 55%)`; // Fixed saturation and lightness for readability
+}
+
 const socket = io("https://fastchat-0opj.onrender.com/");
+
+
 socket.on('connect', () => {
     console.log("Connected to server with ID:", socket.id);
 });
@@ -93,9 +110,13 @@ socket.on('receive_message', (data) => {
             messagesContainer.innerHTML = '';
         }
         const messageElement = document.createElement('p');
+        const sender = data.sender;
+        // Generate the color from the username
+        const userColor = getUsernameColor(sender.username);
         // Simple XSS prevention by replacing < and >
         const sanitizedMessage = data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        messageElement.innerHTML = `<strong>&lt;${data.username}&gt;</strong> ${sanitizedMessage}`;
+        // Create the final HTML with the colored username
+        messageElement.innerHTML = `<strong>&lt;<span style="color: ${userColor};">${sender.username}</span>&gt;</strong> ${sanitizedMessage}`;
         messagesContainer.appendChild(messageElement);
         // Scroll to the bottom
         messagesContainer.scrollTop = messagesContainer.scrollHeight;

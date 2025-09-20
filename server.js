@@ -23,7 +23,7 @@ io.on('connection', (socket) => {
     socket.join(roomId);
     rooms[roomId] = {
       owner: socket.id,
-      participants: [{ id: socket.id, username: 'user-' + socket.id.substr(0, 6) }]
+      participants: [{ id: socket.id, username: socket.id.slice(0, 6) }]
     };
     socket.emit('room_created', roomId);
     console.log(`Room created with ID: ${roomId} by ${socket.id}`);
@@ -47,7 +47,7 @@ io.on('connection', (socket) => {
         }
       } else {
         // This is a regular new user joining
-        const newUser = { id: socket.id, username: 'user-' + socket.id.substr(0, 6) };
+        const newUser = { id: socket.id, username: socket.id.slice(0, 6) };
         room.participants.push(newUser);
       }
       console.log(`User ${socket.id} joined room ${roomId}`);
@@ -61,7 +61,7 @@ io.on('connection', (socket) => {
     const sender = rooms[roomId]?.participants.find(p => p.id === socket.id);
     if (sender) {
         io.to(roomId).emit('receive_message', {
-            username: sender.username,
+            sender: sender, // Now sending { id: '...', username: '...' }
             message: message
         });
     }
