@@ -1,4 +1,4 @@
-const socket = io("http://localhost:3000");
+const socket = io("https://fastchat-0opj.onrender.com/");
 socket.on('connect', () => {
     console.log("Connected to server with ID:", socket.id);
 });
