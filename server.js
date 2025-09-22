@@ -13,8 +13,6 @@ const rooms = {};
 
 // --- Helper Functions ---
 
-const sanitize = (str) => str.slice(0, 15); // Simple sanitizer for usernames
-
 const updateParticipants = (roomId) => {
     if (rooms[roomId]) {
         io.to(roomId).emit('update_participants', rooms[roomId].participants);
@@ -23,21 +21,20 @@ const updateParticipants = (roomId) => {
 
 // --- Event Handlers ---
 
-function handleCreateRoom(socket, data) {
+function handleCreateRoom(socket) {
     const roomId = uuidv4();
-    const username = sanitize(data.username || socket.id.slice(0, 5));
     socket.join(roomId);
     rooms[roomId] = {
       owner: socket.id,
-      participants: [{ id: socket.id, username }]
+      participants: [{ id: socket.id, username: socket.id.slice(0, 5) }]
     };
     socket.emit('room_created', roomId);
-    console.log(`Room created: ${roomId} by ${socket.id} (${username})`);
+    console.log(`Room created: ${roomId} by ${socket.id}`);
     updateParticipants(roomId);
 }
 
 function handleJoinRoom(socket, data) {
-    const { roomId, oldSocketId, username } = data;
+    const { roomId, oldSocketId } = data;
     const room = rooms[roomId];
 
     if (!room) {
@@ -58,7 +55,7 @@ function handleJoinRoom(socket, data) {
         // A regular new user is joining
         const newUser = { 
             id: socket.id, 
-            username: sanitize(username || socket.id.slice(0, 5)) 
+            username: socket.id.slice(0, 5)
         };
         room.participants.push(newUser);
     }
@@ -115,7 +112,7 @@ function handleDisconnect(socket) {
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id}`);
 
-  socket.on('create_room',  (data) => handleCreateRoom(socket, data));
+  socket.on('create_room',  () => handleCreateRoom(socket));
   socket.on('join_room',    (data) => handleJoinRoom(socket, data));
   socket.on('send_message', (data) => handleSendMessage(socket, data));
   socket.on('disconnect',   () => handleDisconnect(socket));

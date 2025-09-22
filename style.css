@@ -52,22 +52,6 @@ a {
 .main-container h1 {
     margin-bottom: 30px;
 }
-#username-input {
-    display: block;
-    width: 200px;
-    margin: 20px auto 15px;
-    background: none;
-    border: 1px solid var(--terminal-fg-dark);
-    color: var(--terminal-fg);
-    padding: 10px;
-    font-family: inherit;
-    font-size: 1em;
-    text-align: center;
-    text-transform: uppercase;
-}
-#username-input:focus {
-    outline: 1px solid var(--terminal-fg);
-}
 .menu-button {
     display: block;
     border: 1px solid var(--terminal-fg);

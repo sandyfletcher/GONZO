@@ -32,14 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function setupIndexPage() {
     const startButton = document.getElementById('start-room-btn');
-    const usernameInput = document.getElementById('username-input');
-
     startButton.addEventListener('click', (e) => {
         e.preventDefault();
-        const username = usernameInput.value.trim() || 'anon';
-        sessionStorage.setItem('username', username);
         console.log("Requesting a new room from server...");
-        socket.emit('create_room', { username });
+        socket.emit('create_room');
     });
 }
 
@@ -60,16 +56,6 @@ function setupRoomPage() {
 }
 
 // --- Helper Functions for Room Page ---
-
-/** Gets username from sessionStorage or prompts user if it's missing. */
-function getUsername() {
-    let username = sessionStorage.getItem('username');
-    if (!username) {
-        username = prompt("Please enter your name:", "anon") || "anon";
-        sessionStorage.setItem('username', username);
-    }
-    return username;
-}
 
 function initializeRoomUI(roomId) {
     document.title = `FASTCHAT — room [${roomId.substring(0, 6)}]`;
@@ -103,9 +89,8 @@ function joinRoom(roomId) {
     const oldSocketId = sessionStorage.getItem('previousSocketId');
     sessionStorage.removeItem('previousSocketId'); // Clean up so it's only used once
     
-    const username = getUsername();
-
-    socket.emit('join_room', { roomId, oldSocketId, username });
+    // The server will assign the username now, so we don't send one.
+    socket.emit('join_room', { roomId, oldSocketId });
 }
 
 // --- Socket Event Listeners ---
