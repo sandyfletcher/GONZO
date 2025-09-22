@@ -127,7 +127,6 @@ function renderUserMessage(data) { // renders a standard user message
     messageElement.appendChild(messageText);
     messagesContainer.appendChild(messageElement);
 }
-
 function renderEventMessage(data) { // renders a join/leave event message
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
@@ -144,7 +143,6 @@ socket.on('room_created', (roomId) => {
     sessionStorage.setItem('previousSocketId', socket.id);
     window.location.href = `room.html#${roomId}`;
 });
-
 socket.on('load_history', (history) => { // handles receiving message history when joining a room
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
@@ -158,9 +156,6 @@ socket.on('load_history', (history) => { // handles receiving message history wh
     });
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
-
-// In main.js
-
 socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
     const memberList = document.querySelector('.member-list');
@@ -171,7 +166,6 @@ socket.on('update_participants', (participants) => {
         let displayName = p.username;
         if (index === 0) { // if owner (first in the list), add a class to the <li>
             li.classList.add('owner'); 
-            displayName += ' (Owner)';
         }
         if (p.id === socket.id) {
             displayName += ' (You)';
@@ -180,7 +174,6 @@ socket.on('update_participants', (participants) => {
         memberList.appendChild(li);
     });
 });
-
 socket.on('user_event', (data) => { // handles a user join/leave event
     renderEventMessage(data);
     const messagesContainer = document.querySelector('.messages');
@@ -188,7 +181,6 @@ socket.on('user_event', (data) => { // handles a user join/leave event
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 });
-
 socket.on('receive_message', (data) => { // uses reusable rendering function
     renderUserMessage(data);
     const messagesContainer = document.querySelector('.messages');
@@ -196,12 +188,10 @@ socket.on('receive_message', (data) => { // uses reusable rendering function
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 });
-
 socket.on('room_closed', (message) => {
     alert(message);
     window.location.href = 'index.html';
 });
-
 socket.on('join_error', (message) => {
     alert(message);
     window.location.href = 'index.html';

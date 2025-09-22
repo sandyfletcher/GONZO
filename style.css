@@ -192,14 +192,13 @@ a {
     font-style: italic;
     text-align: center;
 }
-/* --- Style for the room owner in the member list --- */
+/* member list room owner */
 .member-list li.owner {
     border: 1px solid var(--terminal-fg-dark);
     padding: 5px 8px;
     background-color: #2a2a2a; /* A subtle background to lift it off the page */
     border-radius: 3px;
 }
-
 .member-list li.owner::before {
     content: '👑 '; /* Crown emoji followed by a space */
     margin-right: 2px;
