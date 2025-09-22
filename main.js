@@ -157,17 +157,15 @@ socket.on('load_history', (history) => { // handles receiving message history wh
     });
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
-
 socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
     const memberList = document.querySelector('.member-list');
     if (!memberList) return;
     memberList.innerHTML = '';
-    const usedEmojis = new Set(); // Keep track of emojis used in this update
-    // Function to get a unique random emoji for this session
-    const getUniqueRandomEmoji = () => {
+    const usedEmojis = new Set(); // track emojis used
+    const getUniqueRandomEmoji = () => { // get a unique random emoji for this session
         const availableEmojis = PARTICIPANT_EMOJIS.filter(e => !usedEmojis.has(e));
-        if (availableEmojis.length === 0) { // If we run out of unique emojis, just reuse them
+        if (availableEmojis.length === 0) { // if we run out of unique emojis, just reuse them
             return PARTICIPANT_EMOJIS[Math.floor(Math.random() * PARTICIPANT_EMOJIS.length)];
         }
         const emoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
@@ -177,23 +175,19 @@ socket.on('update_participants', (participants) => {
     participants.forEach((p, index) => {
         const li = document.createElement('li');
         let prefix = '';
-        // 1. Check for owner status
-        if (index === 0) {
+        if (index === 0) { // 1. Check for owner status
             prefix += '👑 ';
         }
-        // 2. Check if the participant is the current user
-        if (p.id === socket.id) {
+        if (p.id === socket.id) { // 2. Check if the participant is the current user
             prefix += '➡️ ';
         } 
-        // 3. If not owner and not you, assign a random emoji
-        else if (index !== 0) {
+        else if (index !== 0) { // 3. If not owner and not you, assign a random emoji
             prefix += getUniqueRandomEmoji() + ' ';
         }
         li.textContent = `${prefix}${p.username}`;
         memberList.appendChild(li);
     });
 });
-
 socket.on('user_event', (data) => { // handles a user join/leave event
     renderEventMessage(data);
     const messagesContainer = document.querySelector('.messages');
