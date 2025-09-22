@@ -114,6 +114,11 @@ a {
     font-size: 0.8em;
     color: var(--terminal-bg);
 }
+/* --- Ensure QR image scales down to fit its container --- */
+.qr-code img {
+    max-width: 100%;
+    height: auto;
+}
 .member-list {
     list-style-type: none;
     padding: 0;
