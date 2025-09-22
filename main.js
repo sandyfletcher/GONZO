@@ -9,7 +9,7 @@ function getUsernameColor(str) {
     for (let i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const hue = hash % 360; // Get a hue value between 0 and 360
+    const hue = hash % 360; // Get hue value between 0 and 360
     return `hsl(${hue}, 80%, 55%)`; // Fixed saturation and lightness for readability
 }
 
