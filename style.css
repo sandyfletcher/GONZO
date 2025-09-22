@@ -219,7 +219,7 @@ a {
 
 @media (max-width: 768px) {
     body {
-        padding: 5px; /* Reduce padding on small screens */
+        padding: 5px; /* Reduce padding on small screens to maximize space */
     }
     .room-container {
         flex-direction: column; /* Stack sidebar and chat vertically */
@@ -228,15 +228,15 @@ a {
     .sidebar {
         flex: 0 1 auto; /* Allow sidebar to shrink but not grow, with an automatic height */
         width: 100%;
-        border-right: none; /* Remove side border */
-        border-bottom: 1px solid var(--border-color); /* Add bottom border */
+        border-right: none; /* Remove the vertical border */
+        border-bottom: 1px solid var(--border-color); /* Add a horizontal border */
         order: 2; /* Make the sidebar appear AFTER the chat area */
-        overflow-y: auto; /* Allow sidebar to scroll if it has too much content for the screen */
+        overflow-y: auto; /* Allow sidebar to scroll if participant list gets long */
     }
     .chat-area {
         order: 1; /* Make the chat area appear BEFORE the sidebar */
     }
     .sidebar-footer {
-        margin-top: 15px; /* Adjust spacing for column layout */
+        margin-top: 15px; /* `margin-top: auto` doesn't work well in this layout */
     }
 }
