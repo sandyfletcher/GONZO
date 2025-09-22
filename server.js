@@ -10,6 +10,17 @@ const io = new Server(server, {
 const rooms = {};
 const MAX_HISTORY = 20; // Max number of messages/events to store per room
 
+// --- RATE LIMITING LOGIC ---
+const createRoomIPs = new Map();
+const CREATE_ROOM_LIMIT = 5; // Max 5 rooms per IP per minute
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in milliseconds
+
+// Clear the IP tracker every minute
+setInterval(() => {
+    createRoomIPs.clear();
+    console.log('Rate limit tracker cleared.');
+}, RATE_LIMIT_WINDOW);
+
 // --- HELPER FUNCTIONS ---
 
 const updateParticipants = (roomId) => {
@@ -18,7 +29,6 @@ const updateParticipants = (roomId) => {
     }
 };
 
-// NEW: Helper to add an item to a room's history
 const addToHistory = (roomId, type, data) => {
     if (!rooms[roomId]) return;
     const history = rooms[roomId].messageHistory;
@@ -40,6 +50,15 @@ const broadcastUserEvent = (roomId, text) => {
 // --- EVENT HANDLERS ---
 
 function handleCreateRoom(socket) {
+    const clientIp = socket.handshake.address;
+    const ipCount = createRoomIPs.get(clientIp) || 0;
+
+    if (ipCount >= CREATE_ROOM_LIMIT) {
+        console.log(`Rate limit exceeded for IP: ${clientIp}`);
+        return; // Stop execution
+    }
+    createRoomIPs.set(clientIp, ipCount + 1);
+
     const roomId = uuidv4();
     socket.join(roomId);
     rooms[roomId] = {
@@ -48,7 +67,7 @@ function handleCreateRoom(socket) {
       messageHistory: [] // NEW: Initialize the history buffer for the room
     };
     socket.emit('room_created', roomId);
-    console.log(`Room created: ${roomId} by ${socket.id}`);
+    console.log(`Room created: ${roomId} by ${socket.id} (IP: ${clientIp})`);
     updateParticipants(roomId);
 }
 

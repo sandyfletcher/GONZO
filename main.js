@@ -119,9 +119,9 @@ function renderUserMessage(data) { // renders a standard user message
     const usernameSpan = document.createElement('span');
     usernameSpan.style.color = userColor;
     usernameSpan.textContent = sender.username;
-    usernameStrong.append('<');
+    usernameStrong.appendChild(document.createTextNode('<')); // explicitly create text nodes for characters that could be interpreted as HTML
     usernameStrong.appendChild(usernameSpan);
-    usernameStrong.append('>');
+    usernameStrong.appendChild(document.createTextNode('>'));
     const messageText = document.createTextNode(` ${data.message}`);
     messageElement.appendChild(usernameStrong);
     messageElement.appendChild(messageText);
