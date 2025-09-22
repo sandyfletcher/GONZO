@@ -20,7 +20,6 @@ body {
     min-height: 100vh;
 }
 h1, h2 {
-    text-transform: uppercase;
     letter-spacing: 2px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 5px;

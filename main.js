@@ -1,5 +1,16 @@
-const PARTICIPANT_EMOJIS = ['👾', '👽', '🤖', '👻', '🎃', '🤡', '🐸', '🐙', '🦖', '🦋'];
-const socket = io("https://fastchat-0opj.onrender.com/");
+const PARTICIPANT_EMOJIS = [
+    // Sci-Fi
+    '👾', '👽', '🤖', '👻', '🎃', '🤡', '🐸', '🐙', '🦖', '🦋',
+    '🚀', '🛰️', '🔭', '🛸', '☄️',
+    // Fantasy & Mythical
+    '🐉', '👹', '👺', '🦄', '🐲', '🧟', '🧛', '🧙', '🧜', '🧞',
+    '🧚', '🗿', '💎', '🔮', '🧿',
+    // Animals & Creatures
+    '🦉', '🦊', '🦇', '🦂', '🕷️', '🦑', '🦀', '🦈', '🐌', '🐍',
+    // Symbols & Tech
+    '💀', '☠️', '💾', '🔑', '💣', '⚙️', '⚛️', '☣️', '☢️', '🌀'
+    
+];const socket = io("https://fastchat-0opj.onrender.com/");
 
 socket.on('connect', () => {
     console.log("Connected to server as", socket.id);
@@ -12,6 +23,16 @@ function getUsernameColor(str) { //  use HSL to parse a colour from username str
     }
     const hue = hash % 360; // get hue value 0 to 360
     return `hsl(${hue}, 80%, 55%)`; // fixed saturation/lightness for readability
+}
+
+function getEmojiForUser(username) { // use a simple hash to deterministically assign an emoji
+    let hash = 0;
+    for (let i = 0; i < username.length; i++) {
+        hash = username.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    // Use Math.abs to ensure the index is non-negative
+    const index = Math.abs(hash) % PARTICIPANT_EMOJIS.length;
+    return PARTICIPANT_EMOJIS[index];
 }
 
 // PAGE SETUP
@@ -162,33 +183,21 @@ socket.on('update_participants', (participants) => {
     const memberList = document.querySelector('.member-list');
     if (!memberList) return;
     memberList.innerHTML = '';
-    const usedEmojis = new Set(); // track emojis used
-    const getUniqueRandomEmoji = () => { // get a unique random emoji for this session
-        const availableEmojis = PARTICIPANT_EMOJIS.filter(e => !usedEmojis.has(e));
-        if (availableEmojis.length === 0) { // if we run out of unique emojis, just reuse them
-            return PARTICIPANT_EMOJIS[Math.floor(Math.random() * PARTICIPANT_EMOJIS.length)];
-        }
-        const emoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
-        usedEmojis.add(emoji);
-        return emoji;
-    };
     participants.forEach((p, index) => {
         const li = document.createElement('li');
         let prefix = '';
         let suffix = '';
-
-        // Assign prefix emoji: crown for owner, random for everyone else
+        // Assign prefix emoji: crown for owner, deterministic emoji for everyone else
         if (index === 0) {
             prefix = '👑 ';
         } else {
-            prefix = getUniqueRandomEmoji() + ' ';
+            const userEmoji = getEmojiForUser(p.username);
+            prefix = userEmoji + ' ';
         }
-        
         // If the participant is the current user, add a left arrow suffix
         if (p.id === socket.id) {
             suffix = ' ⬅️';
         }
-        
         li.textContent = `${prefix}${p.username}${suffix}`;
         memberList.appendChild(li);
     });
