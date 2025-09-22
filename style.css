@@ -149,7 +149,7 @@ a {
     padding: 10px;
     font-family: inherit;
     font-size: 1em;
-    min-width: 0; /* Prevents input from overflowing its flex container */
+    min-width: 0; /* prevent input from overflowing flex container */
 }
 .message-input input:focus {
     outline: 1px solid var(--terminal-fg);

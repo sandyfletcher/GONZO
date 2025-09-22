@@ -88,9 +88,9 @@ function handleJoinRoom(socket, data) {
     console.log(`User ${socket.id} (${username}) joined room ${roomId}`);
     updateParticipants(roomId);
 
-    // MODIFIED: Announce join event only for new users
+    // announce join event for new users
     if (isNewJoiner && username) {
-        broadcastUserEvent(roomId, `${username} has joined the room.`);
+        broadcastUserEvent(roomId, `${username} joined the room.`);
     }
 
     // NEW: Send existing message history to the newly joined user
@@ -128,8 +128,7 @@ function handleDisconnect(socket) {
                     if (currentParticipantIndex > -1) {
                          const leavingUser = rooms[roomId].participants.splice(currentParticipantIndex, 1)[0];
                          updateParticipants(roomId);
-                         // NEW: Announce that the user has left
-                         broadcastUserEvent(roomId, `${leavingUser.username} has left the room.`);
+                         broadcastUserEvent(roomId, `${leavingUser.username} left the room`); // announce user left
                     }
                 }
             }, 3000); // 3 second grace period

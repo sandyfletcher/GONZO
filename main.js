@@ -53,37 +53,28 @@ function setupRoomPage() {
 
 // --- Helper Functions for Room Page ---
 
-// NEW: Helper function for visual feedback on copy
-function showCopyConfirmation(element) {
+function showCopyConfirmation(element) { // visual feedback on copy
     element.classList.add('copied');
     setTimeout(() => {
         element.classList.remove('copied');
     }, 1500);
 }
-
-// MODIFIED: Now sets up click-to-copy functionality
-function initializeRoomUI(roomId, ui) {
+function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
     document.title = `FASTCHAT — [${roomId.substring(0, 6)}]`;
-
     const roomUrl = window.location.href;
     ui.roomLinkElement.textContent = roomUrl;
-
-    // --- Click to Copy Text Link ---
-    ui.roomLinkElement.addEventListener('click', () => {
+    ui.roomLinkElement.addEventListener('click', () => { // click to copy text link
         navigator.clipboard.writeText(roomUrl).then(() => {
             showCopyConfirmation(ui.roomLinkElement);
         }).catch(err => console.error('Failed to copy text: ', err));
     });
-
-    ui.qrElement.innerHTML = ''; // Clear placeholder
+    ui.qrElement.innerHTML = ''; // clear placeholder
     const qr = qrcode(0, 'L');
     qr.addData(roomUrl);
     qr.make();
     ui.qrElement.innerHTML = qr.createImgTag(4, 4);
     const qrImg = ui.qrElement.querySelector('img');
-
-    // --- Click to Copy QR Code Image ---
-    ui.qrElement.addEventListener('click', () => {
+    ui.qrElement.addEventListener('click', () => { // click to copy QR code image
         if (!qrImg || !navigator.clipboard.write) {
             alert('Image copy not supported in this browser.');
             return;
@@ -100,7 +91,6 @@ function initializeRoomUI(roomId, ui) {
         }, 'image/png');
     });
 }
-
 function setupMessageForm(roomId, ui) {
     ui.messageForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -111,7 +101,6 @@ function setupMessageForm(roomId, ui) {
         }
     });
 }
-
 function joinRoom(roomId) {
     const oldSocketId = sessionStorage.getItem('previousSocketId');
     sessionStorage.removeItem('previousSocketId');
@@ -120,15 +109,12 @@ function joinRoom(roomId) {
 
 // --- Rendering Functions ---
 
-// NEW: Renders a standard user message
-function renderUserMessage(data) {
+function renderUserMessage(data) { // renders a standard user message
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
-
     const messageElement = document.createElement('p');
     const sender = data.sender;
     const userColor = getUsernameColor(sender.username);
-    
     const usernameStrong = document.createElement('strong');
     const usernameSpan = document.createElement('span');
     usernameSpan.style.color = userColor;
@@ -136,16 +122,13 @@ function renderUserMessage(data) {
     usernameStrong.append('<');
     usernameStrong.appendChild(usernameSpan);
     usernameStrong.append('>');
-
     const messageText = document.createTextNode(` ${data.message}`);
-
     messageElement.appendChild(usernameStrong);
     messageElement.appendChild(messageText);
     messagesContainer.appendChild(messageElement);
 }
 
-// NEW: Renders a join/leave event message
-function renderEventMessage(data) {
+function renderEventMessage(data) { // renders a join/leave event message
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
     const eventElement = document.createElement('p');
@@ -162,12 +145,10 @@ socket.on('room_created', (roomId) => {
     window.location.href = `room.html#${roomId}`;
 });
 
-// NEW: Handles receiving the message history when joining a room
-socket.on('load_history', (history) => {
+socket.on('load_history', (history) => { // handles receiving message history when joining a room
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
-    messagesContainer.innerHTML = ''; // Clear "Connecting..."
-
+    messagesContainer.innerHTML = ''; // clear "Connecting..."
     history.forEach(item => {
         if (item.type === 'message') {
             renderUserMessage(item.data);
@@ -205,8 +186,7 @@ socket.on('update_participants', (participants) => {
     });
 });
 
-// NEW: Handles a user join/leave event
-socket.on('user_event', (data) => {
+socket.on('user_event', (data) => { // handles a user join/leave event
     renderEventMessage(data);
     const messagesContainer = document.querySelector('.messages');
     if (messagesContainer) {
@@ -214,8 +194,7 @@ socket.on('user_event', (data) => {
     }
 });
 
-// MODIFIED: Now uses the reusable rendering function
-socket.on('receive_message', (data) => {
+socket.on('receive_message', (data) => { // uses reusable rendering function
     renderUserMessage(data);
     const messagesContainer = document.querySelector('.messages');
     if (messagesContainer) {
