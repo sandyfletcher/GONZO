@@ -175,16 +175,21 @@ socket.on('update_participants', (participants) => {
     participants.forEach((p, index) => {
         const li = document.createElement('li');
         let prefix = '';
-        if (index === 0) { // 1. Check for owner status
-            prefix += '👑 ';
+        let suffix = '';
+
+        // Assign prefix emoji: crown for owner, random for everyone else
+        if (index === 0) {
+            prefix = '👑 ';
+        } else {
+            prefix = getUniqueRandomEmoji() + ' ';
         }
-        if (p.id === socket.id) { // 2. Check if the participant is the current user
-            prefix += '➡️ ';
-        } 
-        else if (index !== 0) { // 3. If not owner and not you, assign a random emoji
-            prefix += getUniqueRandomEmoji() + ' ';
+        
+        // If the participant is the current user, add a left arrow suffix
+        if (p.id === socket.id) {
+            suffix = ' ⬅️';
         }
-        li.textContent = `${prefix}${p.username}`;
+        
+        li.textContent = `${prefix}${p.username}${suffix}`;
         memberList.appendChild(li);
     });
 });

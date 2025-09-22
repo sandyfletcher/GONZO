@@ -25,6 +25,7 @@ h1, h2 {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 5px;
     margin-top: 0;
+    display: inline-block; /* Ensures border only spans text width */
 }
 a {
     color: var(--terminal-fg);
@@ -78,6 +79,7 @@ a {
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
+    text-align: center; /* Center all child content by default */
 }
 .sidebar-section {
     margin-bottom: 20px;
@@ -117,6 +119,8 @@ a {
     list-style-type: none;
     padding: 0;
     margin: 0;
+    display: inline-block; /* Shrinks the list to fit content */
+    text-align: left; /* Overrides parent's center alignment */
 }
 .member-list li {
     margin-bottom: 5px;
