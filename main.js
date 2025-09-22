@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- Socket Event Listeners ---
 socket.on('room_created', (roomId) => {
     console.log(`Server created room. ID: ${roomId}`);
-    // **KEY CHANGE 1**: Store our current socket ID before we navigate away
+    // Store our current socket ID before we navigate away
     sessionStorage.setItem('previousSocketId', socket.id);
     // Navigate to the new room
     window.location.href = `room.html#${roomId}`;

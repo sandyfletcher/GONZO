@@ -30,12 +30,12 @@ io.on('connection', (socket) => {
     updateParticipants(roomId);
   });
   socket.on('join_room', (data) => {
-    // **KEY CHANGE 2**: Expect an object with roomId and potentially oldSocketId
+    // Expect an object with roomId and potentially oldSocketId
     const { roomId, oldSocketId } = data; 
     if (rooms[roomId]) {
       const room = rooms[roomId];
       socket.join(roomId);
-      // **KEY CHANGE 3**: Check if this is the owner rejoining after page load
+      // Check if this is the owner rejoining after page load
       if (oldSocketId && room.owner === oldSocketId) {
         console.log(`Owner ${oldSocketId} is rejoining as ${socket.id}`);
         // Update the owner's socket ID to the new one
@@ -72,7 +72,7 @@ io.on('connection', (socket) => {
       const room = rooms[roomId];
       const participantIndex = room.participants.findIndex(p => p.id === socket.id);
       if (participantIndex > -1) {
-        // **KEY CHANGE 4**: Add a delay to the owner disconnect logic
+        // Add a delay to the owner disconnect logic
         // This gives them time to reconnect on the new page before we close the room.
         setTimeout(() => {
           // Re-check if the room and owner still exist and haven't been updated
