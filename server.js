@@ -8,27 +8,21 @@ const io = new Server(server, {
   cors: { origin: "*" }
 });
 const rooms = {};
-const MAX_HISTORY = 20; // Max number of messages/events to store per room
-
-// --- RATE LIMITING LOGIC ---
-const createRoomIPs = new Map();
-const CREATE_ROOM_LIMIT = 5; // Max 5 rooms per IP per minute
+const MAX_HISTORY = 10; // max number of messages/events to store per room
+const createRoomIPs = new Map(); // RATE LIMITING LOGIC
+const CREATE_ROOM_LIMIT = 3; // max 3 rooms per IP per minute
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in milliseconds
-
-// Clear the IP tracker every minute
-setInterval(() => {
+setInterval(() => { // clear IP tracker every minute
     createRoomIPs.clear();
     console.log('Rate limit tracker cleared.');
 }, RATE_LIMIT_WINDOW);
 
-// --- HELPER FUNCTIONS ---
-
+// HELPER FUNCTIONS
 const updateParticipants = (roomId) => {
     if (rooms[roomId]) {
         io.to(roomId).emit('update_participants', rooms[roomId].participants);
     }
 };
-
 const addToHistory = (roomId, type, data) => {
     if (!rooms[roomId]) return;
     const history = rooms[roomId].messageHistory;
@@ -37,55 +31,45 @@ const addToHistory = (roomId, type, data) => {
         history.shift(); // Remove the oldest item if history is full
     }
 };
-
-// NEW: Helper to broadcast a user event (join/leave) and add it to history
-const broadcastUserEvent = (roomId, text) => {
+const broadcastUserEvent = (roomId, text) => { // broadcast a user event (join/leave) and add it to history
     if (rooms[roomId]) {
         const eventData = { text };
         io.to(roomId).emit('user_event', eventData);
         addToHistory(roomId, 'event', eventData); // Also store event in history
     }
 };
-
-// --- EVENT HANDLERS ---
-
+// EVENT HANDLERS
 function handleCreateRoom(socket) {
     const clientIp = socket.handshake.address;
     const ipCount = createRoomIPs.get(clientIp) || 0;
-
     if (ipCount >= CREATE_ROOM_LIMIT) {
         console.log(`Rate limit exceeded for IP: ${clientIp}`);
-        return; // Stop execution
+        return; // stop execution
     }
     createRoomIPs.set(clientIp, ipCount + 1);
-
     const roomId = uuidv4();
     socket.join(roomId);
     rooms[roomId] = {
       owner: socket.id,
       participants: [{ id: socket.id, username: socket.id.slice(0, 5) }],
-      messageHistory: [] // NEW: Initialize the history buffer for the room
+      messageHistory: [] // initialize history buffer for room
     };
     socket.emit('room_created', roomId);
     console.log(`Room created: ${roomId} by ${socket.id} (IP: ${clientIp})`);
     updateParticipants(roomId);
 }
-
 function handleJoinRoom(socket, data) {
     if (typeof data !== 'object' || data === null) return;
     if (typeof data.roomId !== 'string' || data.roomId.length > 40) return;
     if (data.oldSocketId && (typeof data.oldSocketId !== 'string' || data.oldSocketId.length > 25)) return;
-
     const { roomId, oldSocketId } = data;
     const room = rooms[roomId];
     if (!room) {
         return socket.emit('join_error', 'This room does not exist.');
     }
     socket.join(roomId);
-
     let username;
     let isNewJoiner = true; // Flag to check if we should announce the join
-
     if (oldSocketId && room.owner === oldSocketId) {
         console.log(`Owner ${oldSocketId} rejoining as ${socket.id}`);
         room.owner = socket.id;
@@ -103,19 +87,14 @@ function handleJoinRoom(socket, data) {
         room.participants.push(newUser);
         username = newUser.username;
     }
-
     console.log(`User ${socket.id} (${username}) joined room ${roomId}`);
     updateParticipants(roomId);
-
     // announce join event for new users
     if (isNewJoiner && username) {
         broadcastUserEvent(roomId, `${username} joined the room.`);
     }
-
-    // NEW: Send existing message history to the newly joined user
-    socket.emit('load_history', room.messageHistory);
+    socket.emit('load_history', room.messageHistory); // send existing message history to the newly joined user
 }
-
 function handleSendMessage(socket, data) {
     if (typeof data.roomId !== 'string' || typeof data.message !== 'string') return;
     const { roomId, message } = data;
@@ -126,16 +105,14 @@ function handleSendMessage(socket, data) {
     if (sender) {
         const messageData = { sender, message };
         io.to(roomId).emit('receive_message', messageData);
-        addToHistory(roomId, 'message', messageData); // NEW: Add message to history
+        addToHistory(roomId, 'message', messageData); // add message to history
     }
 }
-
 function handleDisconnect(socket) {
     console.log(`User disconnected: ${socket.id}`);
     for (const roomId in rooms) {
         const room = rooms[roomId];
         const participant = room.participants.find(p => p.id === socket.id);
-
         if (participant) {
             setTimeout(() => {
                 if (rooms[roomId] && rooms[roomId].owner === socket.id) {
@@ -155,9 +132,7 @@ function handleDisconnect(socket) {
         }
     }
 }
-
-// --- CONNECTION LOGIC ---
-
+// CONNECTION LOGIC
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id}`);
   socket.on('create_room',  () => handleCreateRoom(socket));
@@ -165,7 +140,6 @@ io.on('connection', (socket) => {
   socket.on('send_message', (data) => handleSendMessage(socket, data));
   socket.on('disconnect',   () => handleDisconnect(socket));
 });
-
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
