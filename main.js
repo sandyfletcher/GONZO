@@ -58,11 +58,9 @@ function setupRoomPage() {
 // --- Helper Functions for Room Page ---
 
 function initializeRoomUI(roomId) {
-    document.title = `FASTCHAT — room [${roomId.substring(0, 6)}]`;
-
+    document.title = `FASTCHAT — [${roomId.substring(0, 6)}]`;
     const roomLinkElement = document.getElementById('room-link');
     roomLinkElement.textContent = window.location.href;
-
     const qrElement = document.querySelector('.qr-code');
     qrElement.innerHTML = ''; // Clear placeholder
     const qr = qrcode(0, 'L');
