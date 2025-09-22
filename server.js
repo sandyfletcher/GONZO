@@ -76,8 +76,9 @@ function handleJoinRoom(socket, data) {
         const ownerParticipant = room.participants.find(p => p.id === oldSocketId);
         if (ownerParticipant) {
             ownerParticipant.id = socket.id;
+            ownerParticipant.username = socket.id.slice(0, 5); // recalculate username with new ID
             username = ownerParticipant.username;
-            isNewJoiner = false; // It's a reconnect, not a new user
+            isNewJoiner = false; // it's a reconnect, not a new user
         }
     } else {
         const newUser = {
