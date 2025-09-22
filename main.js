@@ -1,4 +1,4 @@
-function getUsernameColor(str) { //  uses HSL to parse a colour from username string
+function getUsernameColor(str) { //  use HSL to parse a colour from username string
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);
