@@ -2,16 +2,14 @@ const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
 const { v4: uuidv4 } = require('uuid');
-
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" }
 });
-
 const rooms = {};
 
-// --- Helper Functions ---
+// HELPER FUNCTIONS
 
 const updateParticipants = (roomId) => {
     if (rooms[roomId]) {
@@ -19,7 +17,7 @@ const updateParticipants = (roomId) => {
     }
 };
 
-// --- Event Handlers ---
+// EVENT HANDLERS
 
 function handleCreateRoom(socket) {
     const roomId = uuidv4();
@@ -34,17 +32,16 @@ function handleCreateRoom(socket) {
 }
 
 function handleJoinRoom(socket, data) {
+    if (typeof data !== 'object' || data === null) return; // ensure data is an object and contains a valid roomId
+    if (typeof data.roomId !== 'string' || data.roomId.length > 40) return; // UUIDs are 36 chars
+    if (data.oldSocketId && (typeof data.oldSocketId !== 'string' || data.oldSocketId.length > 25)) return; // if oldSocketId is provided, ensure it's a valid string
     const { roomId, oldSocketId } = data;
     const room = rooms[roomId];
-
     if (!room) {
         return socket.emit('join_error', 'This room does not exist.');
     }
-
     socket.join(roomId);
-    
-    // Check if it's the owner rejoining after page load
-    if (oldSocketId && room.owner === oldSocketId) {
+    if (oldSocketId && room.owner === oldSocketId) { // check if it's the owner rejoining after page load
         console.log(`Owner ${oldSocketId} rejoining as ${socket.id}`);
         room.owner = socket.id;
         const ownerParticipant = room.participants.find(p => p.id === oldSocketId);
@@ -52,14 +49,12 @@ function handleJoinRoom(socket, data) {
             ownerParticipant.id = socket.id;
         }
     } else {
-        // A regular new user is joining
-        const newUser = { 
+        const newUser = { // regular new user is joining
             id: socket.id, 
             username: socket.id.slice(0, 5)
         };
         room.participants.push(newUser);
     }
-
     console.log(`User ${socket.id} joined room ${roomId}`);
     updateParticipants(roomId);
 }
@@ -68,10 +63,8 @@ function handleSendMessage(socket, data) {
     if (typeof data.roomId !== 'string' || typeof data.message !== 'string') return;
     const { roomId, message } = data;
     if (message.trim().length === 0 || message.length > 500) return;
-
     const room = rooms[roomId];
     if (!room) return;
-
     const sender = room.participants.find(p => p.id === socket.id);
     if (sender) {
         io.to(roomId).emit('receive_message', { sender, message });
@@ -83,35 +76,29 @@ function handleDisconnect(socket) {
     for (const roomId in rooms) {
         const room = rooms[roomId];
         const participantIndex = room.participants.findIndex(p => p.id === socket.id);
-
         if (participantIndex > -1) {
-            // Clever timeout allows owner to rejoin on new page before room is destroyed.
-            setTimeout(() => {
-                // Re-check state after the delay
-                if (rooms[roomId] && rooms[roomId].owner === socket.id) {
+            setTimeout(() => { // timeout allows owner to rejoin on new page before room is destroyed
+                if (rooms[roomId] && rooms[roomId].owner === socket.id) { // re-check state after the delay
                     console.log(`Owner of ${roomId} left. Closing room.`);
                     io.to(roomId).emit('room_closed', 'The host has left the room.');
                     delete rooms[roomId];
-                } else if (rooms[roomId]) {
-                    // It wasn't the owner, or the owner already reconnected.
-                    // Just remove the old participant record if it still exists.
+                } else if (rooms[roomId]) { // it wasn't the owner, or owner already reconnected — just remove old participant record if it still exists
                     const currentParticipantIndex = rooms[roomId].participants.findIndex(p => p.id === socket.id);
                     if (currentParticipantIndex > -1) {
                          rooms[roomId].participants.splice(currentParticipantIndex, 1);
                          updateParticipants(roomId);
                     }
                 }
-            }, 2500); // 2.5 second grace period
-            break; // User can only be in one room
+            }, 3000); // 3 second grace period
+            break; // user can only be in one room
         }
     }
 }
 
-// --- Main Connection Logic ---
+// CONNECTION LOGIC
 
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id}`);
-
   socket.on('create_room',  () => handleCreateRoom(socket));
   socket.on('join_room',    (data) => handleJoinRoom(socket, data));
   socket.on('send_message', (data) => handleSendMessage(socket, data));
