@@ -96,8 +96,7 @@ a {
     font-size: 0.9em;
     margin-top: 5px;
     display: block;
-    width: 100%; /* Ensure it takes full width of the centered container */
-    white-space: nowrap;
+    width: 100%; /* full width of centered container */
     overflow: hidden;
     text-overflow: ellipsis;
 }
