@@ -54,7 +54,7 @@ function setupRoomPage() {
 // ROOM PAGE
 
 function initializeRoomUI(roomId, ui) { // accepts ui object
-    document.title = `FASTCHAT — room [${roomId.substring(0, 6)}]`;
+    document.title = `FASTCHAT — [${roomId.substring(0, 6)}]`;
     ui.roomLinkElement.textContent = window.location.href;
     ui.qrElement.innerHTML = ''; // clear placeholder
     const qr = qrcode(0, 'L');

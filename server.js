@@ -82,7 +82,7 @@ function handleDisconnect(socket) {
                     console.log(`Owner of ${roomId} left. Closing room.`);
                     io.to(roomId).emit('room_closed', 'The host has left the room.');
                     delete rooms[roomId];
-                } else if (rooms[roomId]) { // it wasn't the owner, or owner already reconnected — just remove old participant record if it still exists
+                } else if (rooms[roomId]) { // it wasn't the owner, or owner already reconnected — remove old participant record if it still exists
                     const currentParticipantIndex = rooms[roomId].participants.findIndex(p => p.id === socket.id);
                     if (currentParticipantIndex > -1) {
                          rooms[roomId].participants.splice(currentParticipantIndex, 1);
