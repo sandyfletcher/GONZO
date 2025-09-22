@@ -7,6 +7,10 @@
 * {
     box-sizing: border-box;
 }
+html, body {
+    height: 100%; /* <-- THIS IS THE FIX */
+    margin: 0;
+}
 html {
     /* Fluid typography: min 14px, scales with viewport, max 18px */
     font-size: clamp(14px, 1.5vw + 0.5rem, 18px);
@@ -15,9 +19,7 @@ body {
     background-color: var(--terminal-bg);
     color: var(--terminal-fg);
     font-family: 'Courier New', Courier, monospace;
-    margin: 0;
     padding: clamp(10px, 3vw, 20px); /* Fluid padding */
-    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -79,7 +81,6 @@ a {
     padding: 0; /* Remove padding for full-screen layout */
     display: flex;
     flex-direction: column;
-    height: 100vh;
     overflow: hidden; /* prevent body scrolling */
 }
 .room-header {
