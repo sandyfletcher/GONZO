@@ -166,6 +166,12 @@ a {
     background-color: var(--terminal-fg);
     color: var(--terminal-bg);
 }
+.message-input:focus-within button {
+    background-color: var(--terminal-fg);
+    color: var(--terminal-bg);
+}
+
+
 .link, .qr-code {
     cursor: pointer;
     transition: outline 0.2s ease-out;
