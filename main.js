@@ -159,27 +159,22 @@ socket.on('load_history', (history) => { // handles receiving message history wh
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
 
+// In main.js
+
 socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
     const memberList = document.querySelector('.member-list');
-    const ownerName = document.querySelector('.owner-name');
-    if (!memberList || !ownerName) return;
-
+    if (!memberList) return;
     memberList.innerHTML = '';
     participants.forEach((p, index) => {
         const li = document.createElement('li');
         let displayName = p.username;
-
-        if (index === 0) {
-            ownerName.textContent = `${p.username}`;
+        if (index === 0) { // if owner (first in the list), add a class to the <li>
+            li.classList.add('owner'); 
             displayName += ' (Owner)';
         }
-
         if (p.id === socket.id) {
             displayName += ' (You)';
-            if (index === 0) {
-                ownerName.textContent += ' (You)';
-            }
         }
         li.textContent = displayName;
         memberList.appendChild(li);
