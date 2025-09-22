@@ -10,7 +10,11 @@ const PARTICIPANT_EMOJIS = [
     // Symbols & Tech
     '💀', '☠️', '💾', '🔑', '💣', '⚙️', '⚛️', '☣️', '☢️', '🌀'
     
-];const socket = io("https://fastchat-0opj.onrender.com/");
+];
+const socket = io("https://fastchat-0opj.onrender.com/");
+
+// STATE
+let lastMessageSenderId = null;
 
 socket.on('connect', () => {
     console.log("Connected to server as", socket.id);
@@ -61,7 +65,6 @@ function setupRoomPage() {
         roomLinkElement: document.getElementById('room-link'),
         qrElement: document.querySelector('.qr-code'),
         memberList: document.querySelector('.member-list'),
-        ownerName: document.querySelector('.owner-name')
     };
     if (!roomId) {
         ui.messagesContainer.innerHTML = '<p>ERROR: No room ID specified. Start a new room.</p>';
@@ -135,6 +138,10 @@ function renderUserMessage(data) { // renders a standard user message
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
     const messageElement = document.createElement('p');
+    // check if sender is same as last one
+    if (data.sender.id === lastMessageSenderId) {
+        messageElement.classList.add('consecutive-message');
+    }
     const sender = data.sender;
     const userColor = getUsernameColor(sender.username);
     const usernameStrong = document.createElement('strong');
@@ -148,6 +155,7 @@ function renderUserMessage(data) { // renders a standard user message
     messageElement.appendChild(usernameStrong);
     messageElement.appendChild(messageText);
     messagesContainer.appendChild(messageElement);
+    lastMessageSenderId = data.sender.id; // update last sender ID
 }
 function renderEventMessage(data) { // renders a join/leave event message
     const messagesContainer = document.querySelector('.messages');
@@ -156,6 +164,8 @@ function renderEventMessage(data) { // renders a join/leave event message
     eventElement.classList.add('event-message');
     eventElement.textContent = data.text;
     messagesContainer.appendChild(eventElement);
+    // An event message breaks the chain of consecutive user messages
+    lastMessageSenderId = null;
 }
 
 // --- Socket Event Listeners ---
@@ -169,6 +179,7 @@ socket.on('load_history', (history) => { // handles receiving message history wh
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
     messagesContainer.innerHTML = ''; // clear "Connecting..."
+    lastMessageSenderId = null; // Reset for history load
     history.forEach(item => {
         if (item.type === 'message') {
             renderUserMessage(item.data);

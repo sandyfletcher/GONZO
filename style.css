@@ -7,25 +7,31 @@
 * {
     box-sizing: border-box;
 }
+html {
+    /* Fluid typography: min 14px, scales with viewport, max 18px */
+    font-size: clamp(14px, 1.5vw + 0.5rem, 18px);
+}
 body {
     background-color: var(--terminal-bg);
     color: var(--terminal-fg);
     font-family: 'Courier New', Courier, monospace;
-    font-size: 16px;
     margin: 0;
-    padding: 20px;
+    padding: clamp(10px, 3vw, 20px); /* Fluid padding */
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
 }
 h1, h2 {
     letter-spacing: 2px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 5px;
     margin-top: 0;
-    display: inline-block; /* Ensures border only spans text width */
+    display: inline-block;
 }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.25rem; }
+
 a {
     color: var(--terminal-fg);
     text-decoration: none;
@@ -37,27 +43,30 @@ a {
 .cursor {
     display: inline-block;
     background-color: var(--terminal-fg);
-    width: 10px;
+    width: 0.6em; /* scale with font size */
     height: 1.2em;
     animation: blink 1s step-end infinite;
-    margin-left: 5px;
+    margin-left: 0.3em;
     vertical-align: bottom;
 }
 /* --- Main Menu / Centered Content --- */
 .main-container {
     text-align: center;
     border: 1px solid var(--border-color);
-    padding: 40px;
+    padding: clamp(20px, 5vw, 40px); /* fluid padding */
+    width: 100%;
+    max-width: 500px;
 }
 .main-container h1 {
-    margin-bottom: 30px;
+    margin-bottom: 1.5rem;
 }
 .menu-button {
     display: block;
     border: 1px solid var(--terminal-fg);
-    padding: 10px 20px;
-    margin: 15px auto;
-    width: 200px;
+    padding: 0.75rem 1.5rem;
+    margin: 1rem auto;
+    width: 100%;
+    max-width: 250px;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
 }
@@ -66,24 +75,39 @@ a {
     color: var(--terminal-bg);
 }
 /* --- Room Page Layout --- */
+.room-page-body {
+    padding: 0; /* Remove padding for full-screen layout */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden; /* prevent body scrolling */
+}
+.room-header {
+    flex-shrink: 0; /* prevent header from shrinking */
+    text-align: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
 .room-container {
     display: flex;
+    flex-grow: 1; /* take up remaining vertical space */
     width: 100%;
-    height: calc(100vh - 40px); /* Full viewport height minus body padding */
-    border: 1px solid var(--border-color);
+    border: none; /* remove old border */
+    overflow: hidden; /* contain children */
 }
 .sidebar {
-    flex: 0 0 250px; /* slightly smaller for a sleeker look */
+    /* Fluid width: min 220px, 25% of viewport, max 300px */
+    flex: 0 0 clamp(220px, 25%, 300px); 
     padding: 1rem;
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    text-align: center; /* Center all child content by default */
+    text-align: center;
+    overflow-y: auto;
 }
 .sidebar-section {
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem;
 }
-/* --- Centering for Share Info --- */
 .share-info {
     display: flex;
     flex-direction: column;
@@ -92,20 +116,21 @@ a {
 }
 .share-info .link {
     background-color: #2a2a2a;
-    padding: 5px;
+    padding: 0.5rem;
     word-break: break-all;
     font-size: 0.9em;
-    margin-top: 5px;
+    margin-top: 0.5rem;
     display: block;
-    width: 100%; /* full width of centered container */
+    width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .qr-code {
-    width: 128px;
-    height: 128px;
-    background-color: white; /* QR codes need a light background */
-    margin: 10px 0;
+    width: clamp(100px, 100%, 128px); /* make QR code responsive */
+    height: auto;
+    aspect-ratio: 1 / 1; /* maintain square shape */
+    background-color: white;
+    margin: 1rem 0;
     padding: 5px;
     border: 1px dashed var(--terminal-fg-dark);
     display: flex;
@@ -114,8 +139,8 @@ a {
     font-size: 0.8em;
     color: var(--terminal-bg);
 }
-/* --- Ensure QR image scales down to fit its container --- */
 .qr-code img {
+    display: block;
     max-width: 100%;
     height: auto;
 }
@@ -123,43 +148,53 @@ a {
     list-style-type: none;
     padding: 0;
     margin: 0;
-    display: inline-block; /* Shrinks the list to fit content */
-    text-align: left; /* Overrides parent's center alignment */
+    display: inline-block;
+    text-align: left;
 }
 .member-list li {
-    margin-bottom: 5px;
+    margin-bottom: 0.5rem;
 }
 .sidebar-footer {
-    margin-top: auto; /* pushes footer to the bottom */
+    margin-top: auto;
     font-size: 0.8em;
     color: var(--terminal-fg-dark);
 }
 .chat-area {
-    flex: 1; /* takes up remaining space */
+    flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 15px;
-    min-width: 0; /* Prevents flex items from overflowing their container */
+    padding: 1rem;
+    min-width: 0;
 }
 .messages {
     flex: 1;
     overflow-y: auto;
-    margin-bottom: 15px;
+    margin-bottom: 1rem;
+}
+/* --- Message Spacing Logic --- */
+.messages p {
+    margin-block-start: 1em; /* default top spacing */
+    margin-block-end: 0;
+    padding-left: 0.5rem;
+    text-indent: -0.5rem; /* for nice alignment of multi-line messages */
+}
+.messages p.consecutive-message {
+    margin-block-start: 0.25em; /* reduced top spacing */
 }
 .message-input {
     display: flex;
     border-top: 1px solid var(--border-color);
-    padding-top: 15px;
+    padding-top: 1rem;
 }
 .message-input input {
     flex: 1;
     background: none;
     border: 1px solid var(--terminal-fg-dark);
     color: var(--terminal-fg);
-    padding: 10px;
+    padding: 0.75rem;
     font-family: inherit;
     font-size: 1em;
-    min-width: 0; /* prevent input from overflowing flex container */
+    min-width: 0;
 }
 .message-input input:focus {
     outline: 1px solid var(--terminal-fg);
@@ -168,8 +203,8 @@ a {
     background: none;
     border: 1px solid var(--terminal-fg);
     color: var(--terminal-fg);
-    padding: 10px 20px;
-    margin-left: 10px;
+    padding: 0.75rem 1.5rem;
+    margin-left: 0.75rem;
     cursor: pointer;
 }
 .message-input button:hover {
@@ -180,8 +215,6 @@ a {
     background-color: var(--terminal-fg);
     color: var(--terminal-bg);
 }
-
-
 .link, .qr-code {
     cursor: pointer;
     transition: outline 0.2s ease-out;
@@ -202,41 +235,31 @@ a {
     font-size: 0.8em;
     border-radius: 3px;
 }
-.link.copied {
-    outline: 2px solid var(--terminal-fg);
-    position: relative;
-}
 .qr-code.copied {
     box-shadow: inset 0 0 0 2px var(--terminal-fg);
     position: relative;
 }
-/* join/leave event messages */
 .event-message {
     color: var(--terminal-fg-dark);
     font-style: italic;
     text-align: center;
 }
-
 @media (max-width: 768px) {
-    body {
-        padding: 5px; /* Reduce padding on small screens to maximize space */
-    }
     .room-container {
-        flex-direction: column; /* Stack sidebar and chat vertically */
-        height: calc(100vh - 10px); /* Adjust for new body padding */
+        flex-direction: column;
     }
     .sidebar {
-        flex: 0 1 auto; /* Allow sidebar to shrink but not grow, with an automatic height */
+        flex: 0 1 40%; /* Allow sidebar to shrink, take up 40% of available space */
         width: 100%;
-        border-right: none; /* Remove the vertical border */
-        border-bottom: 1px solid var(--border-color); /* Add a horizontal border */
-        order: 2; /* Make the sidebar appear AFTER the chat area */
-        overflow-y: auto; /* Allow sidebar to scroll if participant list gets long */
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        order: 2;
     }
     .chat-area {
-        order: 1; /* Make the chat area appear BEFORE the sidebar */
+        order: 1;
+        min-height: 50%; /* ensure chat has enough space */
     }
     .sidebar-footer {
-        margin-top: 15px; /* `margin-top: auto` doesn't work well in this layout */
+        margin-top: 1rem;
     }
 }
