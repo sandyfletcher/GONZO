@@ -202,17 +202,11 @@ a {
     box-shadow: inset 0 0 0 2px var(--terminal-fg);
     position: relative;
 }
-
-
 /* join/leave event messages */
 .event-message {
     color: var(--terminal-fg-dark);
     font-style: italic;
     text-align: center;
-}
-/* member list room owner */
-.member-list li.owner {
-    content: '👑 '; /* Crown emoji followed by a space */
 }
 
 @media (max-width: 768px) {

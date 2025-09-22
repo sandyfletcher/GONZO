@@ -1,3 +1,10 @@
+const PARTICIPANT_EMOJIS = ['👾', '👽', '🤖', '👻', '🎃', '🤡', '🐸', '🐙', '🦖', '🦋'];
+const socket = io("https://fastchat-0opj.onrender.com/");
+
+socket.on('connect', () => {
+    console.log("Connected to server as", socket.id);
+});
+
 function getUsernameColor(str) { //  use HSL to parse a colour from username string
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -6,12 +13,6 @@ function getUsernameColor(str) { //  use HSL to parse a colour from username str
     const hue = hash % 360; // get hue value 0 to 360
     return `hsl(${hue}, 80%, 55%)`; // fixed saturation/lightness for readability
 }
-
-const socket = io("https://fastchat-0opj.onrender.com/");
-
-socket.on('connect', () => {
-    console.log("Connected to server as", socket.id);
-});
 
 // PAGE SETUP
 
@@ -62,7 +63,7 @@ function showCopyConfirmation(element) { // visual feedback on copy
 function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
     document.title = `eFEMORAL — [${roomId.substring(0, 6)}]`;
     const roomUrl = window.location.href;
-    ui.roomLinkElement.textContent = roomUrl;
+    ui.roomLinkElement.textContent = `Room: ${roomId.substring(0, 8)}...`;
     ui.roomLinkElement.addEventListener('click', () => { // click to copy text link
         navigator.clipboard.writeText(roomUrl).then(() => {
             showCopyConfirmation(ui.roomLinkElement);
@@ -156,24 +157,43 @@ socket.on('load_history', (history) => { // handles receiving message history wh
     });
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
+
 socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
     const memberList = document.querySelector('.member-list');
     if (!memberList) return;
     memberList.innerHTML = '';
+    const usedEmojis = new Set(); // Keep track of emojis used in this update
+    // Function to get a unique random emoji for this session
+    const getUniqueRandomEmoji = () => {
+        const availableEmojis = PARTICIPANT_EMOJIS.filter(e => !usedEmojis.has(e));
+        if (availableEmojis.length === 0) { // If we run out of unique emojis, just reuse them
+            return PARTICIPANT_EMOJIS[Math.floor(Math.random() * PARTICIPANT_EMOJIS.length)];
+        }
+        const emoji = availableEmojis[Math.floor(Math.random() * availableEmojis.length)];
+        usedEmojis.add(emoji);
+        return emoji;
+    };
     participants.forEach((p, index) => {
         const li = document.createElement('li');
-        let displayName = p.username;
-        if (index === 0) { // if owner (first in the list), add a class to the <li>
-            li.classList.add('owner'); 
+        let prefix = '';
+        // 1. Check for owner status
+        if (index === 0) {
+            prefix += '👑 ';
         }
+        // 2. Check if the participant is the current user
         if (p.id === socket.id) {
-            displayName += ' (You)';
+            prefix += '➡️ ';
+        } 
+        // 3. If not owner and not you, assign a random emoji
+        else if (index !== 0) {
+            prefix += getUniqueRandomEmoji() + ' ';
         }
-        li.textContent = displayName;
+        li.textContent = `${prefix}${p.username}`;
         memberList.appendChild(li);
     });
 });
+
 socket.on('user_event', (data) => { // handles a user join/leave event
     renderEventMessage(data);
     const messagesContainer = document.querySelector('.messages');
