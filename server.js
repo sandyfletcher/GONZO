@@ -92,7 +92,7 @@ function handleJoinRoom(socket, data) {
     updateParticipants(roomId);
     // announce join event for new users
     if (isNewJoiner && username) {
-        broadcastUserEvent(roomId, `${username} joined the room.`);
+        broadcastUserEvent(roomId, `${username} joined`);
     }
     socket.emit('load_history', room.messageHistory); // send existing message history to the newly joined user
 }
@@ -118,14 +118,14 @@ function handleDisconnect(socket) {
             setTimeout(() => {
                 if (rooms[roomId] && rooms[roomId].owner === socket.id) {
                     console.log(`Owner of ${roomId} left. Closing room.`);
-                    io.to(roomId).emit('room_closed', 'The host has left the room.');
+                    io.to(roomId).emit('room_closed', 'The host has left');
                     delete rooms[roomId];
                 } else if (rooms[roomId]) {
                     const currentParticipantIndex = rooms[roomId].participants.findIndex(p => p.id === socket.id);
                     if (currentParticipantIndex > -1) {
                          const leavingUser = rooms[roomId].participants.splice(currentParticipantIndex, 1)[0];
                          updateParticipants(roomId);
-                         broadcastUserEvent(roomId, `${leavingUser.username} left the room`); // announce user left
+                         broadcastUserEvent(roomId, `${leavingUser.username} left`); // announce user left
                     }
                 }
             }, 3000); // 3 second grace period
