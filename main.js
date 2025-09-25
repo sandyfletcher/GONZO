@@ -97,9 +97,10 @@ function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
     const qr = qrcode(0, 'L');
     qr.addData(roomUrl);
     qr.make();
-    ui.qrElement.innerHTML = qr.createImgTag(4, 4);
-    const qrImg = ui.qrElement.querySelector('img');
-    ui.qrElement.addEventListener('click', () => { // click to copy QR code image
+    const qrImg = document.createElement('img'); // Create an img element programmatically
+    qrImg.src = qr.createDataURL(4, 4); // Get the image source as a data URL
+    qrImg.alt = 'Room QR Code';
+    ui.qrElement.appendChild(qrImg); // Append the safe element    ui.qrElement.addEventListener('click', () => { // click to copy QR code image
         if (!qrImg || !navigator.clipboard.write) {
             alert('Image copy not supported in this browser.');
             return;
