@@ -2,11 +2,18 @@ const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
 const { v4: uuidv4 } = require('uuid');
+const path = require('path'); // <-- ADDED
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" }
 });
+
+// Serve static files from node_modules and the root directory
+app.use('/scripts', express.static(path.join(__dirname, 'node_modules'))); // <-- ADDED
+app.use(express.static(__dirname)); // <-- ADDED to serve index.html, style.css etc.
+
 const rooms = {};
 const MAX_HISTORY = 10; // max number of messages/events to store per room
 const createRoomIPs = new Map(); // RATE LIMITING LOGIC

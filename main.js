@@ -11,9 +11,10 @@ const PARTICIPANT_EMOJIS = [
     '💀', '☠️', '💾', '🔑', '💣', '⚙️', '⚛️', '☣️', '☢️', '🌀'
     
 ];
+
 const socket = io("https://fastchat-0opj.onrender.com/");
 
-// STATE
+// --- STATE ---
 let lastMessageSenderId = null;
 
 socket.on('connect', () => {
@@ -28,19 +29,16 @@ function getUsernameColor(str) { //  use HSL to parse a colour from username str
     const hue = hash % 360; // get hue value 0 to 360
     return `hsl(${hue}, 80%, 55%)`; // fixed saturation/lightness for readability
 }
-
-function getEmojiForUser(username) { // use a simple hash to deterministically assign an emoji
+function getEmojiForUser(username) { // hash to deterministically assign an emoji
     let hash = 0;
     for (let i = 0; i < username.length; i++) {
         hash = username.charCodeAt(i) + ((hash << 5) - hash);
     }
-    // Use Math.abs to ensure the index is non-negative
-    const index = Math.abs(hash) % PARTICIPANT_EMOJIS.length;
+    const index = Math.abs(hash) % PARTICIPANT_EMOJIS.length; // ensure index is non-negative
     return PARTICIPANT_EMOJIS[index];
 }
 
-// PAGE SETUP
-
+// --- PAGE SETUP ---
 document.addEventListener('DOMContentLoaded', () => { 
     if (document.getElementById('start-room-btn')) { // route to correct setup function based on page content
         setupIndexPage();
@@ -75,9 +73,7 @@ function setupRoomPage() {
     setupMessageForm(roomId, ui);
     joinRoom(roomId);
 }
-
 // --- Helper Functions for Room Page ---
-
 function showCopyConfirmation(element) { // visual feedback on copy
     element.classList.add('copied');
     setTimeout(() => {
@@ -97,10 +93,11 @@ function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
     const qr = qrcode(0, 'L');
     qr.addData(roomUrl);
     qr.make();
-    const qrImg = document.createElement('img'); // Create an img element programmatically
-    qrImg.src = qr.createDataURL(4, 4); // Get the image source as a data URL
+    const qrImg = document.createElement('img');
+    qrImg.src = qr.createDataURL(4, 4);
     qrImg.alt = 'Room QR Code';
-    ui.qrElement.appendChild(qrImg); // Append the safe element    ui.qrElement.addEventListener('click', () => { // click to copy QR code image
+    ui.qrElement.appendChild(qrImg);
+    ui.qrElement.addEventListener('click', () => { // click to copy QR code image
         if (!qrImg || !navigator.clipboard.write) {
             alert('Image copy not supported in this browser.');
             return;
@@ -132,15 +129,12 @@ function joinRoom(roomId) {
     sessionStorage.removeItem('previousSocketId');
     socket.emit('join_room', { roomId, oldSocketId });
 }
-
 // --- Rendering Functions ---
-
 function renderUserMessage(data) { // renders a standard user message
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
     const messageElement = document.createElement('p');
-    // check if sender is same as last one
-    if (data.sender.id === lastMessageSenderId) {
+    if (data.sender.id === lastMessageSenderId) { // check if sender is same as last one
         messageElement.classList.add('consecutive-message');
     }
     const sender = data.sender;
@@ -165,12 +159,9 @@ function renderEventMessage(data) { // renders a join/leave event message
     eventElement.classList.add('event-message');
     eventElement.textContent = data.text;
     messagesContainer.appendChild(eventElement);
-    // An event message breaks the chain of consecutive user messages
-    lastMessageSenderId = null;
+    lastMessageSenderId = null; // event message breaks the chain of consecutive user messages
 }
-
 // --- Socket Event Listeners ---
-
 socket.on('room_created', (roomId) => {
     console.log(`Server created room. ID: ${roomId}`);
     sessionStorage.setItem('previousSocketId', socket.id);
