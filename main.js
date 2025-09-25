@@ -12,7 +12,7 @@ const PARTICIPANT_EMOJIS = [
     
 ];
 
-const socket = io("https://fastchat-0opj.onrender.com/");
+const socket = io();
 
 // --- STATE ---
 let lastMessageSenderId = null;
