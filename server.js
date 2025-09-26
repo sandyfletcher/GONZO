@@ -7,6 +7,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" }
 });
+app.use(express.static(__dirname)); // serve static files (HTML, CSS, JS, images) from the current directory
 const rooms = {};
 const MAX_HISTORY = 10; // max number of messages/events to store per room
 const createRoomIPs = new Map(); // RATE LIMITING LOGIC
