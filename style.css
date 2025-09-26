@@ -160,11 +160,15 @@ a:hover {
     overflow-y: auto;
 }
 .sidebar h1 {
-    font-size: clamp(1.5rem, 3vw, 1.8rem);
+    font-size: 1.6rem;
 }
-.sidebar-section {
+.sidebar h3 {
+    border-bottom: 1px dashed var(--terminal-fg-dark);
+    margin-bottom: 0.8rem;
+}
+/* .sidebar-section {
     margin-bottom: 1.5rem;
-}
+}*/
 .share-info {
     display: flex;
     flex-direction: column;
@@ -173,6 +177,7 @@ a:hover {
 }
 .share-info .link {
     background-color: #2a2a2a;
+    font-family: 'RussoOne', Courier, monospace;
     padding: 0.5rem;
     word-break: break-all;
     font-size: 0.8em;
@@ -183,12 +188,11 @@ a:hover {
     text-overflow: ellipsis;
 }
 .qr-code {
-    width: 100%; /* make QR code responsive */
+    width: auto;
     height: auto;
     aspect-ratio: 1 / 1; /* maintain square shape */
     background-color: white;
     margin: 1rem 0;
-    padding: 5px;
     border: 1px dashed var(--terminal-fg-dark);
     display: flex;
     align-items: center;
