@@ -1,4 +1,4 @@
-// STATE
+// --- STATE ---
 
 let lastMessageSenderId = null;
 const socket = io("https://fastchat-0opj.onrender.com/");
@@ -38,7 +38,7 @@ function getEmojiForUser(username) { // use a simple hash to deterministically a
     return PARTICIPANT_EMOJIS[index];
 }
 
-// PAGE SETUP
+// --- PAGE SETUP ---
 
 document.addEventListener('DOMContentLoaded', () => { 
     if (document.getElementById('start-room-btn')) { // route to correct setup function based on page content
@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupRoomPage();
     }
 });
+
 function setupIndexPage() {
     const startButton = document.getElementById('start-room-btn');
     startButton.addEventListener('click', (e) => {
@@ -58,6 +59,7 @@ function setupIndexPage() {
         socket.emit('create_room');
     });
 }
+
 function setupRoomPage() {
     const roomId = window.location.hash.substring(1);
     const ui = { // cache relevant DOM elements into single object
@@ -77,7 +79,7 @@ function setupRoomPage() {
     setupMessageForm(roomId, ui);
 }
 
-// --- Helper Functions for Room Page ---
+// --- ROOM PAGE ---
 
 function scrollToBottom() {
     const messagesContainer = document.querySelector('.messages');
@@ -150,14 +152,13 @@ function joinRoom(roomId) {
     socket.emit('join_room', { roomId, oldSocketId });
 }
 
-// --- Rendering Functions ---
+// --- RENDERING ---
 
 function renderUserMessage(data) { // renders a standard user message
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
     const messageElement = document.createElement('p');
-    // check if sender is same as last one
-    if (data.sender.id === lastMessageSenderId) {
+    if (data.sender.id === lastMessageSenderId) { // check if sender is same as last one
         messageElement.classList.add('consecutive-message');
     }
     const sender = data.sender;
@@ -187,7 +188,7 @@ function renderEventMessage(data) { // renders a join/leave event message
 
 }
 
-// --- Socket Event Listeners ---
+// --- SOCKET EVENT LISTENERS ---
 
 socket.on('room_created', (roomId) => {
     console.log(`Server created room. ID: ${roomId}`);

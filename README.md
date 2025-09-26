@@ -55,7 +55,7 @@ MECHANICAL FLOW
 
 ⚙️  Usernames are quite long (e.g.: HsJ78HmzhwS-iuJLAAKj), so they're truncated and assigned a colour identifier to make it easy to differentiate users from one another
 
-⚙️  The room functions by storing the last 10 messages in memory and culling anything additional every minute
+⚙️  The room functions by storing the last 10 messages in memory and culling anything beyond that immediately
 
 ⚙️  When a user sends a message, the server broadcasts that message to all other clients in the same room and adds it to the message history
 
