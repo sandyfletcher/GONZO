@@ -1,117 +1,85 @@
-GONZO
+GONZO — temporary chatrooms
 ------------------------
-temporary chatrooms
-------------------------
-A minimalist, ephemeral, real-time chat application with a retro terminal aesthetic.
-GONZO is a privacy-focused chat application that allows users to create temporary, anonymous chatrooms. There are no accounts, no long-term history, and rooms self-destruct when the host leaves. It's designed for quick, transient conversations.
+
+GONZO is a real-time chat application that allows users to create temporary, anonymous chatrooms.
 
 [screenshot of the chat room interface]
+
+FEATURES
 ------------------------
-✨ Features ✨
+✨  ANONYMOUS: No accounts or identifying info — users are assigned a randomized username, which is used to generate a unique colour to make conversations easier to follow
+
+✨  EPHEMERAL: The chatroom and its entire history are completely purged from the server 3 seconds after the host disconnects (the grace period is for users with inconsistent  internet connections)
+
+✨  SHAREABLE: Room codes are unique enough to be impossible to guess, but can be easily accessed with the clickable URL or QR codes
+
+TECH STACK
 ------------------------
-Anonymous & Ephemeral:
+🛠️  HTML5 & CSS3: structure and styling
 
-No user accounts, no sign-ups, no tracking. Chat data exists only in server memory and is wiped when a room is closed.
+🛠️  JAVASCRIPT: client-side logic
 
-Self-Destructing Rooms:
+🛠️  SOCKET.IO: library for bidirectional communication
 
- A chatroom and its entire history are permanently deleted from the server a few seconds after the original host disconnects.
+🛠️  QRCODE-GENERATOR: library that's appropriately named
 
-Easy Sharing:
+🛠️  UUID: library for unique room identifiers
 
- Instantly share a room with others via a simple URL or a scannable QR code.
+🛠️  NODE.JS: runtime environment
 
-Responsive Retro UI:
+🛠️  EXPRESS: web framework for serving static files
 
- A clean, "hacker terminal" interface that works seamlessly on both desktop and mobile devices, including portrait and landscape modes.
-
-Real-Time Communication:
-
- Built with WebSockets (Socket.IO) for instant message delivery.
-
-Reconnect Grace Period:
-
- If a user disconnects temporarily (e.g., due to a network flicker), they have a 3-second window to rejoin without being marked as "left".
-
-Limited Message History:
-
- New participants receive the last 10 messages/events upon joining, giving them context without storing extensive logs.
-
-Deterministic User Avatars:
-
- Each user is assigned a unique color and emoji based on their temporary username, making conversations easy to follow.
-
-Server-Side Rate Limiting:
-
- Prevents abuse by limiting the number of rooms that can be created from a single IP address within a one-minute window.
-
+CODEBASE
 ------------------------
-🛠️ Tech Stack
-Backend
-Node.js: JavaScript runtime environment.
-Express: Minimalist web framework for serving static files.
-Socket.IO: Library for real-time, bidirectional event-based communication.
-UUID: For generating unique room identifiers.
-Frontend
-HTML5 & CSS3: Structure and styling.
-Modern CSS features like CSS Variables, Flexbox, and Media Queries are used for a fluid and themeable layout.
-Vanilla JavaScript: All client-side logic is written without a framework.
-Socket.IO Client: To connect to the backend WebSocket server.
-qrcode-generator: For client-side generation of QR codes.
-------------------------
-🚀 Getting Started
-To run this project locally, follow these steps:
-Clone the repository:
-code
-Bash
-git clone https://github.com/your-username/GONZO.git
-cd GONZO
-Install dependencies:
-code
-Bash
-npm install
-Start the server:
-code
-Bash
-node server.js
-Open the application:
-Open your web browser and navigate to http://localhost:3000.
-⚙️ How It Works
-A user visits the home page (index.html) and clicks "START ROOM".
-The client sends a create_room event to the server via Socket.IO.
-The server generates a unique room ID (UUID), creates a new room object in server memory (stored in the rooms object), and makes the creator the "owner".
-The server emits a room_created event back to the client with the new room ID.
-The client's JavaScript redirects the user to room.html#<roomId>.
-Upon loading room.html, the client script reads the room ID from the URL hash and sends a join_room event to the server.
-Other users can join using the same URL. When they join, the server adds them to the list of participants for that room.
-Messages sent by any client are broadcast to all other clients in the same room.
-If the designated "owner" of the room disconnects, a 3-second timer starts. If they do not reconnect within this window, the server emits a room_closed event to all participants and deletes the room and its message history from memory.
-------------------------
-📁 Project Structure
-code
-Code
-.
-├── server.js           # The Node.js, Express, and Socket.IO backend logic
-├── main.js             # Client-side JavaScript for handling UI and WebSocket events
-├── index.html          # The main landing page
-├── room.html           # The chat room page template
-├── style.css           # All styles for the application, including the retro theme and responsive layouts
+📁
+├── index.html          # landing page
+├── room.html           # chat room page template
+├── style.css           # retro terminal styling and responsive layout parameters
+├── server.js           # node.js, express, and socket.io backend logic
+├── main.js             # client-side javascript for handling ui and websocket events
 └── assets/
-    └── favicon.ico     # Application favicon
+    └── favicon.ico     # site favicon
+
+MECHANICAL FLOW
 ------------------------
+
+⚙️  User arrives at the site and is immediately assigned a randomized visitor ID (example console log: "Connected to server as HsJ78HmzhwS-iuJLAAKj")
+
+⚙️  Clicking the "> START ROOM" button sends a "create_room" event to the server via Socket.IO
+
+⚙️  The server generates a unique room ID, creates a new room object in server memory, gives the creator the "owner" tag, and emits a "room_created" event back to the client with the new room ID
+
+⚙️  The server's emission triggers client-side JavaScript to redirect the user to the unique room URL, then sends a join_room event back to the server
+
+⚙️  
+
+⚙️  
+
+⚙️ The client is redirected to the unique room URL (e.g., room.html#...). This page load creates a new socket connection and a new ID.
+
+⚙️ Upon loading room.html, the client script reads the room ID from the URL. It also retrieves the previous socket ID from session storage and sends both to the server in a join_room event.
+
+⚙️ The server receives the join_room event. It recognizes the oldSocketId and correctly re-associates the user (whether they are the owner or a participant), updating their ID to the new one. It then broadcasts the updated participant list to everyone in the room.
+
+⚙️ After a successful join, the server sends the last 10 messages and events (load_history) to the new user for context. The client then updates its session storage with its new socket ID, ensuring it can be recognized again if it has to reconnect.
+
+⚙️ Other users join using the same URL. As they join, the server adds them to the room's participant list and broadcasts the update.
+
+⚙️ When a user sends a message, the server broadcasts that message to all other clients in the same room and adds it to the room's message history.
+
+⚙️ If the designated "owner" of the room disconnects, a 3-second timer starts. If they do not reconnect within this window (by reloading the page, which triggers the join_room flow), the server emits a room_closed event to all participants and deletes the room and its message history from memory.
+
+GETTING STARTED
+------------------------
+Just use the [site](https://gonzo.sandyfletcher.ca/)!
+
+Before you go saying it has problems connecting, wait another minute or two.
+
+I'm using the free tier from Render to host the server and it'll power off if no one's used it in a while.
+
+Should work perfectly once it's had that first coffee.
+
 📜 License
-This project is open-source. (You may want to add a LICENSE.md file, for example, with the MIT License).
 ------------------------
-If you've made it this far, you're already in the repository.  Let's break it down:
 
-[index.html]
-
-The file starts with the head section that breaks down the imports: favicon + styling info from this codebase and the socket.io library.
-
-The landing page info is then displayed, with a simple CSS animation to create the blinking cursor.
-
-The button at the bottom emits the socket instructions to "create room".
-
-[room.html]
-
-
+This project is open-source, but I might add a LICENSE.md file with the MIT License

@@ -7,7 +7,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: "*" }
 });
-app.use(express.static(__dirname)); // serve static files (HTML, CSS, JS, images) from the current directory
+app.use(express.static(__dirname)); // serve static files (HTML, CSS, JS, images) from current directory
 const rooms = {};
 const MAX_HISTORY = 10; // max number of messages/events to store per room
 const createRoomIPs = new Map(); // rate limiting
@@ -19,6 +19,7 @@ setInterval(() => { // clear IP tracker every minute
 }, RATE_LIMIT_WINDOW);
 
 // HELPER FUNCTIONS
+
 const updateParticipants = (roomId) => {
     if (rooms[roomId]) {
         io.to(roomId).emit('update_participants', rooms[roomId].participants);
@@ -41,6 +42,7 @@ const broadcastUserEvent = (roomId, text) => { // broadcast a user event (join/l
 };
 
 // EVENT HANDLERS
+
 function handleCreateRoom(socket) {
     const clientIp = socket.handshake.address;
     const ipCount = createRoomIPs.get(clientIp) || 0;
@@ -60,6 +62,7 @@ function handleCreateRoom(socket) {
     console.log(`Room created: ${roomId} by ${socket.id} (IP: ${clientIp})`);
     updateParticipants(roomId);
 }
+
 function handleJoinRoom(socket, data) {
     if (typeof data !== 'object' || data === null) return;
     if (typeof data.roomId !== 'string' || data.roomId.length > 40) return;
@@ -71,19 +74,18 @@ function handleJoinRoom(socket, data) {
     }
     socket.join(roomId);
     let username;
-    let isNewJoiner = true; // flag to check if we should announce the join
-    if (oldSocketId && room.owner === oldSocketId) {
-        console.log(`Owner ${oldSocketId} rejoining as ${socket.id}`);
-        room.owner = socket.id;
-        const ownerParticipant = room.participants.find(p => p.id === oldSocketId);
-        if (ownerParticipant) {
-            ownerParticipant.id = socket.id;
-            ownerParticipant.username = socket.id.slice(0, 5); // recalculate username with new ID
-            username = ownerParticipant.username;
-            isNewJoiner = false; // it's a reconnect, not a new user
+    let isNewJoiner = true; // flag to check if we should announce join
+    const reconnectingParticipant = oldSocketId ? room.participants.find(p => p.id === oldSocketId) : null; // logic to handle any reconnecting user
+    if (reconnectingParticipant) {
+        console.log(`User ${oldSocketId} rejoining as ${socket.id}`);
+        reconnectingParticipant.id = socket.id; // update participant's ID to new socket.id
+        if (room.owner === oldSocketId) { // if rejoining user was owner, update owner reference as well
+            room.owner = socket.id;
         }
+        username = reconnectingParticipant.username; // keep same username
+        isNewJoiner = false; // it's a reconnect, not a new joiner
     } else {
-        const newUser = {
+        const newUser = { // brand new user joining room
             id: socket.id,
             username: socket.id.slice(0, 5)
         };
@@ -92,11 +94,12 @@ function handleJoinRoom(socket, data) {
     }
     console.log(`User ${socket.id} (${username}) joined room ${roomId}`);
     updateParticipants(roomId);
-    if (isNewJoiner && username) { // announce join event for new users
+    if (isNewJoiner && username) { // announce join event only for genuinely new users
         broadcastUserEvent(roomId, `${username} joined`);
     }
-    socket.emit('load_history', room.messageHistory); // send existing message history to the newly joined user
+    socket.emit('load_history', room.messageHistory); // send existing message history
 }
+
 function handleSendMessage(socket, data) {
     if (typeof data.roomId !== 'string' || typeof data.message !== 'string') return;
     const { roomId, message } = data;
@@ -110,6 +113,7 @@ function handleSendMessage(socket, data) {
         addToHistory(roomId, 'message', messageData); // add message to history
     }
 }
+
 function handleDisconnect(socket) {
     console.log(`User disconnected: ${socket.id}`);
     for (const roomId in rooms) {
@@ -119,16 +123,20 @@ function handleDisconnect(socket) {
             const username = participant.username; // store username before timeout
             setTimeout(() => {
                 if (!rooms[roomId]) return; // check if room still exists
-                if (rooms[roomId].owner === socket.id) { // check if owner left, ID won't have changed
-                    console.log(`Owner of ${roomId} left. Closing room.`);
+                if (rooms[roomId].owner === socket.id) { // check if disconnected user is owner. if they reconnected, rooms[roomId].owner would have updated to a new ID
+                    console.log(`Owner of ${roomId} left and did not reconnect. Closing room.`);
                     io.to(roomId).emit('room_closed', 'The host has left');
                     delete rooms[roomId];
-                } else { // if participant hasn't reconnected, they will still have the old socket.id
-                    const stillHere = rooms[roomId].participants.some(p => p.id === socket.id);
+                } else { 
+                    const stillHere = rooms[roomId].participants.some(p => p.id === socket.id); // check if participant truly left, didn't reconnect with a new ID
                     if (stillHere) {
+                        console.log(`Participant ${username} (${socket.id}) left room ${roomId}.`);
                         rooms[roomId].participants = rooms[roomId].participants.filter(p => p.id !== socket.id);
                         updateParticipants(roomId);
                         broadcastUserEvent(roomId, `${username} left`);
+                    } else {
+                        console.log(`Participant ${username} (${socket.id}) reconnected with a new ID. No action needed.`); // participant reconnected successfully, so do nothing
+
                     }
                 }
             }, 3000); // 3 second grace period
@@ -138,6 +146,7 @@ function handleDisconnect(socket) {
 }
 
 // CONNECTION LOGIC
+
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id}`);
   socket.on('create_room',  () => handleCreateRoom(socket));
