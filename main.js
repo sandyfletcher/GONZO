@@ -203,8 +203,6 @@ socket.on('load_history', (history) => { // handles receiving message history wh
 socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
     const memberLists = document.querySelectorAll('.member-list');
-    if (!memberLists) return;
-    
     memberLists.forEach(memberList => {
         memberList.innerHTML = '';
         participants.forEach((p, index) => {

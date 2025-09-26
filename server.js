@@ -10,12 +10,12 @@ const io = new Server(server, {
 app.use(express.static(__dirname)); // serve static files (HTML, CSS, JS, images) from the current directory
 const rooms = {};
 const MAX_HISTORY = 10; // max number of messages/events to store per room
-const createRoomIPs = new Map(); // RATE LIMITING LOGIC
+const createRoomIPs = new Map(); // rate limiting
 const CREATE_ROOM_LIMIT = 3; // max 3 rooms per IP per minute
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in milliseconds
 setInterval(() => { // clear IP tracker every minute
     createRoomIPs.clear();
-    console.log('Rate limit tracker cleared.');
+    // console.log('Rate limit tracker cleared.');
 }, RATE_LIMIT_WINDOW);
 
 // HELPER FUNCTIONS
@@ -29,16 +29,17 @@ const addToHistory = (roomId, type, data) => {
     const history = rooms[roomId].messageHistory;
     history.push({ type, data });
     if (history.length > MAX_HISTORY) {
-        history.shift(); // Remove the oldest item if history is full
+        history.shift(); // remove oldest item if history is full
     }
 };
 const broadcastUserEvent = (roomId, text) => { // broadcast a user event (join/leave) and add it to history
     if (rooms[roomId]) {
         const eventData = { text };
         io.to(roomId).emit('user_event', eventData);
-        addToHistory(roomId, 'event', eventData); // Also store event in history
+        addToHistory(roomId, 'event', eventData); // also store event in history
     }
 };
+
 // EVENT HANDLERS
 function handleCreateRoom(socket) {
     const clientIp = socket.handshake.address;
@@ -70,7 +71,7 @@ function handleJoinRoom(socket, data) {
     }
     socket.join(roomId);
     let username;
-    let isNewJoiner = true; // Flag to check if we should announce the join
+    let isNewJoiner = true; // flag to check if we should announce the join
     if (oldSocketId && room.owner === oldSocketId) {
         console.log(`Owner ${oldSocketId} rejoining as ${socket.id}`);
         room.owner = socket.id;
@@ -91,8 +92,7 @@ function handleJoinRoom(socket, data) {
     }
     console.log(`User ${socket.id} (${username}) joined room ${roomId}`);
     updateParticipants(roomId);
-    // announce join event for new users
-    if (isNewJoiner && username) {
+    if (isNewJoiner && username) { // announce join event for new users
         broadcastUserEvent(roomId, `${username} joined`);
     }
     socket.emit('load_history', room.messageHistory); // send existing message history to the newly joined user
@@ -116,17 +116,19 @@ function handleDisconnect(socket) {
         const room = rooms[roomId];
         const participant = room.participants.find(p => p.id === socket.id);
         if (participant) {
+            const username = participant.username; // store username before timeout
             setTimeout(() => {
-                if (rooms[roomId] && rooms[roomId].owner === socket.id) {
+                if (!rooms[roomId]) return; // check if room still exists
+                if (rooms[roomId].owner === socket.id) { // check if owner left, ID won't have changed
                     console.log(`Owner of ${roomId} left. Closing room.`);
                     io.to(roomId).emit('room_closed', 'The host has left');
                     delete rooms[roomId];
-                } else if (rooms[roomId]) {
-                    const currentParticipantIndex = rooms[roomId].participants.findIndex(p => p.id === socket.id);
-                    if (currentParticipantIndex > -1) {
-                         const leavingUser = rooms[roomId].participants.splice(currentParticipantIndex, 1)[0];
-                         updateParticipants(roomId);
-                         broadcastUserEvent(roomId, `${leavingUser.username} left`); // announce user left
+                } else { // if participant hasn't reconnected, they will still have the old socket.id
+                    const stillHere = rooms[roomId].participants.some(p => p.id === socket.id);
+                    if (stillHere) {
+                        rooms[roomId].participants = rooms[roomId].participants.filter(p => p.id !== socket.id);
+                        updateParticipants(roomId);
+                        broadcastUserEvent(roomId, `${username} left`);
                     }
                 }
             }, 3000); // 3 second grace period
@@ -134,6 +136,7 @@ function handleDisconnect(socket) {
         }
     }
 }
+
 // CONNECTION LOGIC
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id}`);
