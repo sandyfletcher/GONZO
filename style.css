@@ -1,5 +1,10 @@
+@font-face { font-family: 'Sixtyfour'; src: url('assets/Sixtyfour.ttf') format('truetype'); font-display: block}
+@font-face { font-family: 'RussoOne'; src: url('assets/RussoOne.ttf') format('truetype'); font-display: block}
+
+/* --- Default --- */
+
 :root {
-    --site-bg: black;
+    --site-bg: rgb(0, 7, 2);
     --terminal-bg: #1a1a1a;
     --terminal-fg: #00ff41;
     --terminal-fg-dark: #00a32a;
@@ -7,6 +12,7 @@
 }
 * {
     box-sizing: border-box;
+    margin: 0;
 }
 html {
     height: 100%;
@@ -24,42 +30,61 @@ body {
     align-items: center;
     justify-content: center;
 }
-h1, h2 {
+h1 {
+    font-family: 'Sixtyfour', Courier, monospace;
+    font-size: clamp(2rem, 3vw, 3rem);
     letter-spacing: 2px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 5px;
-    margin-top: 0;
     display: inline-block;
+    font-weight: normal;
 }
-h1  { font-size: 2rem; }
-h2  { font-size: 1.25rem; }
-a   { color: var(--terminal-fg); }
+h3 {
+    font-family: 'RussoOne', Courier, monospace;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    display: inline-block;
+    font-weight: normal;
+}
+p {
+    font-size: 1rem;
+}
+li {
+    font-size: 0.65rem;
+}
+a {
+    color: var(--terminal-fg);
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
 
+/* --- Reused Components  --- */
 
 .cursor {
     display: inline-block;
     background-color: var(--terminal-fg);
-    width: 0.6em; /* scale with font size */
-    height: 1.2em;
+    width: 0.2em;
+    height: 1.1em;
     animation: blink 1s step-end infinite;
-    margin-left: 0.3em;
+    margin-left: 0.2em;
     vertical-align: bottom;
 }
 @keyframes blink {
     50% { opacity: 0; }
 }
-/* --- Main Menu / Centered Content --- */
+
+/* --- Landing Page  --- */
 
 .main-container {
     background-color: var(--terminal-bg);
     text-align: center;
     border: 1px solid var(--border-color);
-    padding: clamp(20px, 5vw, 40px); /* fluid padding */
+    padding: 1.5rem; /* fluid padding */
     width: 100%;
     max-width: 500px;
 }
 .main-container h1 {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 .menu-button {
     background-color: inherit;
@@ -68,7 +93,7 @@ a   { color: var(--terminal-fg); }
     display: block;
     border: 1px solid var(--terminal-fg);
     padding: 0.75rem 1.5rem;
-    margin: 1rem auto;
+    margin: 0 auto;
     width: 100%;
     max-width: 250px;
     cursor: pointer;
@@ -85,22 +110,19 @@ a   { color: var(--terminal-fg); }
     cursor: wait; /* Show a waiting cursor */
     pointer-events: none; /* A fallback to prevent clicks if disabled fails */
 }
-
 .feature-list {
     list-style: none;
     padding: 0;
-    margin: 1.5rem auto;
+    margin: 1.1rem auto 0.7rem;
     text-align: left; /* Aligns text within the list items */
     display: inline-block; /* Allows the list to be centered by its parent */
     max-width: 100%;
 }
-
 .feature-list li {
     margin-bottom: 0.75rem;
     position: relative;
     padding-left: 1.5em; /* Make space for the pseudo-element */
 }
-
 .feature-list li::before {
     content: '>';
     position: absolute;
@@ -109,16 +131,7 @@ a   { color: var(--terminal-fg); }
     font-weight: bold;
 }
 
-/* Ensure the shared footer style has proper spacing on the main page */
-.main-container .sidebar-footer {
-    margin-top: 2.5rem;
-    font-size: 0.8em;
-    color: var(--terminal-fg-dark);
-}
-
-
-
-/* --- Room Page Layout --- */
+/* --- Room Page --- */
 
 .room-page-body {
     padding: 0; /* Remove padding for full-screen layout */
@@ -212,7 +225,9 @@ a   { color: var(--terminal-fg); }
     overflow-y: auto;
     margin-bottom: 1rem;
 }
+
 /* --- Message Spacing Logic --- */
+
 .messages p {
     margin-block-start: 1em; /* default top spacing */
     margin-block-end: 0;
@@ -287,6 +302,7 @@ a   { color: var(--terminal-fg); }
 }
 
 /* --- LAYOUT CONTROLS --- */
+
 /* By default, show desktop layout and hide mobile elements */
 .mobile-only {
     display: none;
@@ -294,7 +310,6 @@ a   { color: var(--terminal-fg); }
 .desktop-only {
     display: flex; /* The sidebar is a flex container */
 }
-
 
 @media (max-width: 768px) {
     /* On mobile, hide desktop elements and show mobile ones */
@@ -304,12 +319,10 @@ a   { color: var(--terminal-fg); }
     .mobile-only {
         display: block;
     }
-
     .room-container {
         flex-direction: column;
         text-align: center; /* Center content in mobile sections */
     }
-
     /* --- Mobile Layout Sections --- */
     .mobile-header {
         order: 1;
@@ -324,12 +337,10 @@ a   { color: var(--terminal-fg); }
         border-top: 1px solid var(--border-color);
         margin-top: 1rem;
     }
-
     .chat-area {
         order: 2;
         min-height: 50%; /* ensure chat has enough space */
     }
-    
     .mobile-bottom-info {
         order: 3;
         display: flex;
@@ -349,15 +360,12 @@ a   { color: var(--terminal-fg); }
 }
 
 /* --- Mobile Landscape Layout --- */
-/* Targets devices that are wide but not tall, like a phone on its side. */
-/* Using max-height is a reliable way to detect this state. */
+/* Targets devices that are wide but not tall, like a phone on its side. Using max-height is a reliable way to detect this state. */
 @media (max-height: 500px) and (orientation: landscape) {
-    
     /* Revert to a side-by-side layout, similar to desktop */
     .room-container {
         flex-direction: row;
     }
-
     /* Explicitly show the desktop sidebar and hide the mobile-specific elements */
     .desktop-only {
         display: flex;
@@ -365,7 +373,6 @@ a   { color: var(--terminal-fg); }
     .mobile-only {
         display: none;
     }
-
     /* Make the desktop sidebar more compact to save vertical space */
     .sidebar {
         flex: 0 0 220px; /* Use a slightly smaller fixed width */
@@ -374,7 +381,6 @@ a   { color: var(--terminal-fg); }
         border-bottom: none; /* Remove border that might be applied in portrait */
         border-right: 1px solid var(--border-color); /* Ensure right border is visible */
     }
-
     /* Reduce font sizes and spacing within the compact sidebar */
     .sidebar h1 {
         font-size: 1.5rem;
@@ -390,13 +396,11 @@ a   { color: var(--terminal-fg); }
     .member-list li {
         margin-bottom: 0.25rem;
     }
-    
     /* Ensure chat area is correctly ordered and padded */
     .chat-area {
         order: 0;
         padding: 0.75rem;
     }
-
     /* Reduce overall font size for better readability in the compact view */
     html {
         font-size: 14px;

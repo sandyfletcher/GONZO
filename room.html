@@ -11,7 +11,7 @@
 </head>
 <body class="room-page-body">
     <div class="room-container">
-        <!-- == DESKTOP SIDEBAR (Visible on large screens) == -->
+        <!-- DESKTOP SIDEBAR (large screens) -->
         <aside class="sidebar desktop-only">
             <h1>GONZO<span class="cursor"></span></h1>
             <div class="sidebar-section share-info">
@@ -22,21 +22,13 @@
                 <h2>PARTICIPANTS</h2>
                 <ul class="member-list"></ul>
             </div>
-            <div class="sidebar-footer">
-                GONZO © 2025<br>open-source license
-            </div>
         </aside>
-
-        <!-- == MOBILE HEADER (Visible on small screens) == -->
+        <!-- MOBILE HEADER (small screens) -->
         <header class="mobile-header mobile-only">
             <h1>GONZO<span class="cursor"></span></h1>
-            <div class="sidebar-footer">
-                GONZO © 2025<br>open-source license
-            </div>
             <hr class="mobile-divider">
         </header>
-
-        <!-- == CHAT AREA (Common to both layouts) == -->
+        <!-- CHAT AREA (all screens) -->
         <main class="chat-area">
             <div class="messages">
                 <p>Connecting...</p>
@@ -46,8 +38,7 @@
                 <button type="submit">> SEND</button>
             </form>
         </main>
-
-        <!-- == MOBILE BOTTOM INFO (Visible on small screens) == -->
+        <!-- == MOBILE FOOTER (small screens) == -->
         <div class="mobile-bottom-info mobile-only">
             <div class="share-info-mobile">
                 <span class="link" id="room-link-mobile">[roomlink]</span>
@@ -58,7 +49,6 @@
                 <ul class="member-list"></ul>
             </div>
         </div>
-
     </div>
     <script src="main.js" defer></script>
 </body>
