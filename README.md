@@ -67,4 +67,4 @@ Just make sure you've clicked the START button and it now shows as "CONNECTING..
 📜 License
 ------------------------
 
-This project is open-source, but I might add a LICENSE.md file with the MIT License
+This project is open-source until I figure out whether the MIT or GPLv3 License is correct for this application.

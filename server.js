@@ -15,7 +15,6 @@ const CREATE_ROOM_LIMIT = 3; // max 3 rooms per IP per minute
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in milliseconds
 setInterval(() => { // clear IP tracker every minute
     createRoomIPs.clear();
-    // console.log('Rate limit tracker cleared.');
 }, RATE_LIMIT_WINDOW);
 
 // HELPER FUNCTIONS
