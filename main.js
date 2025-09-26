@@ -1,5 +1,6 @@
 // --- STATE ---
 
+const MAX_DISPLAYED_MESSAGES = 10; // Corresponds to MAX_HISTORY on the server
 let lastMessageSenderId = null;
 const socket = io("https://fastchat-0opj.onrender.com/");
 const PARTICIPANT_EMOJIS = [
@@ -154,9 +155,17 @@ function joinRoom(roomId) {
 
 // --- RENDERING ---
 
-function renderUserMessage(data) { // renders a standard user message
+function pruneOldMessages() {
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
+    while (messagesContainer.childElementCount > MAX_DISPLAYED_MESSAGES) { // if greater than limit, remove oldest one / first child
+        if (messagesContainer.firstChild) {
+            messagesContainer.removeChild(messagesContainer.firstChild);
+        }
+    }
+}
+
+function renderUserMessage(data) { // returns element instead of adding it to DOM
     const messageElement = document.createElement('p');
     if (data.sender.id === lastMessageSenderId) { // check if sender is same as last one
         messageElement.classList.add('consecutive-message');
@@ -173,19 +182,17 @@ function renderUserMessage(data) { // renders a standard user message
     const messageText = document.createTextNode(` ${data.message}`);
     messageElement.appendChild(usernameStrong);
     messageElement.appendChild(messageText);
-    messagesContainer.appendChild(messageElement);
     lastMessageSenderId = data.sender.id; // update last sender ID
+    return messageElement;
 }
 
-function renderEventMessage(data) { // renders a join/leave event message
-    const messagesContainer = document.querySelector('.messages');
-    if (!messagesContainer) return;
+function renderEventMessage(data) { // This function now returns the element instead of adding it to the DOM
     const eventElement = document.createElement('p');
     eventElement.classList.add('event-message');
     eventElement.textContent = data.text;
-    messagesContainer.appendChild(eventElement);
-    lastMessageSenderId = null; // event message breaks chain of consecutive user messages
 
+    lastMessageSenderId = null; // event message breaks chain of consecutive user messages
+    return eventElement;
 }
 
 // --- SOCKET EVENT LISTENERS ---
@@ -205,13 +212,17 @@ socket.on('load_history', (history) => { // handles receiving message history wh
     messagesContainer.innerHTML = ''; // clear "Connecting..."
     lastMessageSenderId = null; // reset for history load
     history.forEach(item => {
+        let element;
         if (item.type === 'message') {
-            renderUserMessage(item.data);
+            element = renderUserMessage(item.data);
         } else if (item.type === 'event') {
-            renderEventMessage(item.data);
+            element = renderEventMessage(item.data);
+        }
+        if (element) {
+            messagesContainer.appendChild(element);
         }
     });
-    scrollToBottom();
+    scrollToBottom(); // scroll once after loading all history
 });
 
 socket.on('update_participants', (participants) => {
@@ -239,12 +250,20 @@ socket.on('update_participants', (participants) => {
 });
 
 socket.on('user_event', (data) => { // handles a user join/leave event
-    renderEventMessage(data);
+    const messagesContainer = document.querySelector('.messages');
+    if (!messagesContainer) return;
+    const eventElement = renderEventMessage(data);
+    messagesContainer.appendChild(eventElement);
+    pruneOldMessages();
     scrollToBottom();
 });
 
-socket.on('receive_message', (data) => { // reusable rendering function
-    renderUserMessage(data);
+socket.on('receive_message', (data) => {
+    const messagesContainer = document.querySelector('.messages');
+    if (!messagesContainer) return;
+    const messageElement = renderUserMessage(data);
+    messagesContainer.appendChild(messageElement);
+    pruneOldMessages();
     scrollToBottom();
 });
 
