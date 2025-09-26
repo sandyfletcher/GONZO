@@ -4,36 +4,47 @@ temporary chatrooms
 ------------------------
 A minimalist, ephemeral, real-time chat application with a retro terminal aesthetic.
 GONZO is a privacy-focused chat application that allows users to create temporary, anonymous chatrooms. There are no accounts, no long-term history, and rooms self-destruct when the host leaves. It's designed for quick, transient conversations.
+
 [screenshot of the chat room interface]
 ------------------------
-✨ Features
+✨ Features ✨
+------------------------
 Anonymous & Ephemeral:
+
 No user accounts, no sign-ups, no tracking. Chat data exists only in server memory and is wiped when a room is closed.
 
 Self-Destructing Rooms:
+
  A chatroom and its entire history are permanently deleted from the server a few seconds after the original host disconnects.
 
 Easy Sharing:
+
  Instantly share a room with others via a simple URL or a scannable QR code.
 
 Responsive Retro UI:
+
  A clean, "hacker terminal" interface that works seamlessly on both desktop and mobile devices, including portrait and landscape modes.
 
 Real-Time Communication:
+
  Built with WebSockets (Socket.IO) for instant message delivery.
 
 Reconnect Grace Period:
+
  If a user disconnects temporarily (e.g., due to a network flicker), they have a 3-second window to rejoin without being marked as "left".
 
 Limited Message History:
+
  New participants receive the last 10 messages/events upon joining, giving them context without storing extensive logs.
 
 Deterministic User Avatars:
+
  Each user is assigned a unique color and emoji based on their temporary username, making conversations easy to follow.
 
 Server-Side Rate Limiting:
+
  Prevents abuse by limiting the number of rooms that can be created from a single IP address within a one-minute window.
- 
+
 ------------------------
 🛠️ Tech Stack
 Backend
