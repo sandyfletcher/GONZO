@@ -62,9 +62,9 @@ function setupRoomPage() {
         messagesContainer: document.querySelector('.messages'),
         messageForm: document.getElementById('message-form'),
         messageInput: document.getElementById('message-form').querySelector('input'),
-        roomLinkElement: document.getElementById('room-link'),
-        qrElement: document.querySelector('.qr-code'),
-        memberList: document.querySelector('.member-list'),
+        roomLinkElements: [document.getElementById('room-link-desktop'), document.getElementById('room-link-mobile')],
+        qrElements: document.querySelectorAll('.qr-code'),
+        memberLists: document.querySelectorAll('.member-list'),
     };
     if (!roomId) {
         ui.messagesContainer.innerHTML = '<p>ERROR: No room ID specified. Start a new room.</p>';
@@ -87,33 +87,41 @@ function showCopyConfirmation(element) { // visual feedback on copy
 function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
     document.title = `GONZO — [${roomId.substring(0, 6)}]`;
     const roomUrl = window.location.href;
-    ui.roomLinkElement.textContent = `Room: ${roomId.substring(0, 8)}...`;
-    ui.roomLinkElement.addEventListener('click', () => { // click to copy text link
-        navigator.clipboard.writeText(roomUrl).then(() => {
-            showCopyConfirmation(ui.roomLinkElement);
-        }).catch(err => console.error('Failed to copy text: ', err));
+
+    ui.roomLinkElements.forEach(el => {
+        if (!el) return;
+        el.textContent = `Room: ${roomId.substring(0, 8)}...`;
+        el.addEventListener('click', () => { // click to copy text link
+            navigator.clipboard.writeText(roomUrl).then(() => {
+                showCopyConfirmation(el);
+            }).catch(err => console.error('Failed to copy text: ', err));
+        });
     });
-    ui.qrElement.innerHTML = ''; // clear placeholder
-    const qr = qrcode(0, 'L');
-    qr.addData(roomUrl);
-    qr.make();
-    ui.qrElement.innerHTML = qr.createImgTag(4, 4);
-    const qrImg = ui.qrElement.querySelector('img');
-    ui.qrElement.addEventListener('click', () => { // click to copy QR code image
-        if (!qrImg || !navigator.clipboard.write) {
-            alert('Image copy not supported in this browser.');
-            return;
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = qrImg.width;
-        canvas.height = qrImg.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(qrImg, 0, 0);
-        canvas.toBlob((blob) => {
-            navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-            .then(() => showCopyConfirmation(ui.qrElement))
-            .catch(err => console.error('Failed to copy image: ', err));
-        }, 'image/png');
+    
+    ui.qrElements.forEach(qrElement => {
+        if (!qrElement) return;
+        qrElement.innerHTML = ''; // clear placeholder
+        const qr = qrcode(0, 'L');
+        qr.addData(roomUrl);
+        qr.make();
+        qrElement.innerHTML = qr.createImgTag(4, 4);
+        const qrImg = qrElement.querySelector('img');
+        qrElement.addEventListener('click', () => { // click to copy QR code image
+            if (!qrImg || !navigator.clipboard.write) {
+                alert('Image copy not supported in this browser.');
+                return;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = qrImg.width;
+            canvas.height = qrImg.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(qrImg, 0, 0);
+            canvas.toBlob((blob) => {
+                navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+                .then(() => showCopyConfirmation(qrElement))
+                .catch(err => console.error('Failed to copy image: ', err));
+            }, 'image/png');
+        });
     });
 }
 function setupMessageForm(roomId, ui) {
@@ -191,26 +199,29 @@ socket.on('load_history', (history) => { // handles receiving message history wh
 });
 socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
-    const memberList = document.querySelector('.member-list');
-    if (!memberList) return;
-    memberList.innerHTML = '';
-    participants.forEach((p, index) => {
-        const li = document.createElement('li');
-        let prefix = '';
-        let suffix = '';
-        // Assign prefix emoji: crown for owner, deterministic emoji for everyone else
-        if (index === 0) {
-            prefix = '👑 ';
-        } else {
-            const userEmoji = getEmojiForUser(p.username);
-            prefix = userEmoji + ' ';
-        }
-        // If the participant is the current user, add a left arrow suffix
-        if (p.id === socket.id) {
-            suffix = ' ⬅️';
-        }
-        li.textContent = `${prefix}${p.username}${suffix}`;
-        memberList.appendChild(li);
+    const memberLists = document.querySelectorAll('.member-list');
+    if (!memberLists) return;
+    
+    memberLists.forEach(memberList => {
+        memberList.innerHTML = '';
+        participants.forEach((p, index) => {
+            const li = document.createElement('li');
+            let prefix = '';
+            let suffix = '';
+            // Assign prefix emoji: crown for owner, deterministic emoji for everyone else
+            if (index === 0) {
+                prefix = '👑 ';
+            } else {
+                const userEmoji = getEmojiForUser(p.username);
+                prefix = userEmoji + ' ';
+            }
+            // If the participant is the current user, add a left arrow suffix
+            if (p.id === socket.id) {
+                suffix = ' ⬅️';
+            }
+            li.textContent = `${prefix}${p.username}${suffix}`;
+            memberList.appendChild(li);
+        });
     });
 });
 socket.on('user_event', (data) => { // handles a user join/leave event

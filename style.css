@@ -8,7 +8,7 @@
     box-sizing: border-box;
 }
 html, body {
-    height: 100%; /* <-- THIS IS THE FIX */
+    height: 100%;
     margin: 0;
 }
 html {
@@ -242,22 +242,65 @@ a {
     font-style: italic;
     text-align: center;
 }
+
+/* --- LAYOUT CONTROLS --- */
+/* By default, show desktop layout and hide mobile elements */
+.mobile-only {
+    display: none;
+}
+.desktop-only {
+    display: flex; /* The sidebar is a flex container */
+}
+
+
 @media (max-width: 768px) {
+    /* On mobile, hide desktop elements and show mobile ones */
+    .desktop-only {
+        display: none;
+    }
+    .mobile-only {
+        display: block;
+    }
+
     .room-container {
         flex-direction: column;
+        text-align: center; /* Center content in mobile sections */
     }
-    .sidebar {
-        flex: 0 1 40%; /* Allow sidebar to shrink, take up 40% of available space */
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--border-color);
-        order: 2;
-    }
-    .chat-area {
+
+    /* --- Mobile Layout Sections --- */
+    .mobile-header {
         order: 1;
+        padding: 1rem;
+        flex-shrink: 0;
+    }
+    .mobile-header .sidebar-footer {
+        margin-top: 0.5rem; /* Adjust spacing */
+    }
+    .mobile-divider {
+        border: none;
+        border-top: 1px solid var(--border-color);
+        margin-top: 1rem;
+    }
+
+    .chat-area {
+        order: 2;
         min-height: 50%; /* ensure chat has enough space */
     }
-    .sidebar-footer {
-        margin-top: 1rem;
+    
+    .mobile-bottom-info {
+        order: 3;
+        display: flex;
+        border-top: 1px solid var(--border-color);
+        width: 100%;
+        flex-shrink: 0;
+        padding: 1rem;
+        gap: 1rem; /* Space between the two columns */
+    }
+    .share-info-mobile, .participants-info-mobile {
+        flex: 1; /* Each takes up half the space */
+        min-width: 0; /* Prevents flexbox overflow */
+    }
+    .participants-info-mobile .member-list {
+        text-align: left; /* Keep participant names left-aligned */
     }
 }
