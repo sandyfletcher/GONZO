@@ -43,31 +43,31 @@ CODEBASE
 MECHANICAL FLOW
 ------------------------
 
-⚙️  User arrives at the site and is immediately assigned a randomized visitor ID (example console log: "Connected to server as HsJ78HmzhwS-iuJLAAKj")
+⚙️  User arrives at the site and is immediately assigned a randomized visitor ID 
 
-⚙️  Clicking the "> START ROOM" button sends a "create_room" event to the server via Socket.IO
+⚙️  Clicking the "> START ROOM" button sends a create_room event to the server via Socket.IO
 
-⚙️  The server generates a unique room ID, creates a new room object in server memory, gives the creator the "owner" tag, and emits a "room_created" event back to the client with the new room ID
+⚙️  The server generates a unique room ID, creates an associated room object, and emits a room_created event back to the client
 
-⚙️  The server's emission triggers client-side JavaScript to redirect the user to the unique room URL, then sends a join_room event back to the server
+⚙️  The browser learning the room ID triggers JavaScript that redirects the user to the unique URL, then sends a join_room event back to the server
 
-⚙️  
+⚙️  The server recognizes the oldSocketId and re-associates the user, updating their ID with a new one, then broadcasting the updated participant list to the room
 
-⚙️  
+⚙️  Usernames are quite long (e.g.: HsJ78HmzhwS-iuJLAAKj), so they're truncated and assigned a colour identifier to make it easy to differentiate users from one another
 
-⚙️ The client is redirected to the unique room URL (e.g., room.html#...). This page load creates a new socket connection and a new ID.
+⚙️  The room functions by storing the last 10 messages in memory and culling anything additional every minute
 
-⚙️ Upon loading room.html, the client script reads the room ID from the URL. It also retrieves the previous socket ID from session storage and sends both to the server in a join_room event.
+⚙️  When a user sends a message, the server broadcasts that message to all other clients in the same room and adds it to the message history
 
-⚙️ The server receives the join_room event. It recognizes the oldSocketId and correctly re-associates the user (whether they are the owner or a participant), updating their ID to the new one. It then broadcasts the updated participant list to everyone in the room.
+⚙️  Clickable share buttons offer text- and image-based ways to share the room with others
 
-⚙️ After a successful join, the server sends the last 10 messages and events (load_history) to the new user for context. The client then updates its session storage with its new socket ID, ensuring it can be recognized again if it has to reconnect.
+⚙️  When others join, the server repeats the process of assigning pseudonymous identifiers, broadcasts their arrival to the chatroom, and provides them the stored conversation context
 
-⚙️ Other users join using the same URL. As they join, the server adds them to the room's participant list and broadcasts the update.
+⚙️  If the room's owner disconnects, the server allows a grace period of 3 seconds to reconnect for users with poor internet connections
 
-⚙️ When a user sends a message, the server broadcasts that message to all other clients in the same room and adds it to the room's message history.
+⚙️  If the owner of the room disconnects, a grace period of 3 seconds to reconnect
 
-⚙️ If the designated "owner" of the room disconnects, a 3-second timer starts. If they do not reconnect within this window (by reloading the page, which triggers the join_room flow), the server emits a room_closed event to all participants and deletes the room and its message history from memory.
+ is triggered allows them to reconnect, a 3-second timer starts. If they do not reconnect within this window (by reloading the page, which triggers the join_room flow), the server emits a room_closed event to all participants and deletes the room and its message history from memory.
 
 GETTING STARTED
 ------------------------
@@ -77,7 +77,7 @@ Before you go saying it has problems connecting, wait another minute or two.
 
 I'm using the free tier from Render to host the server and it'll power off if no one's used it in a while.
 
-Should work perfectly once it's had that first coffee.
+Should work perfectly once it's had that first coffee!
 
 📜 License
 ------------------------

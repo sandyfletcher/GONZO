@@ -10,7 +10,13 @@ const PARTICIPANT_EMOJIS = [
 ];
 
 socket.on('connect', () => {
-    console.log("Connected to server as", socket.id);
+    console.log("Connected to server as", socket.id); // if on a room page, join room — handles both initial connection and any subsequent reconnections
+    if (document.querySelector('.room-container')) {
+        const roomId = window.location.hash.substring(1);
+        if (roomId) {
+            joinRoom(roomId);
+        }
+    }
 });
 
 function getUsernameColor(str) { //  use HSL to parse a colour from username string
@@ -69,7 +75,6 @@ function setupRoomPage() {
     }
     initializeRoomUI(roomId, ui);
     setupMessageForm(roomId, ui);
-    joinRoom(roomId);
 }
 
 // --- Helper Functions for Room Page ---
