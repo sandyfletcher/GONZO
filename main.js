@@ -1,20 +1,13 @@
-const PARTICIPANT_EMOJIS = [
-    // Sci-Fi
-    '👾', '👽', '🤖', '👻', '🎃', '🤡', '🐸', '🐙', '🦖', '🦋',
-    '🚀', '🛰️', '🔭', '🛸', '☄️',
-    // Fantasy & Mythical
-    '🐉', '👹', '👺', '🦄', '🐲', '🧟', '🧛', '🧙', '🧜', '🧞',
-    '🧚', '🗿', '💎', '🔮', '🧿',
-    // Animals & Creatures
-    '🦉', '🦊', '🦇', '🦂', '🕷️', '🦑', '🦀', '🦈', '🐌', '🐍',
-    // Symbols & Tech
-    '💀', '☠️', '💾', '🔑', '💣', '⚙️', '⚛️', '☣️', '☢️', '🌀'
-    
-];
-const socket = io("https://fastchat-0opj.onrender.com/");
-
 // STATE
+
 let lastMessageSenderId = null;
+const socket = io("https://fastchat-0opj.onrender.com/");
+const PARTICIPANT_EMOJIS = [
+    '👾', '👽', '🤖', '👻', '🎃', '🤡', '🐸', '🐙', '🦖', '🦋', '🚀', '🛰️', '🔭', '🛸', '☄️',
+    '🐉', '👹', '👺', '🦄', '🐲', '🧟', '🧛', '🧙', '🧜', '🧞', '🧚', '🗿', '💎', '🔮', '🧿',
+    '🦉', '🦊', '🦇', '🦂', '🕷️', '🦑', '🦀', '🦈', '🐌', '🐍', '💀', '☠️', '💾', '🔑', '💣',
+    '⚙️', '⚛️', '☣️', '☢️', '🌀'
+];
 
 socket.on('connect', () => {
     console.log("Connected to server as", socket.id);
@@ -34,8 +27,8 @@ function getEmojiForUser(username) { // use a simple hash to deterministically a
     for (let i = 0; i < username.length; i++) {
         hash = username.charCodeAt(i) + ((hash << 5) - hash);
     }
-    // Use Math.abs to ensure the index is non-negative
-    const index = Math.abs(hash) % PARTICIPANT_EMOJIS.length;
+    const index = Math.abs(hash) % PARTICIPANT_EMOJIS.length; // ensure index is non-negative
+
     return PARTICIPANT_EMOJIS[index];
 }
 
@@ -87,12 +80,14 @@ function scrollToBottom() {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 }
+
 function showCopyConfirmation(element) { // visual feedback on copy
     element.classList.add('copied');
     setTimeout(() => {
         element.classList.remove('copied');
     }, 1500);
 }
+
 function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
     document.title = `GONZO — [${roomId.substring(0, 6)}]`;
     const roomUrl = window.location.href;
@@ -106,7 +101,6 @@ function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
             }).catch(err => console.error('Failed to copy text: ', err));
         });
     });
-    
     ui.qrElements.forEach(qrElement => {
         if (!qrElement) return;
         qrElement.innerHTML = ''; // clear placeholder
@@ -133,6 +127,7 @@ function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
         });
     });
 }
+
 function setupMessageForm(roomId, ui) {
     ui.messageForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -143,6 +138,7 @@ function setupMessageForm(roomId, ui) {
         }
     });
 }
+
 function joinRoom(roomId) {
     const oldSocketId = sessionStorage.getItem('previousSocketId');
     sessionStorage.removeItem('previousSocketId');
@@ -174,6 +170,7 @@ function renderUserMessage(data) { // renders a standard user message
     messagesContainer.appendChild(messageElement);
     lastMessageSenderId = data.sender.id; // update last sender ID
 }
+
 function renderEventMessage(data) { // renders a join/leave event message
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
@@ -181,8 +178,8 @@ function renderEventMessage(data) { // renders a join/leave event message
     eventElement.classList.add('event-message');
     eventElement.textContent = data.text;
     messagesContainer.appendChild(eventElement);
-    // An event message breaks the chain of consecutive user messages
-    lastMessageSenderId = null;
+    lastMessageSenderId = null; // event message breaks chain of consecutive user messages
+
 }
 
 // --- Socket Event Listeners ---
@@ -192,11 +189,12 @@ socket.on('room_created', (roomId) => {
     sessionStorage.setItem('previousSocketId', socket.id);
     window.location.href = `room.html#${roomId}`;
 });
+
 socket.on('load_history', (history) => { // handles receiving message history when joining a room
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
     messagesContainer.innerHTML = ''; // clear "Connecting..."
-    lastMessageSenderId = null; // Reset for history load
+    lastMessageSenderId = null; // reset for history load
     history.forEach(item => {
         if (item.type === 'message') {
             renderUserMessage(item.data);
@@ -206,6 +204,7 @@ socket.on('load_history', (history) => { // handles receiving message history wh
     });
     scrollToBottom();
 });
+
 socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
     const memberLists = document.querySelectorAll('.member-list');
@@ -215,15 +214,13 @@ socket.on('update_participants', (participants) => {
             const li = document.createElement('li');
             let prefix = '';
             let suffix = '';
-            // Assign prefix emoji: crown for owner, deterministic emoji for everyone else
-            if (index === 0) {
+            if (index === 0) { // assign crown to owner, deterministic emoji for everyone else
                 prefix = '👑 ';
             } else {
                 const userEmoji = getEmojiForUser(p.username);
                 prefix = userEmoji + ' ';
             }
-            // If the participant is the current user, add a left arrow suffix
-            if (p.id === socket.id) {
+            if (p.id === socket.id) { // if participant is current user, add arrow suffix
                 suffix = ' ⬅️';
             }
             li.textContent = `${prefix}${p.username}${suffix}`;
@@ -231,18 +228,22 @@ socket.on('update_participants', (participants) => {
         });
     });
 });
+
 socket.on('user_event', (data) => { // handles a user join/leave event
     renderEventMessage(data);
     scrollToBottom();
 });
-socket.on('receive_message', (data) => { // uses reusable rendering function
+
+socket.on('receive_message', (data) => { // reusable rendering function
     renderUserMessage(data);
     scrollToBottom();
 });
+
 socket.on('room_closed', (message) => {
     alert(message);
     window.location.href = 'index.html';
 });
+
 socket.on('join_error', (message) => {
     alert(message);
     window.location.href = 'index.html';
