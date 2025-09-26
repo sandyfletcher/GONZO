@@ -76,6 +76,13 @@ a {
     background-color: var(--terminal-fg);
     color: var(--terminal-bg);
 }
+.menu-button.is-loading {
+    background-color: var(--terminal-fg-dark);
+    color: var(--terminal-bg);
+    border-color: var(--terminal-fg-dark);
+    cursor: wait; /* Show a waiting cursor */
+    pointer-events: none; /* A fallback to prevent clicks if disabled fails */
+}
 /* --- Room Page Layout --- */
 .room-page-body {
     padding: 0; /* Remove padding for full-screen layout */

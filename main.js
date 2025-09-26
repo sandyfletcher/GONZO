@@ -52,6 +52,9 @@ function setupIndexPage() {
     const startButton = document.getElementById('start-room-btn');
     startButton.addEventListener('click', (e) => {
         e.preventDefault();
+        startButton.disabled = true;
+        startButton.textContent = '> CONNECTING...';
+        startButton.classList.add('is-loading');
         console.log("Requesting a new room from server...");
         socket.emit('create_room');
     });
