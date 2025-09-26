@@ -1,4 +1,5 @@
 :root {
+    --site-bg: black;
     --terminal-bg: #1a1a1a;
     --terminal-fg: #00ff41;
     --terminal-fg-dark: #00a32a;
@@ -7,19 +8,18 @@
 * {
     box-sizing: border-box;
 }
-html, body {
+html {
     height: 100%;
     margin: 0;
-}
-html {
-    /* Fluid typography: min 14px, scales with viewport, max 18px */
-    font-size: clamp(14px, 1.5vw + 0.5rem, 18px);
+    font-size: clamp(1rem, 1.5vw, 1.5rem);
 }
 body {
-    background-color: var(--terminal-bg);
+    height: 100%;
+    margin: 0;
+    background-color: var(--site-bg);
     color: var(--terminal-fg);
     font-family: 'Courier New', Courier, monospace;
-    padding: clamp(10px, 3vw, 20px); /* Fluid padding */
+    padding: clamp(1rem, 3vw, 2rem);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -35,10 +35,7 @@ h1  { font-size: 2rem; }
 h2  { font-size: 1.25rem; }
 a   { color: var(--terminal-fg); }
 
-/* --- Blinking Cursor Effect --- */
-@keyframes blink {
-    50% { opacity: 0; }
-}
+
 .cursor {
     display: inline-block;
     background-color: var(--terminal-fg);
@@ -48,10 +45,13 @@ a   { color: var(--terminal-fg); }
     margin-left: 0.3em;
     vertical-align: bottom;
 }
-
+@keyframes blink {
+    50% { opacity: 0; }
+}
 /* --- Main Menu / Centered Content --- */
 
 .main-container {
+    background-color: var(--terminal-bg);
     text-align: center;
     border: 1px solid var(--border-color);
     padding: clamp(20px, 5vw, 40px); /* fluid padding */
