@@ -47,9 +47,6 @@ h3 {
 p {
     font-size: 1rem;
 }
-li {
-    font-size: 0.65rem;
-}
 a {
     color: var(--terminal-fg);
     text-decoration: none;
@@ -57,9 +54,6 @@ a {
 a:hover {
     text-decoration: underline;
 }
-
-/* --- Reused Components  --- */
-
 .cursor {
     display: inline-block;
     background-color: var(--terminal-fg);
@@ -89,7 +83,8 @@ a:hover {
 .menu-button {
     background-color: inherit;
     color: inherit;
-    font-family: inherit;
+    font-family: 'RussoOne', Courier, monospace;
+    font-size: 0.8rem;
     display: block;
     border: 1px solid var(--terminal-fg);
     padding: 0.75rem 1.5rem;
@@ -107,21 +102,22 @@ a:hover {
     background-color: var(--terminal-fg-dark);
     color: var(--terminal-bg);
     border-color: var(--terminal-fg-dark);
-    cursor: wait; /* Show a waiting cursor */
-    pointer-events: none; /* A fallback to prevent clicks if disabled fails */
+    cursor: wait;
+    pointer-events: none;
 }
 .feature-list {
     list-style: none;
     padding: 0;
     margin: 1.1rem auto 0.7rem;
-    text-align: left; /* Aligns text within the list items */
-    display: inline-block; /* Allows the list to be centered by its parent */
+    text-align: left;
+    display: inline-block;
     max-width: 100%;
 }
 .feature-list li {
+    font-size: 0.65rem;
     margin-bottom: 0.75rem;
     position: relative;
-    padding-left: 1.5em; /* Make space for the pseudo-element */
+    padding-left: 1.5em; /* space for pseudo-element */
 }
 .feature-list li::before {
     content: '>';
@@ -134,21 +130,28 @@ a:hover {
 /* --- Room Page --- */
 
 .room-page-body {
-    padding: 0; /* Remove padding for full-screen layout */
+    overflow: hidden; /* prevent body scrolling */
+}
+.page-wrapper {
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* prevent body scrolling */
+    width: 100%;
+    height: 100%;
+    max-width: 1400px;
+    max-height: 1000px;
+    background-color: var(--terminal-bg);
+    border: 2px solid var(--border-color);
+    overflow: hidden;
 }
 .room-container {
     display: flex;
     flex-grow: 1; /* take up remaining vertical space */
     width: 100%;
-    border: none; /* remove old border */
+    border: none;
     overflow: hidden; /* contain children */
 }
 .sidebar {
-    /* Fluid width: min 220px, 25% of viewport, max 300px */
-    flex: 0 0 clamp(220px, 25%, 300px); 
+    flex: 0 0 20%; 
     padding: 1rem;
     border-right: 1px solid var(--border-color);
     display: flex;
@@ -157,7 +160,7 @@ a:hover {
     overflow-y: auto;
 }
 .sidebar h1 {
-    margin-bottom: 1.5rem;
+    font-size: clamp(1.5rem, 3vw, 1.8rem);
 }
 .sidebar-section {
     margin-bottom: 1.5rem;
@@ -172,7 +175,7 @@ a:hover {
     background-color: #2a2a2a;
     padding: 0.5rem;
     word-break: break-all;
-    font-size: 0.9em;
+    font-size: 0.8em;
     margin-top: 0.5rem;
     display: block;
     width: 100%;
@@ -180,7 +183,7 @@ a:hover {
     text-overflow: ellipsis;
 }
 .qr-code {
-    width: clamp(100px, 100%, 128px); /* make QR code responsive */
+    width: 100%; /* make QR code responsive */
     height: auto;
     aspect-ratio: 1 / 1; /* maintain square shape */
     background-color: white;
@@ -206,6 +209,7 @@ a:hover {
     text-align: left;
 }
 .member-list li {
+    font-size: 0.9rem;
     margin-bottom: 0.5rem;
 }
 .sidebar-footer {
@@ -229,6 +233,7 @@ a:hover {
 /* --- Message Spacing Logic --- */
 
 .messages p {
+    font-size: 0.8rem;
     margin-block-start: 1em; /* default top spacing */
     margin-block-end: 0;
     padding-left: 0.5rem;
@@ -249,7 +254,7 @@ a:hover {
     color: var(--terminal-fg);
     padding: 0.75rem;
     font-family: inherit;
-    font-size: 1em;
+    font-size: 0.8rem;
     min-width: 0;
 }
 .message-input input:focus {
@@ -262,6 +267,8 @@ a:hover {
     padding: 0.75rem 1.5rem;
     margin-left: 0.75rem;
     cursor: pointer;
+    font-family: 'RussoOne', Courier, monospace;
+    font-size: 0.8rem;
 }
 .message-input button:hover {
     background-color: var(--terminal-fg);
@@ -319,6 +326,10 @@ a:hover {
     .mobile-only {
         display: block;
     }
+    .page-wrapper {
+        max-height: none; /* Allow mobile layout to use full screen height */
+        border: none;
+    }
     .room-container {
         flex-direction: column;
         text-align: center; /* Center content in mobile sections */
@@ -362,6 +373,9 @@ a:hover {
 /* --- Mobile Landscape Layout --- */
 /* Targets devices that are wide but not tall, like a phone on its side. Using max-height is a reliable way to detect this state. */
 @media (max-height: 500px) and (orientation: landscape) {
+    .page-wrapper {
+        max-height: 100vh; /* Allow landscape to use full screen height */
+    }
     /* Revert to a side-by-side layout, similar to desktop */
     .room-container {
         flex-direction: row;
