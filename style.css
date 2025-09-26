@@ -83,11 +83,6 @@ a {
     flex-direction: column;
     overflow: hidden; /* prevent body scrolling */
 }
-.room-header {
-    flex-shrink: 0; /* prevent header from shrinking */
-    text-align: center;
-    padding: 0.5rem;
-}
 .room-container {
     display: flex;
     flex-grow: 1; /* take up remaining vertical space */
@@ -104,6 +99,9 @@ a {
     flex-direction: column;
     text-align: center;
     overflow-y: auto;
+}
+.sidebar h1 {
+    margin-bottom: 1.5rem;
 }
 .sidebar-section {
     margin-bottom: 1.5rem;
