@@ -54,7 +54,7 @@ function setupIndexPage() {
 }
 function setupRoomPage() {
     const roomId = window.location.hash.substring(1);
-    const ui = { // Cache relevant DOM elements into single object
+    const ui = { // cache relevant DOM elements into single object
         messagesContainer: document.querySelector('.messages'),
         messageForm: document.getElementById('message-form'),
         messageInput: document.getElementById('message-form').querySelector('input'),

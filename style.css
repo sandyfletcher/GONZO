@@ -31,13 +31,10 @@ h1, h2 {
     margin-top: 0;
     display: inline-block;
 }
-h1 { font-size: 2rem; }
-h2 { font-size: 1.25rem; }
+h1  { font-size: 2rem; }
+h2  { font-size: 1.25rem; }
+a   { color: var(--terminal-fg); }
 
-a {
-    color: var(--terminal-fg);
-    text-decoration: none;
-}
 /* --- Blinking Cursor Effect --- */
 @keyframes blink {
     50% { opacity: 0; }
@@ -51,7 +48,9 @@ a {
     margin-left: 0.3em;
     vertical-align: bottom;
 }
+
 /* --- Main Menu / Centered Content --- */
+
 .main-container {
     text-align: center;
     border: 1px solid var(--border-color);
@@ -86,7 +85,41 @@ a {
     cursor: wait; /* Show a waiting cursor */
     pointer-events: none; /* A fallback to prevent clicks if disabled fails */
 }
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem auto;
+    text-align: left; /* Aligns text within the list items */
+    display: inline-block; /* Allows the list to be centered by its parent */
+    max-width: 100%;
+}
+
+.feature-list li {
+    margin-bottom: 0.75rem;
+    position: relative;
+    padding-left: 1.5em; /* Make space for the pseudo-element */
+}
+
+.feature-list li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: var(--terminal-fg-dark);
+    font-weight: bold;
+}
+
+/* Ensure the shared footer style has proper spacing on the main page */
+.main-container .sidebar-footer {
+    margin-top: 2.5rem;
+    font-size: 0.8em;
+    color: var(--terminal-fg-dark);
+}
+
+
+
 /* --- Room Page Layout --- */
+
 .room-page-body {
     padding: 0; /* Remove padding for full-screen layout */
     display: flex;
