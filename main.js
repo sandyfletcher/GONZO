@@ -85,7 +85,7 @@ function showCopyConfirmation(element) { // visual feedback on copy
     }, 1500);
 }
 function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
-    document.title = `eFEMORAL — [${roomId.substring(0, 6)}]`;
+    document.title = `GONZO — [${roomId.substring(0, 6)}]`;
     const roomUrl = window.location.href;
     ui.roomLinkElement.textContent = `Room: ${roomId.substring(0, 8)}...`;
     ui.roomLinkElement.addEventListener('click', () => { // click to copy text link
