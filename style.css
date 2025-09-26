@@ -304,3 +304,58 @@ a {
         text-align: left; /* Keep participant names left-aligned */
     }
 }
+
+/* --- Mobile Landscape Layout --- */
+/* Targets devices that are wide but not tall, like a phone on its side. */
+/* Using max-height is a reliable way to detect this state. */
+@media (max-height: 500px) and (orientation: landscape) {
+    
+    /* Revert to a side-by-side layout, similar to desktop */
+    .room-container {
+        flex-direction: row;
+    }
+
+    /* Explicitly show the desktop sidebar and hide the mobile-specific elements */
+    .desktop-only {
+        display: flex;
+    }
+    .mobile-only {
+        display: none;
+    }
+
+    /* Make the desktop sidebar more compact to save vertical space */
+    .sidebar {
+        flex: 0 0 220px; /* Use a slightly smaller fixed width */
+        padding: 0.75rem;
+        order: 0; /* Reset order from portrait mode */
+        border-bottom: none; /* Remove border that might be applied in portrait */
+        border-right: 1px solid var(--border-color); /* Ensure right border is visible */
+    }
+
+    /* Reduce font sizes and spacing within the compact sidebar */
+    .sidebar h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .sidebar-section {
+        margin-bottom: 0.75rem;
+    }
+    .qr-code {
+        width: 100px;
+        margin: 0.75rem 0;
+    }
+    .member-list li {
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Ensure chat area is correctly ordered and padded */
+    .chat-area {
+        order: 0;
+        padding: 0.75rem;
+    }
+
+    /* Reduce overall font size for better readability in the compact view */
+    html {
+        font-size: 14px;
+    }
+}
