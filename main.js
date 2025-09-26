@@ -81,6 +81,12 @@ function setupRoomPage() {
 
 // --- Helper Functions for Room Page ---
 
+function scrollToBottom() {
+    const messagesContainer = document.querySelector('.messages');
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+}
 function showCopyConfirmation(element) { // visual feedback on copy
     element.classList.add('copied');
     setTimeout(() => {
@@ -198,7 +204,7 @@ socket.on('load_history', (history) => { // handles receiving message history wh
             renderEventMessage(item.data);
         }
     });
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    scrollToBottom();
 });
 socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
@@ -227,17 +233,11 @@ socket.on('update_participants', (participants) => {
 });
 socket.on('user_event', (data) => { // handles a user join/leave event
     renderEventMessage(data);
-    const messagesContainer = document.querySelector('.messages');
-    if (messagesContainer) {
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
+    scrollToBottom();
 });
 socket.on('receive_message', (data) => { // uses reusable rendering function
     renderUserMessage(data);
-    const messagesContainer = document.querySelector('.messages');
-    if (messagesContainer) {
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
+    scrollToBottom();
 });
 socket.on('room_closed', (message) => {
     alert(message);
