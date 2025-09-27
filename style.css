@@ -37,7 +37,7 @@ h1 {
     display: inline-block;
     font-weight: normal;
 }
-h3 {
+h2 {
     font-family: 'RussoOne', Courier, monospace;
     font-size: 1.2rem;
     letter-spacing: 2px;
@@ -175,7 +175,7 @@ a:hover {
     align-items: center;
     text-align: center;
 }
-.share-info .link {
+.link {
     background-color: #2a2a2a;
     font-family: 'RussoOne', Courier, monospace;
     padding: 0.5rem;
@@ -286,6 +286,9 @@ a:hover {
     cursor: pointer;
     transition: outline 0.2s ease-out;
 }
+.link.copied {
+    overflow: visible;
+}
 .copied {
     outline: 2px solid var(--terminal-fg);
     position: relative;
@@ -301,6 +304,7 @@ a:hover {
     padding: 2px 6px;
     font-size: 0.8em;
     border-radius: 3px;
+    font-family: 'RussoOne', Courier, monospace;
 }
 .qr-code.copied {
     box-shadow: inset 0 0 0 2px var(--terminal-fg);
