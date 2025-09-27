@@ -232,6 +232,7 @@ a:hover {
     flex: 1;
     overflow-y: auto;
     margin-bottom: 1rem;
+    text-align: left;
 }
 
 /* --- Message Spacing Logic --- */
