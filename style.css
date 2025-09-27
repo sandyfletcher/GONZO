@@ -54,18 +54,6 @@ a {
 a:hover {
     text-decoration: underline;
 }
-.cursor {
-    display: inline-block;
-    background-color: var(--terminal-fg);
-    width: 0.2em;
-    height: 1.1em;
-    animation: blink 1s step-end infinite;
-    margin-left: 0.2em;
-    vertical-align: bottom;
-}
-@keyframes blink {
-    50% { opacity: 0; }
-}
 
 /* --- Landing Page  --- */
 
@@ -79,6 +67,39 @@ a:hover {
 }
 .main-container h1 {
     margin-bottom: 0.5rem;
+}
+.cursor {
+    display: inline-block;
+    background-color: var(--terminal-fg);
+    width: 0.2em;
+    height: 1.1em;
+    animation: blink 1s step-end infinite;
+    margin-left: 0.2em;
+    vertical-align: bottom;
+}
+@keyframes blink {
+    50% { opacity: 0; }
+}
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.1rem auto 0.7rem;
+    text-align: left;
+    display: inline-block;
+    max-width: 100%;
+}
+.feature-list li {
+    font-size: 0.65rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    padding-left: 1.5em; /* space for pseudo-element */
+}
+.feature-list li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: var(--terminal-fg-dark);
+    font-weight: bold;
 }
 .menu-button {
     background-color: inherit;
@@ -104,27 +125,6 @@ a:hover {
     border-color: var(--terminal-fg-dark);
     cursor: wait;
     pointer-events: none;
-}
-.feature-list {
-    list-style: none;
-    padding: 0;
-    margin: 1.1rem auto 0.7rem;
-    text-align: left;
-    display: inline-block;
-    max-width: 100%;
-}
-.feature-list li {
-    font-size: 0.65rem;
-    margin-bottom: 0.75rem;
-    position: relative;
-    padding-left: 1.5em; /* space for pseudo-element */
-}
-.feature-list li::before {
-    content: '>';
-    position: absolute;
-    left: 0;
-    color: var(--terminal-fg-dark);
-    font-weight: bold;
 }
 
 /* --- Room Page --- */
@@ -160,15 +160,12 @@ a:hover {
     overflow-y: auto;
 }
 .sidebar h1 {
-    font-size: 1.6rem;
+    font-size: 2rem;
 }
 .sidebar h3 {
     border-bottom: 1px dashed var(--terminal-fg-dark);
     margin-bottom: 0.8rem;
 }
-/* .sidebar-section {
-    margin-bottom: 1.5rem;
-}*/
 .share-info {
     display: flex;
     flex-direction: column;
@@ -182,6 +179,7 @@ a:hover {
     word-break: break-all;
     font-size: 0.8em;
     margin-top: 0.5rem;
+    border: 1px dotted var(--border-color);
     display: block;
     width: 100%;
     overflow: hidden;
@@ -192,8 +190,8 @@ a:hover {
     height: auto;
     aspect-ratio: 1 / 1; /* maintain square shape */
     background-color: white;
-    margin: 1rem 0;
-    border: 1px dashed var(--terminal-fg-dark);
+    margin: 0.5rem 0;
+    border: 1px dotted var(--border-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -216,11 +214,6 @@ a:hover {
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
 }
-.sidebar-footer {
-    margin-top: auto;
-    font-size: 0.8em;
-    color: var(--terminal-fg-dark);
-}
 .chat-area {
     flex: 1;
     display: flex;
@@ -234,9 +227,6 @@ a:hover {
     margin-bottom: 1rem;
     text-align: left;
 }
-
-/* --- Message Spacing Logic --- */
-
 .messages p {
     font-size: 0.8rem;
     margin-block-start: 1em; /* default top spacing */
@@ -349,7 +339,7 @@ a:hover {
         padding: 1rem;
         flex-shrink: 0;
     }
-    .mobile-header .sidebar-footer {
+    .mobile-header {
         margin-top: 0.5rem; /* Adjust spacing */
     }
     .mobile-divider {
@@ -409,9 +399,6 @@ a:hover {
         font-size: 1.5rem;
         margin-bottom: 0.75rem;
     }
-    .sidebar-section {
-        margin-bottom: 0.75rem;
-    }
     .qr-code {
         width: 100px;
         margin: 0.75rem 0;
@@ -423,9 +410,5 @@ a:hover {
     .chat-area {
         order: 0;
         padding: 0.75rem;
-    }
-    /* Reduce overall font size for better readability in the compact view */
-    html {
-        font-size: 14px;
     }
 }
