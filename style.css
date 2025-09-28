@@ -314,7 +314,7 @@ a:hover {
     display: none;
 }
 .desktop-only {
-    display: flex; /* The sidebar is a flex container */
+    display: flex;
 }
 
 @media (max-width: 768px) {
@@ -331,7 +331,7 @@ a:hover {
     }
     .room-container {
         flex-direction: column;
-        text-align: center; /* Center content in mobile sections */
+        text-align: center;
     }
     /* --- Mobile Layout Sections --- */
     .mobile-header {
@@ -340,7 +340,7 @@ a:hover {
         flex-shrink: 0;
     }
     .mobile-header {
-        margin-top: 0.5rem; /* Adjust spacing */
+        margin-top: 0.5rem;
     }
     .mobile-divider {
         border: none;
@@ -349,7 +349,8 @@ a:hover {
     }
     .chat-area {
         order: 2;
-        min-height: 50%; /* ensure chat has enough space */
+        flex: 1; /* chat area fills all remaining vertical space */
+        min-height: 0; /* best-practice for shrinkable items in flexbox */
     }
     .mobile-bottom-info {
         order: 3;
@@ -373,7 +374,7 @@ a:hover {
 /* Targets devices that are wide but not tall, like a phone on its side. Using max-height is a reliable way to detect this state. */
 @media (max-height: 500px) and (orientation: landscape) {
     .page-wrapper {
-        max-height: 100vh; /* Allow landscape to use full screen height */
+        max-height: 100vh;
     }
     /* Revert to a side-by-side layout, similar to desktop */
     .room-container {
@@ -393,6 +394,7 @@ a:hover {
         order: 0; /* Reset order from portrait mode */
         border-bottom: none; /* Remove border that might be applied in portrait */
         border-right: 1px solid var(--border-color); /* Ensure right border is visible */
+        min-width: 180px; /* prevents sidebar from getting too squished */
     }
     /* Reduce font sizes and spacing within the compact sidebar */
     .sidebar h1 {
