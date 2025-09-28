@@ -1,8 +1,6 @@
 @font-face { font-family: 'Sixtyfour'; src: url('assets/Sixtyfour.ttf') format('truetype'); font-display: block}
 @font-face { font-family: 'RussoOne'; src: url('assets/RussoOne.ttf') format('truetype'); font-display: block}
 
-/* --- Default --- */
-
 :root {
     --site-bg: rgb(0, 7, 2);
     --terminal-bg: #1a1a1a;
@@ -55,12 +53,34 @@ a:hover {
     text-decoration: underline;
 }
 
-/* --- Landing Page  --- */
+/* --- REUSABLE COMPONENTS --- */
+
+.terminal-box {
+    background-color: var(--terminal-bg);
+    border: 1px solid var(--border-color);
+}
+
+.btn {
+    background-color: inherit;
+    color: inherit;
+    font-family: 'RussoOne', Courier, monospace;
+    font-size: 0.8rem;
+    border: 1px solid var(--terminal-fg);
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.btn:hover {
+    background-color: var(--terminal-fg);
+    color: var(--terminal-bg);
+}
+
+
+/* --- LANDING  --- */
 
 .main-container {
-    background-color: var(--terminal-bg);
     text-align: center;
-    border: 1px solid var(--border-color);
     padding: 1.5rem; /* fluid padding */
     width: 100%;
     max-width: 500px;
@@ -102,22 +122,10 @@ a:hover {
     font-weight: bold;
 }
 .menu-button {
-    background-color: inherit;
-    color: inherit;
-    font-family: 'RussoOne', Courier, monospace;
-    font-size: 0.8rem;
     display: block;
-    border: 1px solid var(--terminal-fg);
-    padding: 0.75rem 1.5rem;
     margin: 0 auto;
     width: 100%;
     max-width: 250px;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-}
-.menu-button:hover {
-    background-color: var(--terminal-fg);
-    color: var(--terminal-bg);
 }
 .menu-button.is-loading {
     background-color: var(--terminal-fg-dark);
@@ -127,7 +135,7 @@ a:hover {
     pointer-events: none;
 }
 
-/* --- Room Page --- */
+/* --- ROOM --- */
 
 .room-page-body {
     overflow: hidden; /* prevent body scrolling */
@@ -139,33 +147,64 @@ a:hover {
     height: 100%;
     max-width: 1400px;
     max-height: 1000px;
-    background-color: var(--terminal-bg);
-    border: 2px solid var(--border-color);
+    border-width: 2px; /* Override base terminal-box border */
     overflow: hidden;
 }
+
+/* MOBILE LAYOUT */
+
 .room-container {
     display: flex;
-    flex-grow: 1; /* take up remaining vertical space */
+    flex-direction: column; /* Stack vertically by default */
+    flex-grow: 1;
     width: 100%;
     border: none;
-    overflow: hidden; /* contain children */
+    overflow: hidden;
 }
-.sidebar {
-    flex: 0 0 20%; 
-    padding: 1rem;
-    border-right: 1px solid var(--border-color);
+.chat-area {
+    order: 1;
+    flex: 1;
     display: flex;
     flex-direction: column;
+    padding: 1rem;
+    min-width: 0;
+    min-height: 0;
+}
+.chat-area::before { /* recreate mobile header with pseudo-element */
+    content: 'GONZO';
+    font-family: 'Sixtyfour', Courier, monospace;
+    font-size: clamp(2rem, 3vw, 3rem);
+    letter-spacing: 2px;
     text-align: center;
-    overflow-y: auto;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
 }
-.sidebar h1 {
-    font-size: 2rem;
+.info-panel {
+    order: 2;
+    display: flex;
+    flex-direction: row;
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+    flex-shrink: 0;
+    padding: 1rem;
+    gap: 1rem;
+    text-align: center;
 }
-.sidebar h3 {
-    border-bottom: 1px dashed var(--terminal-fg-dark);
-    margin-bottom: 0.8rem;
+.info-panel h1 { /* h1 is in pseudo-element on mobile, so hide this one */
+    display: none;
 }
+.info-panel .share-info, /* divide footer into two columns */
+.info-panel div:last-of-type { /* targets members block */
+    flex: 1;
+    min-width: 0;
+}
+.info-panel .member-list {
+    text-align: left;
+}
+
+/* --- SHARED LAYOUT --- */
+
 .share-info {
     display: flex;
     flex-direction: column;
@@ -186,20 +225,15 @@ a:hover {
     text-overflow: ellipsis;
 }
 .qr-code {
-    width: auto;
-    height: auto;
-    aspect-ratio: 1 / 1; /* maintain square shape */
     background-color: white;
     margin: 0.5rem 0;
     border: 1px dotted var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-block; /* This is the key change */
     font-size: 0.8em;
     color: var(--terminal-bg);
 }
 .qr-code img {
-    display: block;
+    display: block; /* Prevents extra space below the image */
     max-width: 100%;
     height: auto;
 }
@@ -214,13 +248,6 @@ a:hover {
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
 }
-.chat-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    min-width: 0;
-}
 .messages {
     flex: 1;
     overflow-y: auto;
@@ -229,13 +256,13 @@ a:hover {
 }
 .messages p {
     font-size: 0.8rem;
-    margin-block-start: 1em; /* default top spacing */
+    margin-block-start: 1em;
     margin-block-end: 0;
     padding-left: 0.5rem;
-    text-indent: -0.5rem; /* for nice alignment of multi-line messages */
+    text-indent: -0.5rem;
 }
 .messages p.consecutive-message {
-    margin-block-start: 0.25em; /* reduced top spacing */
+    margin-block-start: 0.25em;
 }
 .message-input {
     display: flex;
@@ -256,18 +283,7 @@ a:hover {
     outline: 1px solid var(--terminal-fg);
 }
 .message-input button {
-    background: none;
-    border: 1px solid var(--terminal-fg);
-    color: var(--terminal-fg);
-    padding: 0.75rem 1.5rem;
     margin-left: 0.75rem;
-    cursor: pointer;
-    font-family: 'RussoOne', Courier, monospace;
-    font-size: 0.8rem;
-}
-.message-input button:hover {
-    background-color: var(--terminal-fg);
-    color: var(--terminal-bg);
 }
 .message-input:focus-within button {
     background-color: var(--terminal-fg);
@@ -307,97 +323,60 @@ a:hover {
     text-align: center;
 }
 
-/* --- LAYOUT CONTROLS --- */
+/* --- DESKTOP VIEW --- */
 
-/* By default, show desktop layout and hide mobile elements */
-.mobile-only {
-    display: none;
-}
-.desktop-only {
-    display: flex;
-}
-
-@media (max-width: 768px) {
-    /* On mobile, hide desktop elements and show mobile ones */
-    .desktop-only {
-        display: none;
-    }
-    .mobile-only {
-        display: block;
-    }
+@media (min-width: 769px) {
     .page-wrapper {
-        max-height: none; /* Allow mobile layout to use full screen height */
-        border: none;
+        border: 2px solid var(--border-color);
     }
     .room-container {
-        flex-direction: column;
-        text-align: center;
+        flex-direction: row; /* side-by-side layout */
     }
-    /* --- Mobile Layout Sections --- */
-    .mobile-header {
-        order: 1;
+    .info-panel {
+        order: 1; /* moves left */
+        flex: 0 0 20%;
+        flex-direction: column; /* stack vertically */
         padding: 1rem;
-        flex-shrink: 0;
+        border-top: none;
+        border-right: 1px solid var(--border-color);
+        overflow-y: auto;
     }
-    .mobile-header {
-        margin-top: 0.5rem;
-    }
-    .mobile-divider {
-        border: none;
-        border-top: 1px solid var(--border-color);
-        margin-top: 1rem;
+    .info-panel h1 {
+        display: block; /* show H1 again */
+        font-size: 2rem;
     }
     .chat-area {
-        order: 2;
-        flex: 1; /* chat area fills all remaining vertical space */
-        min-height: 0; /* best-practice for shrinkable items in flexbox */
+        order: 2; /* stays right */
     }
-    .mobile-bottom-info {
-        order: 3;
-        display: flex;
-        border-top: 1px solid var(--border-color);
-        width: 100%;
-        flex-shrink: 0;
-        padding: 1rem;
-        gap: 1rem; /* Space between the two columns */
-    }
-    .share-info-mobile, .participants-info-mobile {
-        flex: 1; /* Each takes up half the space */
-        min-width: 0; /* Prevents flexbox overflow */
-    }
-    .participants-info-mobile .member-list {
-        text-align: left; /* Keep participant names left-aligned */
+    .chat-area::before { /* hide mobile header pseudo-element */
+        display: none;
     }
 }
 
-/* --- Mobile Landscape Layout --- */
-/* Targets devices that are wide but not tall, like a phone on its side. Using max-height is a reliable way to detect this state. */
+/* --- MOBILE LANDSCAPE --- */
+
 @media (max-height: 500px) and (orientation: landscape) {
     .page-wrapper {
         max-height: 100vh;
     }
-    /* Revert to a side-by-side layout, similar to desktop */
-    .room-container {
+    .room-container { /* revert to side-by-side layout */
         flex-direction: row;
     }
-    /* Explicitly show the desktop sidebar and hide the mobile-specific elements */
-    .desktop-only {
-        display: flex;
-    }
-    .mobile-only {
+    .chat-area::before {
         display: none;
     }
-    /* Make the desktop sidebar more compact to save vertical space */
-    .sidebar {
-        flex: 0 0 220px; /* Use a slightly smaller fixed width */
+    .info-panel {
+        order: 1;
+        flex: 0 0 220px; /* use a compact fixed width */
+        flex-direction: column;
         padding: 0.75rem;
-        order: 0; /* Reset order from portrait mode */
-        border-bottom: none; /* Remove border that might be applied in portrait */
-        border-right: 1px solid var(--border-color); /* Ensure right border is visible */
-        min-width: 180px; /* prevents sidebar from getting too squished */
+        border-top: none;
+        border-right: 1px solid var(--border-color);
+        min-width: 180px;
+        overflow-y: auto;
     }
-    /* Reduce font sizes and spacing within the compact sidebar */
-    .sidebar h1 {
+    .info-panel h1 {
+        display: block;
         font-size: 1.5rem;
         margin-bottom: 0.75rem;
     }
@@ -408,9 +387,8 @@ a:hover {
     .member-list li {
         margin-bottom: 0.25rem;
     }
-    /* Ensure chat area is correctly ordered and padded */
     .chat-area {
-        order: 0;
+        order: 2;
         padding: 0.75rem;
     }
 }

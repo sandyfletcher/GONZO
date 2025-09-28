@@ -10,10 +10,9 @@
     <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
 </head>
 <body class="room-page-body">
-    <div class="page-wrapper">
+    <div class="page-wrapper terminal-box">
         <div class="room-container">
-            <!-- DESKTOP SIDEBAR (large screens) -->
-            <aside class="sidebar desktop-only">
+            <aside class="info-panel">
                 <h1>GONZO</h1>
                 <div class="share-info">
                     <span class="link" id="room-link-desktop">[roomlink]</span>
@@ -24,32 +23,15 @@
                     <ul class="member-list"></ul>
                 </div>
             </aside>
-            <!-- MOBILE HEADER (small screens) -->
-            <header class="mobile-header mobile-only">
-                <h1>GONZO</h1>
-                <hr class="mobile-divider">
-            </header>
-            <!-- CHAT AREA (all screens) -->
             <main class="chat-area">
                 <div class="messages">
                     <p>Connecting...</p>
                 </div>
                 <form class="message-input" id="message-form">
                     <input type="text" placeholder="Type a message..." autocomplete="off" maxlength="500">
-                    <button type="submit">> SEND</button>
+                    <button type="submit" class="btn">> SEND</button>
                 </form>
             </main>
-            <!-- == MOBILE FOOTER (small screens) == -->
-            <div class="mobile-bottom-info mobile-only">
-                <div class="share-info-mobile">
-                    <span class="link" id="room-link-mobile">[roomlink]</span>
-                    <div class="qr-code"></div>
-                </div>
-                <div class="participants-info-mobile">
-                    <h2>PARTICIPANTS</h2>
-                    <ul class="member-list"></ul>
-                </div>
-            </div>
         </div>
     </div>
     <script src="main.js" defer></script>
