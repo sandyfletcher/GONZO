@@ -232,23 +232,37 @@ a:hover {
     list-style-type: none;
     padding: 0;
     margin: 0.5rem auto 0;
-    column-count: 1; /* Default to single column */
-    column-gap: 1.5rem; /* Space between columns */
-    justify-content: center; /* This setting won't work perfectly with column-count */
+    column-count: 1; /* default to single column */
+    column-gap: 0.5rem; /* space between columns */
+    justify-content: center; /* won't work perfectly with column-count */
     text-align: left;
     overflow-y: auto;
     flex: 1;
     min-height: 0;
     align-content: start;
+    -ms-overflow-style: none;  /* hide scrollbar in IE and Edge */
+    scrollbar-width: none;  /* ... in Firefox */
+}
+.member-list::-webkit-scrollbar {
+    display: none; /* ... in Chrome, Safari, and newer Edge */
+}
+.member-list li {
+    font-size: clamp(0.5rem, 1vw, 0.7rem);
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    break-inside: avoid; /* prevents names from splitting across two columns */
+    padding: 0.1rem 0.2rem; /* for borders */
+    overflow: hidden; 
+    text-overflow: ellipsis;
+}
+.member-list li.is-me {/* current user indicator */
+    border: 1px solid var(--terminal-fg);
 }
 .member-list.two-columns {
     column-count: 2;
 }
-.member-list li {
-    font-size: clamp(0.6rem, 1vw, 0.7rem);
-    margin-bottom: 0.2rem;
-    white-space: nowrap;
-    break-inside: avoid; /* prevents names from splitting across two columns */
+.member-list.two-columns li {
+    font-size: 0.5rem;
 }
 .chat-area {
     flex: 1;
@@ -313,7 +327,8 @@ a:hover {
         flex: 0 1 auto;
         border-right: none;
         border-bottom: 1px solid var(--border-color);
-        max-height: 16rem;
+        max-height: 12rem;
+        max-width: none; 
     }
     .share-panel {
         flex: 1;
@@ -323,5 +338,8 @@ a:hover {
     .members-panel {
         flex: 1;
         max-height: 14rem;
+    }
+    .member-list li {
+    font-size: clamp(0.8rem, 1vw, 1rem);
     }
 }

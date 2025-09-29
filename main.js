@@ -235,23 +235,20 @@ socket.on('update_participants', (participants) => {
         participants.forEach((p, index) => {
             const li = document.createElement('li');
             let prefix = '';
-            let suffix = '';
-            if (index === 0) { // assign crown to owner, deterministic emoji for everyone else
+            if (index === 0) { // assign prefix emojis prefix
                 prefix = '👑 ';
             } else {
                 const userEmoji = getEmojiForUser(p.username);
                 prefix = userEmoji + ' ';
             }
-            if (p.id === socket.id) { // if participant is current user, add arrow suffix
-                suffix = ' ⬅️';
+            if (p.id === socket.id) { // apply 'is-me' class
+                li.classList.add('is-me');
             }
-            li.textContent = `${prefix}${p.username}${suffix}`;
+            li.textContent = `${prefix}${p.username}`; // set list item content
             memberList.appendChild(li);
         });
-    
-        // check if content height (calculated in column-count: 1) overflows the container
-        if (memberList.scrollHeight > memberList.clientHeight) {
-            memberList.classList.add('two-columns'); // if ys, switch to column-count: 2
+        if (memberList.scrollHeight > memberList.clientHeight) { // check if content height (calculated in column-count: 1) overflows the container
+            memberList.classList.add('two-columns'); // if yes, switch to column-count: 2
         } 
     });
 });
