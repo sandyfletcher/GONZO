@@ -248,7 +248,7 @@ a:hover {
     font-size: clamp(0.6rem, 1vw, 0.7rem);
     margin-bottom: 0.2rem;
     white-space: nowrap;
-    break-inside: avoid; 
+    break-inside: avoid; /* prevents names from splitting across two columns */
 }
 .chat-area {
     flex: 1;

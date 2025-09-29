@@ -35,7 +35,6 @@ function getEmojiForUser(username) { // use a simple hash to deterministically a
         hash = username.charCodeAt(i) + ((hash << 5) - hash);
     }
     const index = Math.abs(hash) % PARTICIPANT_EMOJIS.length; // ensure index is non-negative
-
     return PARTICIPANT_EMOJIS[index];
 }
 
@@ -99,11 +98,11 @@ function showCopyConfirmation(element) { // visual feedback on copy
     }, 1500);
 }
 
-function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
+function initializeRoomUI(roomId, ui) { //  set up click-to-copy functionality
     document.title = `GONZO — [${roomId.substring(0, 6)}]`;
     const roomUrl = window.location.href;
-    const linkEl = ui.roomLinkElement; // 2. Get the single element
-    if (linkEl) { // 3. Check for element existence (safer than relying on DOM existing)
+    const linkEl = ui.roomLinkElement;
+    if (linkEl) { // check for element existence
         linkEl.textContent = `Room: ${roomId.substring(0, 8)}...`;
         linkEl.addEventListener('click', () => { // click to copy text link
             navigator.clipboard.writeText(roomUrl).then(() => {
@@ -119,7 +118,7 @@ function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
         qr.make();
         qrElement.innerHTML = qr.createImgTag(4, 4);
         const qrImg = qrElement.querySelector('img');
-        qrElement.addEventListener('click', () => { // click to copy QR code image
+        qrElement.addEventListener('click', () => { // click to copy QR image
             if (!qrImg || !navigator.clipboard.write) {
                 alert('Image copy not supported in this browser.');
                 return;
@@ -231,27 +230,29 @@ socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
     const memberLists = document.querySelectorAll('.member-list');
     memberLists.forEach(memberList => {
-        memberList.innerHTML = ''; // clear and populate list first
-        memberList.classList.remove('two-columns'); // reset layout to single column for accurate measurement
+        memberList.classList.remove('two-columns'); // temporarily set to single column for measurement
+        memberList.innerHTML = ''; // clear and populate list
         participants.forEach((p, index) => {
             const li = document.createElement('li');
             let prefix = '';
             let suffix = '';
-            if (index === 0) {
+            if (index === 0) { // assign crown to owner, deterministic emoji for everyone else
                 prefix = '👑 ';
             } else {
                 const userEmoji = getEmojiForUser(p.username);
                 prefix = userEmoji + ' ';
             }
-            if (p.id === socket.id) {
+            if (p.id === socket.id) { // if participant is current user, add arrow suffix
                 suffix = ' ⬅️';
             }
             li.textContent = `${prefix}${p.username}${suffix}`;
             memberList.appendChild(li);
         });
-        if (memberList.scrollHeight > memberList.clientHeight) { // measure if total content height exceeds container height
-            memberList.classList.add('two-columns'); // if it overflows, switch to two columns
-        }
+    
+        // check if content height (calculated in column-count: 1) overflows the container
+        if (memberList.scrollHeight > memberList.clientHeight) {
+            memberList.classList.add('two-columns'); // if ys, switch to column-count: 2
+        } 
     });
 });
 
