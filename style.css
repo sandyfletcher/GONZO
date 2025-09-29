@@ -185,7 +185,7 @@ a:hover {
     background-color: #2a2a2a;
     font-family: 'RussoOne', Courier, monospace;
     padding: 0.5rem;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     text-align: center;
     border: 1px dotted var(--border-color);
     display: block;
@@ -302,6 +302,7 @@ a:hover {
         flex: 0 1 auto;
         border-right: none;
         border-bottom: 1px solid var(--border-color);
+        max-height: 16rem;
     }
     .share-panel {
         flex: 1;
@@ -310,6 +311,6 @@ a:hover {
     }
     .members-panel {
         flex: 1;
-        max-height: 7rem;
+        max-height: 14rem;
     }
 }
