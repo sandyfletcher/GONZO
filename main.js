@@ -251,7 +251,7 @@ socket.on('update_participants', (participants) => {
         // A. Ensure we are measuring against a single-column layout
         memberList.classList.remove('two-columns');
         // B. Check if the content's scroll height is greater than the container's client height
-        if (container.scrollHeight > container.clientHeight) {
+        if (memberList.scrollHeight > memberList.clientHeight) {
             // If it overflows, switch to two columns
             memberList.classList.add('two-columns');
         } 
