@@ -51,6 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function setupIndexPage() {
     const startButton = document.getElementById('start-btn');
+    startButton.disabled = false;
+    startButton.textContent = '> START ROOM';
+    startButton.classList.remove('is-loading');
     startButton.addEventListener('click', (e) => {
         e.preventDefault();
         startButton.disabled = true;
