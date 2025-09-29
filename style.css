@@ -1,6 +1,6 @@
 @font-face { font-family: 'Sixtyfour'; src: url('assets/Sixtyfour.ttf') format('truetype'); font-display: block}
 @font-face { font-family: 'RussoOne'; src: url('assets/RussoOne.ttf') format('truetype'); font-display: block}
-
+/* --- DEFAULT  --- */
 :root {
     --site-bg: rgb(0, 7, 2);
     --terminal-bg: #1a1a1a;
@@ -84,9 +84,7 @@ a:hover {
     cursor: wait;
     pointer-events: none;
 }
-
 /* --- LANDING  --- */
-
 .landing {
     max-width: 700px;
     max-height: 500px;
@@ -125,9 +123,7 @@ a:hover {
     color: var(--terminal-fg-dark);
     font-weight: bold;
 }
-
 /* --- ROOM --- */
-
 .room {
     max-width: 99%;
     height: 95%;
@@ -239,9 +235,9 @@ a:hover {
     grid-template-columns: auto auto; /* switch to two columns */
 }
 .member-list li {
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-    white-space: nowrap; /* prevent names from wrapping */
+    font-size: 0.6rem;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
 }
 .chat-area {
     flex: 1;
@@ -296,9 +292,7 @@ a:hover {
     background-color: var(--terminal-fg);
     color: var(--terminal-bg);
 }
-
 /* --- MOBILE --- */
-
 @media (max-width: 800px) {
     .room {
         flex-direction: column;
