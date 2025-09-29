@@ -133,6 +133,7 @@ a:hover {
     overflow: hidden;
 }
 .info-wrapper {
+    max-width: 10rem;
     display: flex;
     flex-direction: column;
     flex: 0 0 10rem;
@@ -230,11 +231,10 @@ a:hover {
 .member-list {
     list-style-type: none;
     padding: 0;
-    margin: 0.5rem auto;
-    display: grid;
-    grid-template-columns: auto; /* default single column */
-    gap: 0 1.5rem; /* row 0, column 1.5 */
-    justify-content: center;
+    margin: 0.5rem auto 0;
+    column-count: 1; /* Default to single column */
+    column-gap: 1.5rem; /* Space between columns */
+    justify-content: center; /* This setting won't work perfectly with column-count */
     text-align: left;
     overflow-y: auto;
     flex: 1;
@@ -242,12 +242,13 @@ a:hover {
     align-content: start;
 }
 .member-list.two-columns {
-    grid-template-columns: auto auto; /* switch to two columns */
+    column-count: 2;
 }
 .member-list li {
-    font-size: 0.6rem;
+    font-size: clamp(0.6rem, 1vw, 0.7rem);
     margin-bottom: 0.2rem;
     white-space: nowrap;
+    break-inside: avoid; 
 }
 .chat-area {
     flex: 1;

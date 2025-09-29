@@ -231,33 +231,27 @@ socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
     const memberLists = document.querySelectorAll('.member-list');
     memberLists.forEach(memberList => {
-        memberList.innerHTML = ''; // Step 1: Clear and populate the list first
+        memberList.innerHTML = ''; // clear and populate list first
+        memberList.classList.remove('two-columns'); // reset layout to single column for accurate measurement
         participants.forEach((p, index) => {
             const li = document.createElement('li');
             let prefix = '';
             let suffix = '';
-            if (index === 0) { // assign crown to owner, deterministic emoji for everyone else
+            if (index === 0) {
                 prefix = '👑 ';
             } else {
                 const userEmoji = getEmojiForUser(p.username);
                 prefix = userEmoji + ' ';
             }
-            if (p.id === socket.id) { // if participant is current user, add arrow suffix
+            if (p.id === socket.id) {
                 suffix = ' ⬅️';
             }
             li.textContent = `${prefix}${p.username}${suffix}`;
             memberList.appendChild(li);
         });
-        // Step 2: Now that the list is populated, measure for overflow
-        const container = memberList.parentElement; // This is the '.members-panel'
-        // A. Ensure we are measuring against a single-column layout
-        memberList.classList.remove('two-columns');
-        // B. Check if the content's scroll height is greater than the container's client height
-        if (memberList.scrollHeight > memberList.clientHeight) {
-            // If it overflows, switch to two columns
-            memberList.classList.add('two-columns');
-        } 
-        // C. If it doesn't overflow, the 'two-columns' class remains removed, so no 'else' is needed.
+        if (memberList.scrollHeight > memberList.clientHeight) { // measure if total content height exceeds container height
+            memberList.classList.add('two-columns'); // if it overflows, switch to two columns
+        }
     });
 });
 
