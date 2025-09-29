@@ -151,56 +151,47 @@ a:hover {
     overflow: hidden;
 }
 
-/* MOBILE LAYOUT */
+
+/* NEW: MOBILE-FIRST LAYOUT (Default) */
 
 .room-container {
     display: flex;
-    flex-direction: column; /* Stack vertically by default */
+    flex-direction: column; /* Stack all items vertically */
     flex-grow: 1;
     width: 100%;
-    border: none;
     overflow: hidden;
 }
+
+/* Panels are grouped at the top on mobile */
+.title-panel, .share-panel, .members-panel {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+.title-panel { padding-bottom: 0; }
+.share-panel { 
+    display: flex;
+    flex-direction: row; /* Side-by-side on mobile header */
+    justify-content: space-around;
+    align-items: center;
+    gap: 1rem;
+}
+.members-panel {
+    padding-top: 0;
+}
+/* Re-style member list for horizontal mobile header */
+.members-panel .member-list {
+    text-align: left;
+    max-height: 10vh; /* Prevent list from taking too much vertical space */
+    overflow-y: auto;
+}
+
 .chat-area {
-    order: 1;
-    flex: 1;
+    flex: 1; /* Takes remaining vertical space */
     display: flex;
     flex-direction: column;
     padding: 1rem;
-    min-width: 0;
-    min-height: 0;
-}
-.chat-area::before { /* recreate mobile header with pseudo-element */
-    content: 'GONZO';
-    font-family: 'Sixtyfour', Courier, monospace;
-    font-size: clamp(2rem, 3vw, 3rem);
-    letter-spacing: 2px;
-    text-align: center;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 1rem;
-}
-.info-panel {
-    order: 2;
-    display: flex;
-    flex-direction: row;
-    border-top: 1px solid var(--border-color);
-    width: 100%;
-    flex-shrink: 0;
-    padding: 1rem;
-    gap: 1rem;
-    text-align: center;
-}
-.info-panel h1 { /* h1 is in pseudo-element on mobile, so hide this one */
-    display: none;
-}
-.info-panel .share-info, /* divide footer into two columns */
-.info-panel div:last-of-type { /* targets members block */
-    flex: 1;
-    min-width: 0;
-}
-.info-panel .member-list {
-    text-align: left;
+    min-height: 0; /* Important for flex child */
 }
 
 /* --- SHARED LAYOUT --- */
@@ -210,6 +201,8 @@ a:hover {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    flex: 1; /* Allow flex to grow/shrink */
+    min-width: 0;
 }
 .link {
     background-color: #2a2a2a;
@@ -228,25 +221,35 @@ a:hover {
     background-color: white;
     margin: 0.5rem 0;
     border: 1px dotted var(--border-color);
-    display: inline-block; /* This is the key change */
+    display: inline-block;
     font-size: 0.8em;
     color: var(--terminal-bg);
+    padding: 4px; /* Give QR a little breathing room */
 }
 .qr-code img {
     display: block; /* Prevents extra space below the image */
-    max-width: 100%;
+    width: 100%; /* Make QR responsive */
+    max-width: 120px; /* But not too big */
     height: auto;
 }
 .member-list {
     list-style-type: none;
     padding: 0;
-    margin: 0;
-    display: inline-block;
+    margin: 0.5rem auto 0; /* auto margin for centering */
+    display: grid;
+    grid-template-columns: auto; /* default single centered column */
+    gap: 0 1.5rem; /* row gap 0, column gap 1.5rem */
+    max-width: max-content; /* ensure container is only as wide as its content */
+    justify-content: center;
     text-align: left;
+}
+.member-list.two-columns { /* added via JS when list gets long */
+    grid-template-columns: auto auto; /* switch to two columns */
 }
 .member-list li {
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
+    white-space: nowrap; /* prevent names from wrapping */
 }
 .messages {
     flex: 1;
@@ -323,72 +326,60 @@ a:hover {
     text-align: center;
 }
 
-/* --- DESKTOP VIEW --- */
-
-@media (min-width: 769px) {
+/* NEW: DESKTOP & LANDSCAPE VIEW */
+@media (min-width: 769px), (max-height: 500px) and (orientation: landscape) {
     .page-wrapper {
         border: 2px solid var(--border-color);
     }
     .room-container {
-        flex-direction: row; /* side-by-side layout */
+        display: grid; /* Switch to Grid layout */
+        grid-template-columns: minmax(200px, 25%); /* Sidebar column */
+        grid-template-rows: auto auto 1fr; /* Title, Share, Members take needed height */
+        grid-template-areas:
+            "title   chat"
+            "share   chat"
+            "members chat";
+        overflow: hidden;
     }
-    .info-panel {
-        order: 1; /* moves left */
-        flex: 0 0 20%;
-        flex-direction: column; /* stack vertically */
-        padding: 1rem;
-        border-top: none;
+    .title-panel, .share-panel, .members-panel {
         border-right: 1px solid var(--border-color);
-        overflow-y: auto;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem;
+        overflow: hidden;
     }
-    .info-panel h1 {
-        display: block; /* show H1 again */
-        font-size: 2rem;
+    .members-panel {
+        border-bottom: none; /* Last panel in sidebar doesn't need bottom border */
+        overflow-y: auto; /* Allow members list to scroll if needed */
     }
-    .chat-area {
-        order: 2; /* stays right */
+    .title-panel { grid-area: title; }
+    .share-panel { grid-area: share; flex-direction: column; } /* Revert to column for sidebar */
+    .members-panel { grid-area: members; }
+    .chat-area { 
+        grid-area: chat;
+        padding: 1rem;
     }
-    .chat-area::before { /* hide mobile header pseudo-element */
-        display: none;
-    }
+    .title-panel h1 { font-size: 2rem; }
 }
 
-/* --- MOBILE LANDSCAPE --- */
-
+/* NEW: MOBILE LANDSCAPE SPECIFIC OVERRIDES */
 @media (max-height: 500px) and (orientation: landscape) {
     .page-wrapper {
         max-height: 100vh;
     }
-    .room-container { /* revert to side-by-side layout */
-        flex-direction: row;
+    .room-container {
+        grid-template-columns: minmax(180px, 220px) 1fr; /* More compact sidebar */
     }
-    .chat-area::before {
-        display: none;
+    .title-panel, .share-panel, .members-panel, .chat-area {
+        padding: 0.75rem; /* Tighter padding */
     }
-    .info-panel {
-        order: 1;
-        flex: 0 0 220px; /* use a compact fixed width */
-        flex-direction: column;
-        padding: 0.75rem;
-        border-top: none;
-        border-right: 1px solid var(--border-color);
-        min-width: 180px;
-        overflow-y: auto;
-    }
-    .info-panel h1 {
-        display: block;
+    .title-panel h1 {
         font-size: 1.5rem;
-        margin-bottom: 0.75rem;
     }
-    .qr-code {
-        width: 100px;
-        margin: 0.75rem 0;
+    /* NEW: Reduce QR code size as requested */
+    .qr-code img {
+        max-width: 100px;
     }
     .member-list li {
         margin-bottom: 0.25rem;
-    }
-    .chat-area {
-        order: 2;
-        padding: 0.75rem;
     }
 }

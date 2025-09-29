@@ -228,6 +228,15 @@ socket.on('load_history', (history) => { // handles receiving message history wh
 socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
     const memberLists = document.querySelectorAll('.member-list');
+    const participantCount = participants.length;
+    const COLUMN_THRESHOLD = 6; // switch to 2 columns if there are more than 6 participants
+    memberLists.forEach(list => { // dynamically add or remove a class to switch between one and two columns
+        if (participantCount > COLUMN_THRESHOLD) {
+            list.classList.add('two-columns');
+        } else {
+            list.classList.remove('two-columns');
+        }
+    });
     memberLists.forEach(memberList => {
         memberList.innerHTML = '';
         participants.forEach((p, index) => {
