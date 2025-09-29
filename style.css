@@ -14,36 +14,43 @@
 }
 html {
     height: 100%;
-    margin: 0;
     font-size: clamp(1rem, 1.5vw, 1.5rem);
+    background-color: var(--site-bg);
 }
 body {
     height: 100%;
-    margin: 0;
-    background-color: var(--site-bg);
     color: var(--terminal-fg);
     font-family: 'Courier New', Courier, monospace;
-    padding: clamp(1rem, 3vw, 2rem);
     display: flex;
     align-items: center;
     justify-content: center;
 }
+.terminal-box {
+    margin: 1rem;
+    background-color: var(--terminal-bg);
+    border: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    max-width: 1400px;
+    max-height: 1000px;
+    overflow: hidden;
+    text-align: center;
+}
 h1 {
     font-family: 'Sixtyfour', Courier, monospace;
-    font-size: clamp(1.5rem, 3vw, 4rem);
-    letter-spacing: 2px;
+    font-size: 3rem;
+    letter-spacing: 0.2rem;
     display: inline-block;
     font-weight: normal;
 }
 h2 {
     font-family: 'RussoOne', Courier, monospace;
-    font-size: clamp(1rem, 2vw, 1.4rem);
-    letter-spacing: 2px;
+    font-size: 1.2rem;
+    letter-spacing: 0.2rem;
     display: inline-block;
     font-weight: normal;
-}
-p {
-    font-size: 1rem;
 }
 a {
     color: var(--terminal-fg);
@@ -52,14 +59,6 @@ a {
 a:hover {
     text-decoration: underline;
 }
-
-/* --- REUSABLE COMPONENTS --- */
-
-.terminal-box {
-    background-color: var(--terminal-bg);
-    border: 2px solid var(--border-color);
-}
-
 .btn {
     background-color: inherit;
     color: inherit;
@@ -69,24 +68,30 @@ a:hover {
     padding: 0.75rem 1.5rem;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 10rem;
 }
-
 .btn:hover {
     background-color: var(--terminal-fg);
     color: var(--terminal-bg);
 }
-
+.btn.is-loading {
+    background-color: var(--terminal-fg-dark);
+    color: var(--terminal-bg);
+    border-color: var(--terminal-fg-dark);
+    cursor: wait;
+    pointer-events: none;
+}
 
 /* --- LANDING  --- */
 
-.main-container {
-    text-align: center;
-    padding: 1.5rem; /* fluid padding */
-    width: 100%;
-    max-width: 500px;
-}
-.main-container h1 {
-    margin-bottom: 0.5rem;
+.landing {
+    max-width: 700px;
+    max-height: 500px;
+    min-width: 365px;
+    justify-content: center;
 }
 .cursor {
     display: inline-block;
@@ -102,7 +107,6 @@ a:hover {
 }
 .feature-list {
     list-style: none;
-    padding: 0;
     margin: 1.1rem auto 0.7rem;
     text-align: left;
     display: inline-block;
@@ -112,7 +116,7 @@ a:hover {
     font-size: 0.65rem;
     margin-bottom: 0.75rem;
     position: relative;
-    padding-left: 1.5em; /* space for pseudo-element */
+    padding-left: 1.5em; /* space for '>' */
 }
 .feature-list li::before {
     content: '>';
@@ -121,69 +125,39 @@ a:hover {
     color: var(--terminal-fg-dark);
     font-weight: bold;
 }
-.menu-button {
-    display: block;
-    margin: 0 auto;
-    width: 100%;
-    max-width: 250px;
-}
-.menu-button.is-loading {
-    background-color: var(--terminal-fg-dark);
-    color: var(--terminal-bg);
-    border-color: var(--terminal-fg-dark);
-    cursor: wait;
-    pointer-events: none;
-}
 
 /* --- ROOM --- */
 
-.room-page-body {
-    overflow: hidden; /* prevent body scrolling */
-}
-.page-wrapper {
+.room {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    height: 100%;
-    max-width: 1400px;
-    max-height: 1000px;
-    overflow: hidden;
-}
-
-/* MOBILE-FIRST LAYOUT (Default) */
-
-.room-container {
-    display: flex;
-    flex-direction: column; /* Stack all items vertically */
     flex-grow: 1;
-    width: 100%;
     overflow: hidden;
 }
-.title-panel {
-    padding: 1rem;
-    text-align: center;
-    border-bottom: 1px solid var(--border-color);
-}
-.info-wrapper { /* for side-by-side panels on mobile */
+.info-wrapper { /* side-by-side on mobile */
     display: flex;
     border-bottom: 1px solid var(--border-color);
+    max-width: 8rem;
 }
-.share-panel, .members-panel {
+.share-panel {
     flex: 1 1 50%; /* Each takes 50% width and can shrink/grow */
     padding: 1rem;
     text-align: center;
     min-width: 0; /* Allow flex items to shrink below their content size */
-}
-.share-panel {
     border-right: 1px solid var(--border-color); /* Vertical separator */
 }
-
-.members-panel .member-list {
+.members-panel {
+    padding: 1rem;
+    text-align: center;
+    min-width: 0; /* Allow flex items to shrink below their content size */
+    max-height: 25vh; /* Allow list to use some vertical space before scrolling */
+    overflow-y: auto;
+}
+ .member-list {
     text-align: left;
     max-height: 25vh; /* Allow list to use some vertical space before scrolling */
     overflow-y: auto;
 }
-
 .chat-area {
     flex: 1; /* Takes remaining vertical space */
     display: flex;
@@ -191,17 +165,34 @@ a:hover {
     padding: 1rem;
     min-height: 0; /* Important for flex child */
 }
-
-/* --- SHARED LAYOUT --- */
-
 .share-info {
     display: flex;
     flex-direction: column;
+    max-width: 15rem;
+    display: flex;
     align-items: center;
-    text-align: center;
-    flex: 1; /* Allow flex to grow/shrink */
-    min-width: 0;
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    padding: 0.5rem;
 }
+.share-info h1 {
+    font-size: 1.2rem;
+}
+.share-info .qr-code {
+    height: 50%;
+    border-bottom: 1px dotted var(--border-color);
+    padding: 0.5rem;
+    background-color: white; /* Ensure background stays white */
+    border: none; /* Override original border */
+}
+.share-info .link {
+    height: 25%;
+    text-align: center;
+    border: none; /* Override original border */
+    background-color: #2a2a2a; /* Ensure background is correct */
+}
+
 .link {
     background-color: #2a2a2a;
     font-family: 'RussoOne', Courier, monospace;
@@ -225,9 +216,11 @@ a:hover {
     padding: 4px; /* Give QR a little breathing room */
 }
 .qr-code img {
-    display: block; /* Prevents extra space below the image */
-    width: 100%; /* Make QR responsive */
-    max-width: 120px; /* But not too big */
+    display: block;
+    object-fit: contain;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
     height: auto;
 }
 .member-list {
@@ -326,31 +319,22 @@ a:hover {
 
 /* DESKTOP & LANDSCAPE VIEW */
 @media (min-width: 769px), (max-height: 500px) and (orientation: landscape) {
-    .page-wrapper {
-        border: 2px solid var(--border-color);
-    }
-    .room-container {
+    .room {
         display: grid;
-        /* Sidebar column squeezes between 160px and 250px */
         grid-template-columns: 18% 1fr;
-        grid-template-rows: auto 1fr; /* Title row, then rest of space for info/chat */
+        grid-template-rows: 1fr; /* The grid now has only one row */
         grid-template-areas:
-            "title chat"
-            "info  chat";
+            "sidebar chat"; /* Simplified to two areas */
         overflow: hidden;
     }
-    /* Configure the wrapper for desktop sidebar */
+    /* The info-wrapper now IS the entire sidebar */
     .info-wrapper {
-        grid-area: info;
+        grid-area: sidebar; /* Assign it to our new sidebar area */
         display: flex;
         flex-direction: column; /* Stack panels vertically */
         border: none;
         border-right: 1px solid var(--border-color);
         min-height: 0; /* Crucial for child flex containers */
-    }
-    .title-panel {
-        grid-area: title;
-        border-right: 1px solid var(--border-color);
     }
     /* Reset mobile styles and set up for vertical stacking */
     .share-panel, .members-panel {
@@ -375,14 +359,8 @@ a:hover {
 
 /* NEW: MOBILE LANDSCAPE SPECIFIC OVERRIDES */
 @media (max-height: 500px) and (orientation: landscape) {
-    .page-wrapper {
-        max-height: 100vh;
-    }
-    .title-panel, .share-panel, .members-panel, .chat-area {
+    .share-panel, .members-panel, .chat-area {
         padding: 0.75rem; /* Tighter padding */
-    }
-    .qr-code img {
-        max-width: 100px;
     }
     .member-list li {
         margin-bottom: 0.25rem;

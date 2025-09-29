@@ -12,7 +12,7 @@ const PARTICIPANT_EMOJIS = [
 
 socket.on('connect', () => {
     console.log("Connected to server as", socket.id); // if on a room page, join room — handles both initial connection and any subsequent reconnections
-    if (document.querySelector('.room-container')) {
+    if (document.querySelector('.room')) {
         const roomId = window.location.hash.substring(1);
         if (roomId) {
             joinRoom(roomId);
@@ -42,15 +42,15 @@ function getEmojiForUser(username) { // use a simple hash to deterministically a
 // --- PAGE SETUP ---
 
 document.addEventListener('DOMContentLoaded', () => { 
-    if (document.getElementById('start-room-btn')) { // route to correct setup function based on page content
+    if (document.getElementById('start-btn')) { // route to correct setup function based on page content
         setupIndexPage();
-    } else if (document.querySelector('.room-container')) {
+    } else if (document.querySelector('.room')) {
         setupRoomPage();
     }
 });
 
 function setupIndexPage() {
-    const startButton = document.getElementById('start-room-btn');
+    const startButton = document.getElementById('start-btn');
     startButton.addEventListener('click', (e) => {
         e.preventDefault();
         startButton.disabled = true;

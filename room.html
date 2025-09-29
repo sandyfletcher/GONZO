@@ -9,34 +9,30 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
 </head>
-<body class="room-page-body">
-    <div class="page-wrapper terminal-box">
-        <div class="room-container">
-            <div class="title-panel">
-                <h1>GONZO</h1>
-            </div>
-            <div class="info-wrapper">
-                <div class="share-panel">
-                    <div class="share-info">
-                        <span class="link" id="room-link-desktop">[roomlink]</span>
-                        <div class="qr-code"></div>
-                    </div>
-                </div>
-                <div class="members-panel">
-                    <h2>NODES</h2>
-                    <ul class="member-list"></ul>
+<body>
+    <div class="room terminal-box">
+        <div class="info-wrapper">
+            <div class="share-panel">
+                <div class="share-info">
+                    <h1>GONZO</h1>
+                    <div class="qr-code"></div>
+                    <span class="link" id="room-link-desktop">[roomlink]</span>
                 </div>
             </div>
-            <main class="chat-area">
-                <div class="messages">
-                    <p>Connecting...</p>
-                </div>
-                <form class="message-input" id="message-form">
-                    <input type="text" placeholder="Type a message..." autocomplete="off" maxlength="500">
-                    <button type="submit" class="btn">> SEND</button>
-                </form>
-            </main>
+            <div class="members-panel">
+                <h2>NODES</h2>
+                <ul class="member-list"></ul>
+            </div>
         </div>
+        <main class="chat-area">
+            <div class="messages">
+                <p>Connecting...</p>
+            </div>
+            <form class="message-input" id="message-form">
+                <input type="text" placeholder="Type a message..." autocomplete="off" maxlength="500">
+                <button type="submit" class="btn">> SEND</button>
+            </form>
+        </main>
     </div>
     <script src="main.js" defer></script>
 </body>
