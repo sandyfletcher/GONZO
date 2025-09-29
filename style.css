@@ -310,5 +310,6 @@ a:hover {
     }
     .members-panel {
         flex: 1;
+        max-height: 7rem;
     }
 }

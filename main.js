@@ -228,17 +228,8 @@ socket.on('load_history', (history) => { // handles receiving message history wh
 socket.on('update_participants', (participants) => {
     console.log('Updating participants:', participants);
     const memberLists = document.querySelectorAll('.member-list');
-    const participantCount = participants.length;
-    const COLUMN_THRESHOLD = 6; // switch to 2 columns if there are more than 6 participants
-    memberLists.forEach(list => { // dynamically add or remove a class to switch between one and two columns
-        if (participantCount > COLUMN_THRESHOLD) {
-            list.classList.add('two-columns');
-        } else {
-            list.classList.remove('two-columns');
-        }
-    });
     memberLists.forEach(memberList => {
-        memberList.innerHTML = '';
+        memberList.innerHTML = ''; // Step 1: Clear and populate the list first
         participants.forEach((p, index) => {
             const li = document.createElement('li');
             let prefix = '';
@@ -255,6 +246,16 @@ socket.on('update_participants', (participants) => {
             li.textContent = `${prefix}${p.username}${suffix}`;
             memberList.appendChild(li);
         });
+        // Step 2: Now that the list is populated, measure for overflow
+        const container = memberList.parentElement; // This is the '.members-panel'
+        // A. Ensure we are measuring against a single-column layout
+        memberList.classList.remove('two-columns');
+        // B. Check if the content's scroll height is greater than the container's client height
+        if (container.scrollHeight > container.clientHeight) {
+            // If it overflows, switch to two columns
+            memberList.classList.add('two-columns');
+        } 
+        // C. If it doesn't overflow, the 'two-columns' class remains removed, so no 'else' is needed.
     });
 });
 
