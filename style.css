@@ -30,14 +30,14 @@ body {
 }
 h1 {
     font-family: 'Sixtyfour', Courier, monospace;
-    font-size: clamp(2rem, 3vw, 3rem);
+    font-size: clamp(1.5rem, 3vw, 4rem);
     letter-spacing: 2px;
     display: inline-block;
     font-weight: normal;
 }
 h2 {
     font-family: 'RussoOne', Courier, monospace;
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 2vw, 1.4rem);
     letter-spacing: 2px;
     display: inline-block;
     font-weight: normal;
@@ -57,7 +57,7 @@ a:hover {
 
 .terminal-box {
     background-color: var(--terminal-bg);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
 }
 
 .btn {
@@ -147,12 +147,10 @@ a:hover {
     height: 100%;
     max-width: 1400px;
     max-height: 1000px;
-    border-width: 2px; /* Override base terminal-box border */
     overflow: hidden;
 }
 
-
-/* NEW: MOBILE-FIRST LAYOUT (Default) */
+/* MOBILE-FIRST LAYOUT (Default) */
 
 .room-container {
     display: flex;
@@ -161,28 +159,28 @@ a:hover {
     width: 100%;
     overflow: hidden;
 }
-
-/* Panels are grouped at the top on mobile */
-.title-panel, .share-panel, .members-panel {
+.title-panel {
     padding: 1rem;
     text-align: center;
     border-bottom: 1px solid var(--border-color);
 }
-.title-panel { padding-bottom: 0; }
-.share-panel { 
+.info-wrapper { /* for side-by-side panels on mobile */
     display: flex;
-    flex-direction: row; /* Side-by-side on mobile header */
-    justify-content: space-around;
-    align-items: center;
-    gap: 1rem;
+    border-bottom: 1px solid var(--border-color);
 }
-.members-panel {
-    padding-top: 0;
+.share-panel, .members-panel {
+    flex: 1 1 50%; /* Each takes 50% width and can shrink/grow */
+    padding: 1rem;
+    text-align: center;
+    min-width: 0; /* Allow flex items to shrink below their content size */
 }
-/* Re-style member list for horizontal mobile header */
+.share-panel {
+    border-right: 1px solid var(--border-color); /* Vertical separator */
+}
+
 .members-panel .member-list {
     text-align: left;
-    max-height: 10vh; /* Prevent list from taking too much vertical space */
+    max-height: 25vh; /* Allow list to use some vertical space before scrolling */
     overflow-y: auto;
 }
 
@@ -326,39 +324,53 @@ a:hover {
     text-align: center;
 }
 
-/* NEW: DESKTOP & LANDSCAPE VIEW */
+/* DESKTOP & LANDSCAPE VIEW */
 @media (min-width: 769px), (max-height: 500px) and (orientation: landscape) {
     .page-wrapper {
         border: 2px solid var(--border-color);
     }
     .room-container {
-        display: grid; /* Switch to Grid layout */
-        grid-template-columns: minmax(200px, 25%); /* Sidebar column */
-        grid-template-rows: auto auto 1fr; /* Title, Share, Members take needed height */
+        display: grid;
+        /* Sidebar column squeezes between 160px and 250px */
+        grid-template-columns: 18% 1fr;
+        grid-template-rows: auto 1fr; /* Title row, then rest of space for info/chat */
         grid-template-areas:
-            "title   chat"
-            "share   chat"
-            "members chat";
+            "title chat"
+            "info  chat";
         overflow: hidden;
     }
-    .title-panel, .share-panel, .members-panel {
+    /* Configure the wrapper for desktop sidebar */
+    .info-wrapper {
+        grid-area: info;
+        display: flex;
+        flex-direction: column; /* Stack panels vertically */
+        border: none;
         border-right: 1px solid var(--border-color);
+        min-height: 0; /* Crucial for child flex containers */
+    }
+    .title-panel {
+        grid-area: title;
+        border-right: 1px solid var(--border-color);
+    }
+    /* Reset mobile styles and set up for vertical stacking */
+    .share-panel, .members-panel {
+        flex: none; /* Reset mobile flex sizing */
+        border: none;
+    }
+    .share-panel {
         border-bottom: 1px solid var(--border-color);
-        padding: 1rem;
-        overflow: hidden;
     }
     .members-panel {
-        border-bottom: none; /* Last panel in sidebar doesn't need bottom border */
-        overflow-y: auto; /* Allow members list to scroll if needed */
+        flex-grow: 1; /* Allows this panel to fill remaining sidebar space */
+        min-height: 0; /* Prevents overflow, enables child scrolling */
+        overflow-y: auto; /* ONLY the members panel content scrolls */
     }
-    .title-panel { grid-area: title; }
-    .share-panel { grid-area: share; flex-direction: column; } /* Revert to column for sidebar */
-    .members-panel { grid-area: members; }
-    .chat-area { 
+    .chat-area {
         grid-area: chat;
-        padding: 1rem;
     }
-    .title-panel h1 { font-size: 2rem; }
+    .link {
+        font-size: clamp(0.7em, 1.5vw, 0.8em);
+    }
 }
 
 /* NEW: MOBILE LANDSCAPE SPECIFIC OVERRIDES */
@@ -366,16 +378,9 @@ a:hover {
     .page-wrapper {
         max-height: 100vh;
     }
-    .room-container {
-        grid-template-columns: minmax(180px, 220px) 1fr; /* More compact sidebar */
-    }
     .title-panel, .share-panel, .members-panel, .chat-area {
         padding: 0.75rem; /* Tighter padding */
     }
-    .title-panel h1 {
-        font-size: 1.5rem;
-    }
-    /* NEW: Reduce QR code size as requested */
     .qr-code img {
         max-width: 100px;
     }
