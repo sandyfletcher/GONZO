@@ -70,7 +70,7 @@ function setupRoomPage() {
         messagesContainer: document.querySelector('.messages'),
         messageForm: document.getElementById('message-form'),
         messageInput: document.getElementById('message-form').querySelector('input'),
-        roomLinkElements: [document.getElementById('room-link-desktop'), document.getElementById('room-link-mobile')],
+        roomLinkElement: document.getElementById('room-link'),
         qrElements: document.querySelectorAll('.qr-code'),
         memberLists: document.querySelectorAll('.member-list'),
     };
@@ -102,16 +102,15 @@ function showCopyConfirmation(element) { // visual feedback on copy
 function initializeRoomUI(roomId, ui) { //  sets up click-to-copy functionality
     document.title = `GONZO — [${roomId.substring(0, 6)}]`;
     const roomUrl = window.location.href;
-
-    ui.roomLinkElements.forEach(el => {
-        if (!el) return;
-        el.textContent = `Room: ${roomId.substring(0, 8)}...`;
-        el.addEventListener('click', () => { // click to copy text link
+    const linkEl = ui.roomLinkElement; // 2. Get the single element
+    if (linkEl) { // 3. Check for element existence (safer than relying on DOM existing)
+        linkEl.textContent = `Room: ${roomId.substring(0, 8)}...`;
+        linkEl.addEventListener('click', () => { // click to copy text link
             navigator.clipboard.writeText(roomUrl).then(() => {
-                showCopyConfirmation(el);
+                showCopyConfirmation(linkEl);
             }).catch(err => console.error('Failed to copy text: ', err));
         });
-    });
+    }
     ui.qrElements.forEach(qrElement => {
         if (!qrElement) return;
         qrElement.innerHTML = ''; // clear placeholder
