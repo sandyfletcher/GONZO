@@ -129,82 +129,36 @@ a:hover {
 /* --- ROOM --- */
 
 .room {
+    max-width: 99%;
+    height: 95%;
     display: flex;
-    flex-direction: column;
-    flex-grow: 1;
+    flex-direction: row; 
     overflow: hidden;
 }
-.info-wrapper { /* side-by-side on mobile */
-    display: flex;
-    border-bottom: 1px solid var(--border-color);
-    max-width: 8rem;
-}
-.share-panel {
-    flex: 1 1 50%; /* Each takes 50% width and can shrink/grow */
-    padding: 1rem;
-    text-align: center;
-    min-width: 0; /* Allow flex items to shrink below their content size */
-    border-right: 1px solid var(--border-color); /* Vertical separator */
-}
-.members-panel {
-    padding: 1rem;
-    text-align: center;
-    min-width: 0; /* Allow flex items to shrink below their content size */
-    max-height: 25vh; /* Allow list to use some vertical space before scrolling */
-    overflow-y: auto;
-}
- .member-list {
-    text-align: left;
-    max-height: 25vh; /* Allow list to use some vertical space before scrolling */
-    overflow-y: auto;
-}
-.chat-area {
-    flex: 1; /* Takes remaining vertical space */
+.info-wrapper {
     display: flex;
     flex-direction: column;
-    padding: 1rem;
-    min-height: 0; /* Important for flex child */
+    flex: 0 0 10rem;
+    border-right: 1px solid var(--border-color);
+}
+.share-panel {
+    padding: 0.8rem;
+    text-align: center;
+    min-width: 0;
+    border-bottom: 1px solid var(--border-color);
 }
 .share-info {
     display: flex;
     flex-direction: column;
-    max-width: 15rem;
+    max-width: 15rem; 
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    margin: 0;
-    padding: 0.5rem;
+    font-size: 0.7rem;
 }
 .share-info h1 {
-    font-size: 1.2rem;
-}
-.share-info .qr-code {
-    height: 50%;
-    border-bottom: 1px dotted var(--border-color);
-    padding: 0.5rem;
-    background-color: white; /* Ensure background stays white */
-    border: none; /* Override original border */
-}
-.share-info .link {
-    height: 25%;
-    text-align: center;
-    border: none; /* Override original border */
-    background-color: #2a2a2a; /* Ensure background is correct */
-}
-
-.link {
-    background-color: #2a2a2a;
-    font-family: 'RussoOne', Courier, monospace;
-    padding: 0.5rem;
-    word-break: break-all;
-    font-size: 0.8em;
-    margin-top: 0.5rem;
-    border: 1px dotted var(--border-color);
-    display: block;
-    width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 1.4rem;
 }
 .qr-code {
     background-color: white;
@@ -213,7 +167,15 @@ a:hover {
     display: inline-block;
     font-size: 0.8em;
     color: var(--terminal-bg);
-    padding: 4px; /* Give QR a little breathing room */
+    padding: 0.2rem; 
+    cursor: pointer;
+    transition: outline 0.2s ease-out;
+}
+.qr-code.copied {
+    box-shadow: inset 0 0 0 2px var(--terminal-fg);
+    position: relative;
+    outline: 2px solid var(--terminal-fg);
+    position: relative;
 }
 .qr-code img {
     display: block;
@@ -223,24 +185,70 @@ a:hover {
     width: auto;
     height: auto;
 }
+.link {
+    background-color: #2a2a2a;
+    font-family: 'RussoOne', Courier, monospace;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    text-align: center;
+    border: 1px dotted var(--border-color);
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: outline 0.2s ease-out;
+}
+.link.copied {
+    overflow: visible;
+    outline: 2px solid var(--terminal-fg);
+    position: relative;
+}
+.copied::after {
+    content: 'COPIED!';
+    position: absolute;
+    top: -0.9rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--terminal-fg);
+    color: var(--terminal-bg);
+    padding: 2px 6px;
+    font-size: 0.8em;
+    border-radius: 3px;
+    font-family: 'RussoOne', Courier, monospace;
+}
+.members-panel {
+    padding: 0.8rem;
+    text-align: center;
+    min-width: 0;
+    overflow-y: auto;
+    flex: 1;
+}
 .member-list {
     list-style-type: none;
     padding: 0;
-    margin: 0.5rem auto 0; /* auto margin for centering */
+    margin: 0.5rem auto;
     display: grid;
-    grid-template-columns: auto; /* default single centered column */
-    gap: 0 1.5rem; /* row gap 0, column gap 1.5rem */
-    max-width: max-content; /* ensure container is only as wide as its content */
+    grid-template-columns: auto; /* default single column */
+    gap: 0 1.5rem; /* row 0, column 1.5 */
     justify-content: center;
     text-align: left;
+    overflow-y: auto;
 }
-.member-list.two-columns { /* added via JS when list gets long */
+.member-list.two-columns {
     grid-template-columns: auto auto; /* switch to two columns */
 }
 .member-list li {
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
     white-space: nowrap; /* prevent names from wrapping */
+}
+.chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    min-height: 0;
 }
 .messages {
     flex: 1;
@@ -257,6 +265,11 @@ a:hover {
 }
 .messages p.consecutive-message {
     margin-block-start: 0.25em;
+}
+.event-message {
+    color: var(--terminal-fg-dark);
+    font-style: italic;
+    text-align: center;
 }
 .message-input {
     display: flex;
@@ -283,86 +296,25 @@ a:hover {
     background-color: var(--terminal-fg);
     color: var(--terminal-bg);
 }
-.link, .qr-code {
-    cursor: pointer;
-    transition: outline 0.2s ease-out;
-}
-.link.copied {
-    overflow: visible;
-}
-.copied {
-    outline: 2px solid var(--terminal-fg);
-    position: relative;
-}
-.copied::after {
-    content: 'COPIED!';
-    position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--terminal-fg);
-    color: var(--terminal-bg);
-    padding: 2px 6px;
-    font-size: 0.8em;
-    border-radius: 3px;
-    font-family: 'RussoOne', Courier, monospace;
-}
-.qr-code.copied {
-    box-shadow: inset 0 0 0 2px var(--terminal-fg);
-    position: relative;
-}
-.event-message {
-    color: var(--terminal-fg-dark);
-    font-style: italic;
-    text-align: center;
-}
 
-/* DESKTOP & LANDSCAPE VIEW */
-@media (min-width: 769px), (max-height: 500px) and (orientation: landscape) {
+/* --- MOBILE --- */
+
+@media (max-width: 800px) {
     .room {
-        display: grid;
-        grid-template-columns: 18% 1fr;
-        grid-template-rows: 1fr; /* The grid now has only one row */
-        grid-template-areas:
-            "sidebar chat"; /* Simplified to two areas */
-        overflow: hidden;
+        flex-direction: column;
     }
-    /* The info-wrapper now IS the entire sidebar */
     .info-wrapper {
-        grid-area: sidebar; /* Assign it to our new sidebar area */
-        display: flex;
-        flex-direction: column; /* Stack panels vertically */
-        border: none;
-        border-right: 1px solid var(--border-color);
-        min-height: 0; /* Crucial for child flex containers */
-    }
-    /* Reset mobile styles and set up for vertical stacking */
-    .share-panel, .members-panel {
-        flex: none; /* Reset mobile flex sizing */
-        border: none;
-    }
-    .share-panel {
+        flex-direction: row;
+        flex: 0 1 auto;
+        border-right: none;
         border-bottom: 1px solid var(--border-color);
     }
+    .share-panel {
+        flex: 1;
+        border-bottom: none;
+        border-right: 1px solid var(--border-color);
+    }
     .members-panel {
-        flex-grow: 1; /* Allows this panel to fill remaining sidebar space */
-        min-height: 0; /* Prevents overflow, enables child scrolling */
-        overflow-y: auto; /* ONLY the members panel content scrolls */
-    }
-    .chat-area {
-        grid-area: chat;
-    }
-    .link {
-        font-size: clamp(0.7em, 1.5vw, 0.8em);
-    }
-}
-
-/* NEW: MOBILE LANDSCAPE SPECIFIC OVERRIDES */
-@media (max-height: 500px) and (orientation: landscape) {
-    .share-panel, .members-panel, .chat-area {
-        padding: 0.75rem; /* Tighter padding */
-    }
-    .member-list li {
-        margin-bottom: 0.25rem;
+        flex: 1;
     }
 }
