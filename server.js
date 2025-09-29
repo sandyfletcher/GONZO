@@ -117,29 +117,37 @@ function handleDisconnect(socket) {
     console.log(`User disconnected: ${socket.id}`);
     for (const roomId in rooms) {
         const room = rooms[roomId];
-        const participant = room.participants.find(p => p.id === socket.id);
-        if (participant) {
-            const username = participant.username; // store username before timeout
+        const participantIndex = room.participants.findIndex(p => p.id === socket.id);
+        if (participantIndex !== -1) {
+            const participant = room.participants[participantIndex];
+            const username = participant.username; // Get username before they are removed
+            // Set a grace period to allow for reconnection
             setTimeout(() => {
-                if (!rooms[roomId]) return; // check if room still exists
-                if (rooms[roomId].owner === socket.id) { // check if disconnected user is owner. if they reconnected, rooms[roomId].owner would have updated to a new ID
-                    console.log(`Owner of ${roomId} left and did not reconnect. Closing room.`);
-                    io.to(roomId).emit('room_closed', 'The host has left');
-                    delete rooms[roomId];
-                } else { 
-                    const stillHere = rooms[roomId].participants.some(p => p.id === socket.id); // check if participant truly left, didn't reconnect with a new ID
-                    if (stillHere) {
-                        console.log(`Participant ${username} (${socket.id}) left room ${roomId}.`);
-                        rooms[roomId].participants = rooms[roomId].participants.filter(p => p.id !== socket.id);
-                        updateParticipants(roomId);
-                        broadcastUserEvent(roomId, `${username} left`);
-                    } else {
-                        console.log(`Participant ${username} (${socket.id}) reconnected with a new ID. No action needed.`); // participant reconnected successfully, so do nothing
-
+                if (!rooms[roomId]) return; // Room might have been closed already
+                // Check if the participant is still in the list with the *same old socket.id*.
+                // If they reconnected, handleJoinRoom would have updated their id.
+                const participantStillExistsWithOldId = rooms[roomId].participants.some(p => p.id === socket.id);
+                if (participantStillExistsWithOldId) {
+                    // This means they did NOT reconnect successfully within the grace period.
+                    // Case 1: The owner left. Close the room.
+                    if (rooms[roomId].owner === socket.id) {
+                        console.log(`Owner ${username} (${socket.id}) of room ${roomId} did not reconnect. Closing room.`);
+                        io.to(roomId).emit('room_closed', 'The host has left the room.');
+                        delete rooms[roomId];
+                        return; // Stop further processing for this room
                     }
+                    // Case 2: A regular participant left.
+                    console.log(`Participant ${username} (${socket.id}) left room ${roomId}.`);
+                    rooms[roomId].participants = rooms[roomId].participants.filter(p => p.id !== socket.id);
+                    updateParticipants(roomId);
+                    broadcastUserEvent(roomId, `${username} left`);
+                } else {
+                    // The participant is no longer in the list with the old ID,
+                    // which means handleJoinRoom successfully updated them.
+                    console.log(`Participant ${username} (${socket.id}) reconnected successfully with a new ID.`);
                 }
-            }, 3000); // 3 second grace period
-            break;
+            }, 3000); // 3-second grace period
+            break; // Found the room, no need to check others
         }
     }
 }
