@@ -198,8 +198,10 @@ function renderEventMessage(data) { // This function now returns the element ins
 
 // --- SOCKET EVENT LISTENERS ---
 
-socket.on('room_created', (roomId) => {
+socket.on('room_created', (payload) => {
+    const { roomId, token } = payload;
     console.log(`Server created room. ID: ${roomId}`);
+    sessionStorage.setItem('participantToken-' + roomId, token);     // +++ Save the token immediately, BEFORE redirecting +++
     window.location.href = `room.html#${roomId}`;
 });
 

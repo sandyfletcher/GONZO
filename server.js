@@ -62,7 +62,7 @@ function handleCreateRoom(socket) {
       }],
       messageHistory: [] 
     };
-    socket.emit('room_created', roomId); 
+    socket.emit('room_created', { roomId, token: ownerToken });
     console.log(`Room created: ${roomId} by ${socket.id}`);
     updateParticipants(roomId);
 }
@@ -83,10 +83,15 @@ function handleJoinRoom(socket, data) {
     const reconnectingParticipant = participantToken ? room.participants.find(p => p.token === participantToken) : null; // find user by their secure token
     if (reconnectingParticipant) {
         console.log(`User rejoining with token as ${socket.id}`);
-        reconnectingParticipant.id = socket.id; // update participant's ID to new socket.id
-        if (room.owner === reconnectingParticipant.id) { // this check is a bit redundant now but safe
-            room.owner = socket.id;
-        }
+    const oldId = reconnectingParticipant.id; // First, store the old ID
+    reconnectingParticipant.id = socket.id;   // THEN, update to the new ID
+    if (room.owner === oldId) { // Now, check against the stored old ID
+        console.log(`Room owner has reconnected. Updating owner ID.`);
+        room.owner = socket.id; // And update the owner reference
+    }
+    username = reconnectingParticipant.username;
+    userToken = reconnectingParticipant.token;
+    isNewJoiner = false;
         username = reconnectingParticipant.username;
         userToken = reconnectingParticipant.token; // this is their existing token
         isNewJoiner = false;
