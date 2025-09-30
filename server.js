@@ -52,51 +52,64 @@ function handleCreateRoom(socket) {
     createRoomIPs.set(clientIp, ipCount + 1);
     const roomId = uuidv4();
     socket.join(roomId);
+    const ownerToken = uuidv4();
     rooms[roomId] = {
       owner: socket.id,
-      participants: [{ id: socket.id, username: socket.id.slice(0, 5) }],
-      messageHistory: [] // initialize history buffer for room
+      participants: [{ 
+          id: socket.id, 
+          username: socket.id.slice(0, 5),
+          token: ownerToken // + Store the token
+      }],
+      messageHistory: [] 
     };
-    socket.emit('room_created', roomId);
-    console.log(`Room created: ${roomId} by ${socket.id} (IP: ${clientIp})`);
+    socket.emit('room_created', roomId); 
+    console.log(`Room created: ${roomId} by ${socket.id}`);
     updateParticipants(roomId);
 }
 
 function handleJoinRoom(socket, data) {
     if (typeof data !== 'object' || data === null) return;
     if (typeof data.roomId !== 'string' || data.roomId.length > 40) return;
-    if (data.oldSocketId && (typeof data.oldSocketId !== 'string' || data.oldSocketId.length > 25)) return;
-    const { roomId, oldSocketId } = data;
+    if (data.participantToken && (typeof data.participantToken !== 'string' || data.participantToken.length > 40)) return; // validate new token property
+    const { roomId, participantToken } = data;
     const room = rooms[roomId];
     if (!room) {
         return socket.emit('join_error', 'This room does not exist.');
     }
     socket.join(roomId);
     let username;
-    let isNewJoiner = true; // flag to check if we should announce join
-    const reconnectingParticipant = oldSocketId ? room.participants.find(p => p.id === oldSocketId) : null; // logic to handle any reconnecting user
+    let userToken; // to hold the token we'll send back
+    let isNewJoiner = true;
+    const reconnectingParticipant = participantToken ? room.participants.find(p => p.token === participantToken) : null; // find user by their secure token
     if (reconnectingParticipant) {
-        console.log(`User ${oldSocketId} rejoining as ${socket.id}`);
+        console.log(`User rejoining with token as ${socket.id}`);
         reconnectingParticipant.id = socket.id; // update participant's ID to new socket.id
-        if (room.owner === oldSocketId) { // if rejoining user was owner, update owner reference as well
+        if (room.owner === reconnectingParticipant.id) { // this check is a bit redundant now but safe
             room.owner = socket.id;
         }
-        username = reconnectingParticipant.username; // keep same username
-        isNewJoiner = false; // it's a reconnect, not a new joiner
+        username = reconnectingParticipant.username;
+        userToken = reconnectingParticipant.token; // this is their existing token
+        isNewJoiner = false;
     } else {
-        const newUser = { // brand new user joining room
+        const newUserToken = uuidv4(); // generate a new token
+        const newUser = {
             id: socket.id,
-            username: socket.id.slice(0, 5)
+            username: socket.id.slice(0, 5),
+            token: newUserToken // assign new token
         };
         room.participants.push(newUser);
         username = newUser.username;
+        userToken = newUser.token; // this is new token to send back
     }
     console.log(`User ${socket.id} (${username}) joined room ${roomId}`);
     updateParticipants(roomId);
     if (isNewJoiner && username) { // announce join event only for genuinely new users
         broadcastUserEvent(roomId, `${username} joined`);
     }
-    socket.emit('load_history', room.messageHistory); // send existing message history
+    socket.emit('load_history', { // send history AND user's personal token back to them
+        history: room.messageHistory,
+        token: userToken // this ensures only this user gets their token
+    });
 }
 
 function handleSendMessage(socket, data) {

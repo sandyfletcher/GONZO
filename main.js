@@ -149,9 +149,9 @@ function setupMessageForm(roomId, ui) {
 }
 
 function joinRoom(roomId) {
-    const oldSocketId = sessionStorage.getItem('socketId-' + roomId); // read ID for this specific room to avoid conflicts
-    console.log(`Attempting to join room ${roomId} with old ID: ${oldSocketId}`);
-    socket.emit('join_room', { roomId, oldSocketId });
+    const participantToken = sessionStorage.getItem('participantToken-' + roomId); // read participant token
+    console.log(`Attempting to join room ${roomId} with token: ${participantToken}`);
+    socket.emit('join_room', { roomId, participantToken }); // send token to server
 }
 
 // --- RENDERING ---
@@ -200,17 +200,19 @@ function renderEventMessage(data) { // This function now returns the element ins
 
 socket.on('room_created', (roomId) => {
     console.log(`Server created room. ID: ${roomId}`);
-    sessionStorage.setItem('socketId-' + roomId, socket.id); // store socket ID with a key specific to the room
     window.location.href = `room.html#${roomId}`;
 });
 
-socket.on('load_history', (history) => { // handles receiving message history when joining a room
+socket.on('load_history', (payload) => {
+    const { history, token } = payload; // destructure payload to get history and token
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
-    const roomId = window.location.hash.substring(1); // after a successful join, update our stored ID
-    sessionStorage.setItem('socketId-' + roomId, socket.id);
-    console.log(`Successfully joined room. Updated stored ID to: ${socket.id}`);
-    messagesContainer.innerHTML = ''; // clear "Connecting..."
+    const roomId = window.location.hash.substring(1);
+    if (token) { // if we received a token, store it securely in sessionStorage
+        console.log(`Received and stored participant token for room ${roomId}.`);
+        sessionStorage.setItem('participantToken-' + roomId, token);
+    }
+    messagesContainer.innerHTML = ''; // clear placeholder text
     lastMessageSenderId = null; // reset for history load
     history.forEach(item => {
         let element;
