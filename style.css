@@ -319,7 +319,7 @@ a:hover {
 /* --- MOBILE --- */
 @media (max-width: 700px) {
     .terminal-box {
-        aspect-ratio: 3 / 4;
+        aspect-ratio: 3 / 6;
         max-height: 95vh;
     }
     .room {
@@ -344,5 +344,18 @@ a:hover {
     }
     .member-list li {
     font-size: clamp(0.8rem, 1vw, 1rem);
+    }
+    .chat-area {
+    padding: 0.5rem;
+    }
+    .messages {
+    margin-bottom: 0.5rem;
+    }
+    .message-input {
+    padding-top: 0.5rem;
+    }
+    .message-input button {
+        margin-left: 0.5rem;
+        max-width: 6rem;
     }
 }
