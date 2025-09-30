@@ -31,10 +31,10 @@ body {
     border: 2px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    width: 100%;
-    height: 100%;
+    aspect-ratio: 16 / 10; 
+    width: 95%;
     max-width: 1400px;
-    max-height: 1000px;
+    max-height: 90vh;
     overflow: hidden;
     text-align: center;
 }
@@ -125,12 +125,9 @@ a:hover {
 }
 /* --- ROOM --- */
 .room {
-    max-width: 99%;
     min-width: 20rem;
-    height: 95%;
     display: flex;
     flex-direction: row; 
-    overflow: hidden;
 }
 .info-wrapper {
     max-width: 10rem;
@@ -141,9 +138,11 @@ a:hover {
 }
 .share-panel {
     padding: 0.8rem;
-    text-align: center;
     min-width: 0;
     border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .share-info {
     display: flex;
@@ -319,6 +318,10 @@ a:hover {
 }
 /* --- MOBILE --- */
 @media (max-width: 700px) {
+    .terminal-box {
+        aspect-ratio: 3 / 4;
+        max-height: 95vh;
+    }
     .room {
         flex-direction: column;
     }
