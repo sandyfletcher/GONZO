@@ -8,8 +8,8 @@ const PARTICIPANT_EMOJIS = [
     '⚙️', '⚛️', '☣️', '☢️', '🌀'
 ];
 
-socket.on('connect', () => {
-    console.log("Connected to server as", socket.id); // if on a room page, join room — handles both initial connection and any subsequent reconnections
+socket.on('connect', () => { // if on a room page, join room — handles both initial connection and any subsequent reconnections
+    // console.log("Connected to server as", socket.id); 
     if (document.querySelector('.room')) {
         const roomId = window.location.hash.substring(1);
         if (roomId) {
@@ -75,7 +75,7 @@ function setupRoomPage() {
     initializeRoomUI(roomId, ui);
     setupMessageForm(roomId, ui);
     socket.on('update_participants', (participants) => {
-        console.log('Updating participants:', participants);
+        // console.log('Updating participants:', participants);
         const memberList = ui.memberList; // use cached element
         if (!memberList) return; // safety check
         memberList.classList.remove('two-columns');
@@ -172,7 +172,7 @@ function setupMessageForm(roomId, ui) {
 }
 function joinRoom(roomId) {
     const participantToken = sessionStorage.getItem('participantToken-' + roomId); // read participant token
-    console.log(`Attempting to join room ${roomId} with token: ${participantToken}`);
+    // console.log(`Attempting to join room ${roomId} with token: ${participantToken}`);
     socket.emit('join_room', { roomId, participantToken }); // send token to server
 }
 
@@ -229,7 +229,7 @@ socket.on('load_history', (payload) => {
     if (!messagesContainer) return;
     const roomId = window.location.hash.substring(1);
     if (token) { // if we received a token, store it securely in sessionStorage
-        console.log(`Received and stored participant token for room ${roomId}.`);
+        // console.log(`Received and stored participant token for room ${roomId}.`);
         sessionStorage.setItem('participantToken-' + roomId, token);
     }
     messagesContainer.innerHTML = ''; // clear placeholder text
