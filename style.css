@@ -14,7 +14,6 @@
 }
 html {
     height: 100%;
-    max-height: 100svh;
     font-size: clamp(1rem, 1.5vw, 1.5rem);
     background-color: var(--site-bg);
 }
