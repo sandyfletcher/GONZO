@@ -25,15 +25,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 1rem; 
 }
 .terminal-box {
-    aspect-ratio: 16 / 10;
-    width: 95%;
+    width: 100%;
     background-color: var(--terminal-bg);
     border: 2px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    margin: 1rem;
     overflow: hidden;
     text-align: center;
 }
@@ -85,6 +84,7 @@ a:hover {
 }
 /* --- LANDING  --- */
 .landing {
+    padding: 2rem 1rem; 
     min-width: 365px;
     max-width: 35rem;
     justify-content: center;
@@ -123,6 +123,9 @@ a:hover {
 }
 /* --- ROOM --- */
 .room {
+    height: 100%;
+    max-height: 50rem;
+    aspect-ratio: 16 / 10;
     min-width: 20rem;
     max-width: 60rem;
     display: flex;
@@ -317,9 +320,6 @@ a:hover {
 }
 /* --- MOBILE --- */
 @media (max-width: 700px) {
-    .terminal-box {
-        aspect-ratio: 3 / 6;
-    }
     .landing {
         max-height: 22rem;
     }
