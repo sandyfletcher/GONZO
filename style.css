@@ -320,9 +320,6 @@ a:hover {
 }
 /* --- MOBILE --- */
 @media (max-width: 700px) {
-    .landing {
-        max-height: 22rem;
-    }
     .room {
         flex-direction: column;
     }
@@ -344,16 +341,16 @@ a:hover {
         max-height: 14rem;
     }
     .member-list li {
-    font-size: clamp(0.8rem, 1vw, 1rem);
+        font-size: clamp(0.8rem, 1vw, 1rem);
     }
     .chat-area {
-    padding: 0.5rem;
+        padding: 0.5rem;
     }
     .messages {
-    margin-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
     }
     .message-input {
-    padding-top: 0.5rem;
+        padding-top: 0.5rem;
     }
     .message-input button {
         margin-left: 0.5rem;
@@ -361,16 +358,6 @@ a:hover {
     }
 }
 @media (orientation: landscape) and (max-height: 500px) {
-    .terminal-box {
-        width: 95vw;
-        height: 95vh;
-        aspect-ratio: unset;
-        margin: auto;
-        max-height: none;
-    }
-    .landing {
-        max-width: 30rem;
-    }
     .room {
         flex-direction: row;
     }
