@@ -1,3 +1,4 @@
+/* --- IMPORTS  --- */
 @font-face { font-family: 'Sixtyfour'; src: url('assets/Sixtyfour.ttf') format('truetype'); font-display: block}
 @font-face { font-family: 'RussoOne'; src: url('assets/RussoOne.ttf') format('truetype'); font-display: block}
 /* --- DEFAULT  --- */
@@ -19,7 +20,6 @@ html {
 }
 body {
     height: 100%;
-    max-width: 1400px;
     color: var(--terminal-fg);
     font-family: 'Courier New', Courier, monospace;
     display: flex;
@@ -85,9 +85,8 @@ a:hover {
 }
 /* --- LANDING  --- */
 .landing {
-    max-width: 700px;
-    max-height: 500px;
     min-width: 365px;
+    max-width: 35rem;
     justify-content: center;
 }
 .cursor {
@@ -125,6 +124,7 @@ a:hover {
 /* --- ROOM --- */
 .room {
     min-width: 20rem;
+    max-width: 60rem;
     display: flex;
     flex-direction: row; 
 }
@@ -238,11 +238,11 @@ a:hover {
     flex: 1;
     min-height: 0;
     align-content: start;
-    -ms-overflow-style: none;  /* hide scrollbar in IE and Edge */
-    scrollbar-width: none;  /* ... in Firefox */
+    -ms-overflow-style: none;  /* hide scrollbar in IE and edge */
+    scrollbar-width: none;  /* ... in firefox */
 }
 .member-list::-webkit-scrollbar {
-    display: none; /* ... in Chrome, Safari, and newer Edge */
+    display: none; /* ... chrome, safari, and newer edge */
 }
 .member-list li {
     font-size: clamp(0.5rem, 1vw, 0.7rem);
@@ -321,6 +321,9 @@ a:hover {
         aspect-ratio: 3 / 6;
         max-height: 95vh;
     }
+    .landing {
+        max-height: 22rem;
+    }
     .room {
         flex-direction: column;
     }
@@ -356,5 +359,35 @@ a:hover {
     .message-input button {
         margin-left: 0.5rem;
         max-width: 6rem;
+    }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+    .terminal-box {
+        width: 95vw;
+        height: 95vh;
+        aspect-ratio: unset;
+        margin: auto;
+        max-height: none;
+    }
+    .landing {
+        max-width: 30rem;
+    }
+    .room {
+        flex-direction: row;
+    }
+    .info-wrapper {
+        flex-direction: column;
+        flex: 0 0 10rem;
+        border-right: 1px solid var(--border-color);
+        border-bottom: none;
+        max-height: none;
+    }
+    .share-panel {
+        flex: initial;
+        border-bottom: 1px solid var(--border-color);
+        border-right: none;
+    }
+    .members-panel {
+        max-height: none;
     }
 }
