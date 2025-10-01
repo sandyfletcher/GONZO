@@ -92,9 +92,6 @@ function handleJoinRoom(socket, data) {
     username = reconnectingParticipant.username;
     userToken = reconnectingParticipant.token;
     isNewJoiner = false;
-        username = reconnectingParticipant.username;
-        userToken = reconnectingParticipant.token; // this is their existing token
-        isNewJoiner = false;
     } else {
         const newUserToken = uuidv4(); // generate a new token
         const newUser = {

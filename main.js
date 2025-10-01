@@ -70,16 +70,46 @@ function setupRoomPage() {
         messageForm: document.getElementById('message-form'),
         messageInput: document.getElementById('message-form').querySelector('input'),
         roomLinkElement: document.getElementById('room-link'),
-        qrElements: document.querySelectorAll('.qr-code'),
-        memberLists: document.querySelectorAll('.member-list'),
+        qrElement: document.querySelector('.qr-code'),
+        memberList: document.querySelector('.member-list'),
     };
     if (!roomId) {
         ui.messagesContainer.innerHTML = '<p>ERROR: No room ID specified. Start a new room.</p>';
         ui.messageForm.style.display = 'none';
         return; // stop execution
     }
+    // Pass the ui object to the functions that need it
     initializeRoomUI(roomId, ui);
     setupMessageForm(roomId, ui);
+
+    // This listener is now correctly placed inside the setup function for the room page
+    socket.on('update_participants', (participants) => {
+        console.log('Updating participants:', participants);
+        const memberList = ui.memberList; // Use the cached element
+        if (!memberList) return; // Safety check
+        memberList.classList.remove('two-columns');
+        memberList.innerHTML = '';
+        participants.forEach((p, index) => {
+            const li = document.createElement('li');
+            let prefix = '';
+            if (index === 0) {
+                prefix = '👑 ';
+            } else {
+                const userEmoji = getEmojiForUser(p.username);
+                prefix = userEmoji + ' ';
+            }
+            if (p.id === socket.id) {
+                li.classList.add('is-me');
+            }
+            li.textContent = `${prefix}${p.username}`;
+            memberList.appendChild(li);
+        });
+        // Check for overflow to decide if we need two columns.
+        // This is a JS-based workaround because pure CSS cannot easily create columns based on content overflow in this manner.
+        if (memberList.scrollHeight > memberList.clientHeight) {
+            memberList.classList.add('two-columns');
+        }
+    });
 }
 
 // --- ROOM PAGE ---
@@ -89,6 +119,14 @@ function scrollToBottom() {
     if (messagesContainer) {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
+}
+
+function addMessageToDOM(element) {
+    const messagesContainer = document.querySelector('.messages');
+    if (!messagesContainer || !element) return;
+    messagesContainer.appendChild(element);
+    pruneOldMessages();
+    scrollToBottom();
 }
 
 function showCopyConfirmation(element) { // visual feedback on copy
@@ -110,8 +148,9 @@ function initializeRoomUI(roomId, ui) { //  set up click-to-copy functionality
             }).catch(err => console.error('Failed to copy text: ', err));
         });
     }
-    ui.qrElements.forEach(qrElement => {
-        if (!qrElement) return;
+    
+    const qrElement = ui.qrElement; // Use the singular property name
+    if (qrElement) { // Check if the single element exists
         qrElement.innerHTML = ''; // clear placeholder
         const qr = qrcode(0, 'L');
         qr.addData(roomUrl);
@@ -134,7 +173,7 @@ function initializeRoomUI(roomId, ui) { //  set up click-to-copy functionality
                 .catch(err => console.error('Failed to copy image: ', err));
             }, 'image/png');
         });
-    });
+    }
 }
 
 function setupMessageForm(roomId, ui) {
@@ -230,49 +269,12 @@ socket.on('load_history', (payload) => {
     scrollToBottom(); // scroll once after loading all history
 });
 
-socket.on('update_participants', (participants) => {
-    console.log('Updating participants:', participants);
-    const memberLists = document.querySelectorAll('.member-list');
-    memberLists.forEach(memberList => {
-        memberList.classList.remove('two-columns'); // temporarily set to single column for measurement
-        memberList.innerHTML = ''; // clear and populate list
-        participants.forEach((p, index) => {
-            const li = document.createElement('li');
-            let prefix = '';
-            if (index === 0) { // assign prefix emojis prefix
-                prefix = '👑 ';
-            } else {
-                const userEmoji = getEmojiForUser(p.username);
-                prefix = userEmoji + ' ';
-            }
-            if (p.id === socket.id) { // apply 'is-me' class
-                li.classList.add('is-me');
-            }
-            li.textContent = `${prefix}${p.username}`; // set list item content
-            memberList.appendChild(li);
-        });
-        if (memberList.scrollHeight > memberList.clientHeight) { // check if content height (calculated in column-count: 1) overflows the container
-            memberList.classList.add('two-columns'); // if yes, switch to column-count: 2
-        } 
-    });
-});
-
-socket.on('user_event', (data) => { // handles a user join/leave event
-    const messagesContainer = document.querySelector('.messages');
-    if (!messagesContainer) return;
-    const eventElement = renderEventMessage(data);
-    messagesContainer.appendChild(eventElement);
-    pruneOldMessages();
-    scrollToBottom();
+socket.on('user_event', (data) => {
+    addMessageToDOM(renderEventMessage(data));
 });
 
 socket.on('receive_message', (data) => {
-    const messagesContainer = document.querySelector('.messages');
-    if (!messagesContainer) return;
-    const messageElement = renderUserMessage(data);
-    messagesContainer.appendChild(messageElement);
-    pruneOldMessages();
-    scrollToBottom();
+    addMessageToDOM(renderUserMessage(data));
 });
 
 socket.on('room_closed', (message) => {
