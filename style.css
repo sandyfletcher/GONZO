@@ -19,6 +19,7 @@ html {
 }
 body {
     height: 100%;
+    max-width: 1400px;
     color: var(--terminal-fg);
     font-family: 'Courier New', Courier, monospace;
     display: flex;
@@ -26,15 +27,13 @@ body {
     justify-content: center;
 }
 .terminal-box {
-    margin: 1rem;
+    aspect-ratio: 16 / 10;
+    width: 95%;
     background-color: var(--terminal-bg);
     border: 2px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    aspect-ratio: 16 / 10; 
-    width: 95%;
-    max-width: 1400px;
-    max-height: 90vh;
+    margin: 1rem;
     overflow: hidden;
     text-align: center;
 }
