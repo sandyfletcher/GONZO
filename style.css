@@ -19,7 +19,7 @@ html {
     background-color: var(--site-bg);
 }
 body {
-    height: 100%;
+    height: 100svh;
     color: var(--terminal-fg);
     font-family: 'Courier New', Courier, monospace;
     display: flex;
