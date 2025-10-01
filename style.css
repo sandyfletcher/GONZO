@@ -269,13 +269,13 @@ a:hover {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 1rem;
+    padding: 0.5rem;
     min-height: 0;
 }
 .messages {
     flex: 1;
     overflow-y: auto;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     text-align: left;
 }
 .messages p {
@@ -296,7 +296,7 @@ a:hover {
 .message-input {
     display: flex;
     border-top: 1px solid var(--border-color);
-    padding-top: 1rem;
+    padding-top: 0.5rem;
 }
 .message-input input {
     flex: 1;
@@ -312,9 +312,10 @@ a:hover {
     outline: 1px solid var(--terminal-fg);
 }
 .message-input button {
-    margin-left: 0.75rem;
+    margin-left: 0.5rem;
+    max-width: 7rem;
 }
-.message-input:focus-within button {
+.message-input button:focus {
     background-color: var(--terminal-fg);
     color: var(--terminal-bg);
 }
@@ -352,10 +353,6 @@ a:hover {
     .message-input {
         padding-top: 0.5rem;
     }
-    .message-input button {
-        margin-left: 0.5rem;
-        max-width: 6rem;
-    }
 }
 @media (orientation: landscape) and (max-height: 500px) {
     .room {
@@ -372,8 +369,14 @@ a:hover {
         flex: initial;
         border-bottom: 1px solid var(--border-color);
         border-right: none;
+        padding: 0.5rem;
+    }
+    .qr-code {
+        max-width: 3.5rem;
+        margin: 0.2rem 0;  /* Reduces the top/bottom margin */
     }
     .members-panel {
         max-height: none;
+        padding: 0.5rem;
     }
 }
