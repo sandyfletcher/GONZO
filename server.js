@@ -66,7 +66,6 @@ function handleCreateRoom(socket) {
     console.log(`Room created: ${roomId} by ${socket.id}`);
     updateParticipants(roomId);
 }
-
 function handleJoinRoom(socket, data) {
     if (typeof data !== 'object' || data === null) return;
     if (typeof data.roomId !== 'string' || data.roomId.length > 40) return;
@@ -113,7 +112,6 @@ function handleJoinRoom(socket, data) {
         token: userToken // this ensures only this user gets their token
     });
 }
-
 function handleSendMessage(socket, data) {
     if (typeof data.roomId !== 'string' || typeof data.message !== 'string') return;
     const { roomId, message } = data;
@@ -127,7 +125,6 @@ function handleSendMessage(socket, data) {
         addToHistory(roomId, 'message', messageData); // add message to history
     }
 }
-
 function handleDisconnect(socket) {
     console.log(`User disconnected: ${socket.id}`);
     for (const roomId in rooms) {
@@ -136,8 +133,7 @@ function handleDisconnect(socket) {
         if (participantIndex !== -1) {
             const participant = room.participants[participantIndex];
             const username = participant.username; // Get username before they are removed
-            // Set a grace period to allow for reconnection
-            setTimeout(() => {
+            setTimeout(() => { // set grace period to allow for reconnection
                 if (!rooms[roomId]) return; // Room might have been closed already
                 // Check if the participant is still in the list with the *same old socket.id*.
                 // If they reconnected, handleJoinRoom would have updated their id.
@@ -156,13 +152,11 @@ function handleDisconnect(socket) {
                     rooms[roomId].participants = rooms[roomId].participants.filter(p => p.id !== socket.id);
                     updateParticipants(roomId);
                     broadcastUserEvent(roomId, `${username} left`);
-                } else {
-                    // The participant is no longer in the list with the old ID,
-                    // which means handleJoinRoom successfully updated them.
+                } else { // participant is no longer in list with old ID
                     console.log(`Participant ${username} (${socket.id}) reconnected successfully with a new ID.`);
                 }
             }, 3000); // 3-second grace period
-            break; // Found the room, no need to check others
+            break; // found room, no need to check others
         }
     }
 }

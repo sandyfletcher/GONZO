@@ -1,6 +1,4 @@
-// --- STATE ---
-
-const MAX_DISPLAYED_MESSAGES = 10; // Corresponds to MAX_HISTORY on the server
+const MAX_DISPLAYED_MESSAGES = 10; // corresponds to MAX_HISTORY on the server
 let lastMessageSenderId = null;
 const socket = io("https://fastchat-0opj.onrender.com/");
 const PARTICIPANT_EMOJIS = [
@@ -19,7 +17,6 @@ socket.on('connect', () => {
         }
     }
 });
-
 function getUsernameColor(str) { //  use HSL to parse a colour from username string
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -28,7 +25,6 @@ function getUsernameColor(str) { //  use HSL to parse a colour from username str
     const hue = hash % 360; // get hue value 0 to 360
     return `hsl(${hue}, 80%, 55%)`; // fixed saturation/lightness for readability
 }
-
 function getEmojiForUser(username) { // use a simple hash to deterministically assign an emoji
     let hash = 0;
     for (let i = 0; i < username.length; i++) {
@@ -47,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setupRoomPage();
     }
 });
-
 function setupIndexPage() {
     const startButton = document.getElementById('start-btn');
     startButton.disabled = false;
@@ -62,7 +57,6 @@ function setupIndexPage() {
         socket.emit('create_room');
     });
 }
-
 function setupRoomPage() {
     const roomId = window.location.hash.substring(1);
     const ui = { // cache relevant DOM elements into single object
@@ -78,15 +72,12 @@ function setupRoomPage() {
         ui.messageForm.style.display = 'none';
         return; // stop execution
     }
-    // Pass the ui object to the functions that need it
     initializeRoomUI(roomId, ui);
     setupMessageForm(roomId, ui);
-
-    // This listener is now correctly placed inside the setup function for the room page
     socket.on('update_participants', (participants) => {
         console.log('Updating participants:', participants);
-        const memberList = ui.memberList; // Use the cached element
-        if (!memberList) return; // Safety check
+        const memberList = ui.memberList; // use cached element
+        if (!memberList) return; // safety check
         memberList.classList.remove('two-columns');
         memberList.innerHTML = '';
         participants.forEach((p, index) => {
@@ -104,9 +95,7 @@ function setupRoomPage() {
             li.textContent = `${prefix}${p.username}`;
             memberList.appendChild(li);
         });
-        // Check for overflow to decide if we need two columns.
-        // This is a JS-based workaround because pure CSS cannot easily create columns based on content overflow in this manner.
-        if (memberList.scrollHeight > memberList.clientHeight) {
+        if (memberList.scrollHeight > memberList.clientHeight) { // JS-based workaround to handle column overflow
             memberList.classList.add('two-columns');
         }
     });
@@ -120,7 +109,6 @@ function scrollToBottom() {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 }
-
 function addMessageToDOM(element) {
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer || !element) return;
@@ -128,14 +116,12 @@ function addMessageToDOM(element) {
     pruneOldMessages();
     scrollToBottom();
 }
-
 function showCopyConfirmation(element) { // visual feedback on copy
     element.classList.add('copied');
     setTimeout(() => {
         element.classList.remove('copied');
     }, 1500);
 }
-
 function initializeRoomUI(roomId, ui) { //  set up click-to-copy functionality
     document.title = `GONZO — [${roomId.substring(0, 6)}]`;
     const roomUrl = window.location.href;
@@ -148,7 +134,6 @@ function initializeRoomUI(roomId, ui) { //  set up click-to-copy functionality
             }).catch(err => console.error('Failed to copy text: ', err));
         });
     }
-    
     const qrElement = ui.qrElement; // Use the singular property name
     if (qrElement) { // Check if the single element exists
         qrElement.innerHTML = ''; // clear placeholder
@@ -175,7 +160,6 @@ function initializeRoomUI(roomId, ui) { //  set up click-to-copy functionality
         });
     }
 }
-
 function setupMessageForm(roomId, ui) {
     ui.messageForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -186,7 +170,6 @@ function setupMessageForm(roomId, ui) {
         }
     });
 }
-
 function joinRoom(roomId) {
     const participantToken = sessionStorage.getItem('participantToken-' + roomId); // read participant token
     console.log(`Attempting to join room ${roomId} with token: ${participantToken}`);
@@ -204,7 +187,6 @@ function pruneOldMessages() {
         }
     }
 }
-
 function renderUserMessage(data) { // returns element instead of adding it to DOM
     const messageElement = document.createElement('p');
     if (data.sender.id === lastMessageSenderId) { // check if sender is same as last one
@@ -225,12 +207,10 @@ function renderUserMessage(data) { // returns element instead of adding it to DO
     lastMessageSenderId = data.sender.id; // update last sender ID
     return messageElement;
 }
-
 function renderEventMessage(data) { // This function now returns the element instead of adding it to the DOM
     const eventElement = document.createElement('p');
     eventElement.classList.add('event-message');
     eventElement.textContent = data.text;
-
     lastMessageSenderId = null; // event message breaks chain of consecutive user messages
     return eventElement;
 }
@@ -240,10 +220,9 @@ function renderEventMessage(data) { // This function now returns the element ins
 socket.on('room_created', (payload) => {
     const { roomId, token } = payload;
     console.log(`Server created room. ID: ${roomId}`);
-    sessionStorage.setItem('participantToken-' + roomId, token);     // +++ Save the token immediately, BEFORE redirecting +++
+    sessionStorage.setItem('participantToken-' + roomId, token); // save token before redirecting
     window.location.href = `room.html#${roomId}`;
 });
-
 socket.on('load_history', (payload) => {
     const { history, token } = payload; // destructure payload to get history and token
     const messagesContainer = document.querySelector('.messages');
@@ -268,20 +247,16 @@ socket.on('load_history', (payload) => {
     });
     scrollToBottom(); // scroll once after loading all history
 });
-
 socket.on('user_event', (data) => {
     addMessageToDOM(renderEventMessage(data));
 });
-
 socket.on('receive_message', (data) => {
     addMessageToDOM(renderUserMessage(data));
 });
-
 socket.on('room_closed', (message) => {
     alert(message);
     window.location.href = 'index.html';
 });
-
 socket.on('join_error', (message) => {
     alert(message);
     window.location.href = 'index.html';
