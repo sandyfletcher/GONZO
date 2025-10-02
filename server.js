@@ -15,9 +15,45 @@ const MAX_HISTORY = 10; // max number of messages/events to store per room
 const createRoomIPs = new Map(); // rate limiting
 const CREATE_ROOM_LIMIT = 3; // max 3 rooms per IP per minute
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in milliseconds
+const ROOM_INACTIVITY_LIMIT = 2 * 60 * 60 * 1000; // 2 hours
+const WARN_AFTER_1H_INACTIVITY = 60 * 60 * 1000;     // Warn after 1h of no messages
+const WARN_AFTER_90M_INACTIVITY = 90 * 60 * 1000;    // Warn after 90m of no messages
+const WARN_AFTER_110M_INACTIVITY = 110 * 60 * 1000;  // Warn after 110m (1h 50m) of no messages
+
 setInterval(() => { // clear IP tracker every minute
     createRoomIPs.clear();
 }, RATE_LIMIT_WINDOW);
+
+setInterval(() => { // check all rooms once every minute
+    const now = Date.now();
+    for (const roomId in rooms) {
+        const room = rooms[roomId];
+        const inactivityDuration = now - room.lastMessageTimestamp;
+
+        if (inactivityDuration >= ROOM_INACTIVITY_LIMIT) {
+            // INACTIVITY LIMIT REACHED: Close and delete the room
+            console.log(`Room ${roomId} closed due to inactivity.`);
+            io.to(roomId).emit('room_closed', 'Room closed due to 2 hours of inactivity.');
+            delete rooms[roomId]; // Free up memory
+        }
+        // CHECK WARNINGS (ordered from most urgent to least)
+        else if (inactivityDuration >= WARN_AFTER_110M_INACTIVITY && !room.warningsSent.w10m) {
+            broadcastUserEvent(roomId, '⚠️ Room will close in 10 minutes due to inactivity.');
+            room.warningsSent.w10m = true;
+            room.warningsSent.w30m = true;
+            room.warningsSent.w1h = true;
+        }
+        else if (inactivityDuration >= WARN_AFTER_90M_INACTIVITY && !room.warningsSent.w30m) {
+            broadcastUserEvent(roomId, '⚠️ Room will close in 30 minutes due to inactivity.');
+            room.warningsSent.w30m = true;
+            room.warningsSent.w1h = true;
+        }
+        else if (inactivityDuration >= WARN_AFTER_1H_INACTIVITY && !room.warningsSent.w1h) {
+            broadcastUserEvent(roomId, '⚠️ Room will close in 1 hour due to inactivity.');
+            room.warningsSent.w1h = true;
+        }
+    }
+}, 60 * 1000); // Run every 60 seconds
 
 // HELPER FUNCTIONS
 
@@ -57,16 +93,23 @@ function handleCreateRoom(socket) {
     const ownerToken = uuidv4();
     rooms[roomId] = {
       owner: socket.id,
-      participants: [{ 
-          id: socket.id, 
+      lastMessageTimestamp: Date.now(),
+      warningsSent: {
+          w1h: false,
+          w30m: false,
+          w10m: false
+      },
+      participants: [{
+          id: socket.id,
           username: socket.id.slice(0, 5),
-          token: ownerToken // + Store the token
+          token: ownerToken
       }],
-      messageHistory: [] 
+      messageHistory: []
     };
     socket.emit('room_created', { roomId, token: ownerToken });
     console.log(`Room created: ${roomId} by ${socket.id}`);
     updateParticipants(roomId);
+    broadcastUserEvent(roomId, 'Room initialized. Room will close after 2 hours of inactivity.');
 }
 function handleJoinRoom(socket, data) {
     if (typeof data !== 'object' || data === null) return;
@@ -117,15 +160,18 @@ function handleJoinRoom(socket, data) {
 function handleSendMessage(socket, data) {
     if (typeof data.roomId !== 'string' || typeof data.message !== 'string') return;
     const { roomId, message } = data;
-    const cleanMessage = DOMPurify.sanitize(message); // sanitize user's message
+    const cleanMessage = DOMPurify.sanitize(message);
     if (cleanMessage.trim().length === 0 || cleanMessage.length > 500) return;
     const room = rooms[roomId];
     if (!room) return;
     const sender = room.participants.find(p => p.id === socket.id);
     if (sender) {
+        room.lastMessageTimestamp = Date.now(); // reset clock
+        room.warningsSent = { w1h: false, w30m: false, w10m: false };
+        console.log(`Activity in room ${roomId}. Inactivity timer reset.`);
         const messageData = { sender, message: cleanMessage };
         io.to(roomId).emit('receive_message', messageData);
-        addToHistory(roomId, 'message', messageData); // add sanitized message to history
+        addToHistory(roomId, 'message', messageData);
     }
 }
 function handleDisconnect(socket) {
