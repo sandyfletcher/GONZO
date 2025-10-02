@@ -160,22 +160,20 @@ a:hover {
     font-size: 1.4rem;
 }
 .qr-code {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
     background-color: white;
     margin: 0.5rem 0;
     border: 1px dotted var(--border-color);
     display: inline-block;
-    font-size: 0.8em;
     color: var(--terminal-bg);
     padding: 0.2rem; 
     cursor: pointer;
     transition: outline 0.2s ease-out;
     max-width: 6rem;
-}
-.qr-code.copied {
-    box-shadow: inset 0 0 0 2px var(--terminal-fg);
-    position: relative;
-    outline: 2px solid var(--terminal-fg);
-    position: relative;
 }
 .qr-code img {
     display: block;
@@ -185,21 +183,16 @@ a:hover {
     width: auto;
     height: auto;
 }
-.link {
-    background-color: #2a2a2a;
-    font-family: 'RussoOne', Courier, monospace;
-    padding: 0.5rem;
-    font-size: 0.7rem;
-    text-align: center;
-    border: 1px dotted var(--border-color);
-    display: block;
-    width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-    transition: outline 0.2s ease-out;
+.qr-code.copied {
+    box-shadow: inset 0 0 0 2px var(--terminal-fg);
+    position: relative;
+    outline: 2px solid var(--terminal-fg);
+    position: relative;
 }
-.link.copied {
+.share-info .btn {
+    font-size: 0.5rem;
+}
+.btn.copied {
     overflow: visible;
     outline: 2px solid var(--terminal-fg);
     position: relative;
