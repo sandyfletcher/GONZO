@@ -2,6 +2,8 @@ const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
 const { v4: uuidv4 } = require('uuid');
+const { JSDOM } = require('jsdom');
+const DOMPurify = require('dompurify')(new JSDOM('').window);
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -115,14 +117,15 @@ function handleJoinRoom(socket, data) {
 function handleSendMessage(socket, data) {
     if (typeof data.roomId !== 'string' || typeof data.message !== 'string') return;
     const { roomId, message } = data;
-    if (message.trim().length === 0 || message.length > 500) return;
+    const cleanMessage = DOMPurify.sanitize(message); // sanitize user's message
+    if (cleanMessage.trim().length === 0 || cleanMessage.length > 500) return;
     const room = rooms[roomId];
     if (!room) return;
     const sender = room.participants.find(p => p.id === socket.id);
     if (sender) {
-        const messageData = { sender, message };
+        const messageData = { sender, message: cleanMessage };
         io.to(roomId).emit('receive_message', messageData);
-        addToHistory(roomId, 'message', messageData); // add message to history
+        addToHistory(roomId, 'message', messageData); // add sanitized message to history
     }
 }
 function handleDisconnect(socket) {
