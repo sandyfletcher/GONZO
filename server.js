@@ -30,30 +30,29 @@ setInterval(() => { // check all rooms once every minute
         const room = rooms[roomId];
         const inactivityDuration = now - room.lastMessageTimestamp;
 
-        if (inactivityDuration >= ROOM_INACTIVITY_LIMIT) {
-            // INACTIVITY LIMIT REACHED: Close and delete the room
+        if (inactivityDuration >= ROOM_INACTIVITY_LIMIT) { // limit reached — close and delete room
             // console.log(`Room ${roomId} closed due to inactivity.`);
-            io.to(roomId).emit('room_closed', 'Room closed due to 2 hours of inactivity.');
-            delete rooms[roomId]; // Free up memory
+            io.to(roomId).emit('room_closed', 'room closed due to inactivity.');
+            delete rooms[roomId]; // free up memory
         }
-        // CHECK WARNINGS (ordered from most urgent to least)
+        // check warningsCHECK WARNINGS (ordered from most urgent to least)
         else if (inactivityDuration >= WARN_AFTER_110M_INACTIVITY && !room.warningsSent.w10m) {
-            broadcastUserEvent(roomId, '⚠️ Room will close in 10 minutes due to inactivity.');
+            broadcastUserEvent(roomId, 'room will close in 10 minutes due to inactivity');
             room.warningsSent.w10m = true;
             room.warningsSent.w30m = true;
             room.warningsSent.w1h = true;
         }
         else if (inactivityDuration >= WARN_AFTER_90M_INACTIVITY && !room.warningsSent.w30m) {
-            broadcastUserEvent(roomId, '⚠️ Room will close in 30 minutes due to inactivity.');
+            broadcastUserEvent(roomId, 'room will close in 30 minutes due to inactivity');
             room.warningsSent.w30m = true;
             room.warningsSent.w1h = true;
         }
         else if (inactivityDuration >= WARN_AFTER_1H_INACTIVITY && !room.warningsSent.w1h) {
-            broadcastUserEvent(roomId, '⚠️ Room will close in 1 hour due to inactivity.');
+            broadcastUserEvent(roomId, 'room will close in 1 hour due to inactivity');
             room.warningsSent.w1h = true;
         }
     }
-}, 60 * 1000); // Run every 60 seconds
+}, 60 * 1000); // run every 60 seconds
 
 // HELPER FUNCTIONS
 

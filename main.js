@@ -235,8 +235,14 @@ function renderEventMessage(data) { // This function now returns the element ins
 socket.on('room_created', (payload) => {
     const { roomId, token } = payload;
     // console.log(`Server created room. ID: ${roomId}`);
-    sessionStorage.setItem('participantToken-' + roomId, token); // save token before redirecting
-    window.location.href = `room.html#${roomId}`;
+    // 1. Add the shutdown class to the body to trigger the CSS animation
+    document.body.classList.add('is-shutting-down');
+    // 2. Wait for the animation to finish (800ms = 0.8s) before navigating
+    setTimeout(() => {
+        // These two lines are the original logic, now delayed
+        sessionStorage.setItem('participantToken-' + roomId, token);
+        window.location.href = `room.html#${roomId}`;
+    }, 800); 
 });
 socket.on('load_history', (payload) => {
     const { history, token } = payload; // destructure payload to get history and token
