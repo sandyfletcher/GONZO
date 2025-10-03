@@ -1,7 +1,10 @@
 /* --- IMPORTS  --- */
+
 @font-face { font-family: 'Sixtyfour'; src: url('assets/Sixtyfour.ttf') format('truetype'); font-display: block}
 @font-face { font-family: 'RussoOne'; src: url('assets/RussoOne.ttf') format('truetype'); font-display: block}
+
 /* --- DEFAULT  --- */
+
 :root {
     --site-bg: rgb(0, 7, 2);
     --terminal-bg: #1a1a1a;
@@ -28,6 +31,7 @@ body {
     padding: 1.5rem;
     position: relative; /* for after */
     text-shadow: 0 0 3px var(--terminal-fg-dark); /* subtle global glow */
+    overflow-x: hidden;
 }
 body::after {
     content: '';
@@ -52,10 +56,7 @@ body::after {
     z-index: 10;
 }
 body.is-shutting-down .terminal-box {
-    animation: crt-shutdown 0.8s ease-out forwards;
-}
-body.is-shutting-down .terminal-box > * {
-    animation: content-fade-out 0.3s ease-out forwards;
+    animation: slide-out-left 0.6s ease-out forwards;
 }
 .terminal-box {
     width: 100%;
@@ -65,10 +66,23 @@ body.is-shutting-down .terminal-box > * {
     flex-direction: column;
     overflow: hidden;
     text-align: center;
+}
+.landing.terminal-box {
     animation: crt-warm-up 1s ease-out forwards;
 }
-.terminal-box > * {
+.landing.terminal-box > * {
     animation: content-fade-in 1.5s ease-out forwards;
+}
+/* 2. Room page uses our new, smooth, combined animation */
+.room.terminal-box {
+    /* Apply the new animation with a total duration of 1.6s */
+    animation: slide-in-and-warm-up 1.6s ease-out forwards;
+}
+/* 3. The content inside the room page fades in during the "warm-up" phase */
+.room.terminal-box > * {
+    /* The warm-up starts at 40% of 1.6s = 0.64s. We'll start this animation then. */
+    animation: content-fade-in 1.5s ease-out forwards;
+    animation-delay: 0.65s; /* Delay the content until the box is in place */
 }
 h1 {
     font-family: 'Sixtyfour', Courier, monospace;
@@ -118,7 +132,9 @@ a:hover {
     cursor: wait;
     pointer-events: none;
 }
+
 /* --- LANDING  --- */
+
 .landing {
     padding: 2rem 1rem; 
     min-width: 365px;
@@ -155,7 +171,9 @@ a:hover {
     color: var(--terminal-fg-dark);
     font-weight: bold;
 }
+
 /* --- ROOM --- */
+
 .room {
     height: 100%;
     max-height: 50rem;
@@ -247,7 +265,6 @@ a:hover {
     font-family: 'RussoOne', Courier, monospace;
     animation: copied-feedback 1.5s ease-out forwards; /* Add animation */
 }
-
 .members-panel {
     padding: 0.8rem;
     text-align: center;
@@ -363,7 +380,9 @@ a:hover {
     background-color: var(--terminal-fg);
     color: var(--terminal-bg);
 }
+
 /* --- ANIMATIONS --- */
+
 @keyframes blink {
     50% { opacity: 0; }
 }
@@ -392,13 +411,45 @@ a:hover {
     from { opacity: 1; }
     to { opacity: 0; }
 }
-
+@keyframes slide-out-left {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-100vw); /* Move it one full screen width to the left */
+        opacity: 0;
+    }
+}
+@keyframes slide-in-and-warm-up {
+    /* Start: The element is off-screen AND collapsed to a thin bar */
+    0% {
+        transform: translateX(100vw) scaleY(0.01);
+        opacity: 0;
+    }
+    /* A brief moment after starting, become visible as a bar */
+    10% {
+        opacity: 1;
+    }
+    /* Mid-point: The slide-in is complete. It is now centered, but STILL a thin bar */
+    40% {
+        transform: translateX(0) scaleY(0.01);
+        opacity: 1;
+    }
+    /* End: The element stays centered and expands to its full height */
+    100% {
+        transform: translateX(0) scaleY(1);
+        opacity: 1;
+    }
+}
 @keyframes crt-shutdown {
     0% { transform: scaleY(1); opacity: 1; }
     70% { transform: scaleY(0.01); opacity: 1; }
     100% { transform: scaleY(0.01); opacity: 0; }
 }
+
 /* --- MOBILE --- */
+
 @media (max-width: 700px) {
     body {
         padding: 0.5rem;
@@ -458,7 +509,7 @@ a:hover {
     }
     .qr-code {
         max-width: 3.5rem;
-        margin: 0.2rem 0;  /* Reduces the top/bottom margin */
+        margin: 0.2rem 0;
     }
     .members-panel {
         max-height: none;
