@@ -168,6 +168,7 @@ function setupMessageForm(roomId, ui) {
             socket.emit('send_message', { roomId, message });
             ui.messageInput.value = '';
         }
+        ui.messageInput.focus();
     });
 }
 function joinRoom(roomId) {

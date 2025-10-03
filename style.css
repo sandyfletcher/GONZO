@@ -199,6 +199,8 @@ a:hover {
     cursor: pointer;
     transition: outline 0.2s ease-out;
     max-width: 6rem;
+    position: relative; /* enable z-index */
+    z-index: 11; /* one above scanlines */
 }
 .qr-code img {
     display: block;
@@ -296,6 +298,7 @@ a:hover {
     flex-direction: column;
     padding: 0.5rem;
     min-height: 0;
+    min-width: 0;
 }
 .messages {
     flex: 1;
@@ -309,6 +312,7 @@ a:hover {
     margin-block-end: 0;
     padding-left: 0.5rem;
     text-indent: -0.5rem;
+    overflow-wrap: break-word;
 }
 .animate-in {
     animation: message-fade-in 0.3s ease-out;
