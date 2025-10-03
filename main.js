@@ -53,7 +53,7 @@ function setupIndexPage() {
         startButton.disabled = true;
         startButton.textContent = '> CONNECTING...';
         startButton.classList.add('is-loading');
-        console.log("Requesting a new room from server...");
+        // console.log("Requesting a new room from server...");
         socket.emit('create_room');
     });
 }
@@ -123,7 +123,7 @@ function showCopyConfirmation(element) { // visual feedback on copy
     }, 1500);
 }
 function initializeRoomUI(roomId, ui) { //  set up click-to-copy functionality
-    document.title = `GONZO — [${roomId.substring(0, 6)}]`;
+    document.title = `caecus — [${roomId.substring(0, 6)}]`;
     const roomUrl = window.location.href;
     const linkEl = ui.roomLinkElement;
     if (linkEl) { // check for element existence
@@ -219,7 +219,7 @@ function renderEventMessage(data) { // This function now returns the element ins
 
 socket.on('room_created', (payload) => {
     const { roomId, token } = payload;
-    console.log(`Server created room. ID: ${roomId}`);
+    // console.log(`Server created room. ID: ${roomId}`);
     sessionStorage.setItem('participantToken-' + roomId, token); // save token before redirecting
     window.location.href = `room.html#${roomId}`;
 });
@@ -248,10 +248,20 @@ socket.on('load_history', (payload) => {
     scrollToBottom(); // scroll once after loading all history
 });
 socket.on('user_event', (data) => {
-    addMessageToDOM(renderEventMessage(data));
+    // 1. Render the element just like before
+    const element = renderEventMessage(data); 
+    // 2. Add our new animation class
+    element.classList.add('animate-in');
+    // 3. Add the element to the DOM
+    addMessageToDOM(element);
 });
 socket.on('receive_message', (data) => {
-    addMessageToDOM(renderUserMessage(data));
+    // 1. Render the element
+    const element = renderUserMessage(data);
+    // 2. Add our new animation class
+    element.classList.add('animate-in');
+    // 3. Add the element to the DOM
+    addMessageToDOM(element);
 });
 socket.on('room_closed', (message) => {
     alert(message);

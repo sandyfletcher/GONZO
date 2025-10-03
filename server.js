@@ -32,7 +32,7 @@ setInterval(() => { // check all rooms once every minute
 
         if (inactivityDuration >= ROOM_INACTIVITY_LIMIT) {
             // INACTIVITY LIMIT REACHED: Close and delete the room
-            console.log(`Room ${roomId} closed due to inactivity.`);
+            // console.log(`Room ${roomId} closed due to inactivity.`);
             io.to(roomId).emit('room_closed', 'Room closed due to 2 hours of inactivity.');
             delete rooms[roomId]; // Free up memory
         }
@@ -107,9 +107,9 @@ function handleCreateRoom(socket) {
       messageHistory: []
     };
     socket.emit('room_created', { roomId, token: ownerToken });
-    console.log(`Room created: ${roomId} by ${socket.id}`);
+    // console.log(`Room created: ${roomId} by ${socket.id}`);
     updateParticipants(roomId);
-    broadcastUserEvent(roomId, 'Room initialized. Room will close after 2 hours of inactivity.');
+    broadcastUserEvent(roomId, 'Room will self-destruct after 2 hours of inactivity.');
 }
 function handleJoinRoom(socket, data) {
     if (typeof data !== 'object' || data === null) return;
@@ -126,11 +126,11 @@ function handleJoinRoom(socket, data) {
     let isNewJoiner = true;
     const reconnectingParticipant = participantToken ? room.participants.find(p => p.token === participantToken) : null; // find user by their secure token
     if (reconnectingParticipant) {
-        console.log(`User rejoining with token as ${socket.id}`);
+        // console.log(`User rejoining with token as ${socket.id}`);
     const oldId = reconnectingParticipant.id; // First, store the old ID
     reconnectingParticipant.id = socket.id;   // THEN, update to the new ID
     if (room.owner === oldId) { // Now, check against the stored old ID
-        console.log(`Room owner has reconnected. Updating owner ID.`);
+        // console.log(`Room owner has reconnected. Updating owner ID.`);
         room.owner = socket.id; // And update the owner reference
     }
     username = reconnectingParticipant.username;
@@ -147,12 +147,12 @@ function handleJoinRoom(socket, data) {
         username = newUser.username;
         userToken = newUser.token; // this is new token to send back
     }
-    console.log(`User ${socket.id} (${username}) joined room ${roomId}`);
+    // console.log(`User ${socket.id} (${username}) joined room ${roomId}`);
     updateParticipants(roomId);
     if (isNewJoiner && username) { // announce join event only for genuinely new users
         broadcastUserEvent(roomId, `${username} joined`);
     }
-    socket.emit('load_history', { // send history AND user's personal token back to them
+    socket.emit('load_history', { // send history and user's personal token back to them
         history: room.messageHistory,
         token: userToken // this ensures only this user gets their token
     });
@@ -168,14 +168,14 @@ function handleSendMessage(socket, data) {
     if (sender) {
         room.lastMessageTimestamp = Date.now(); // reset clock
         room.warningsSent = { w1h: false, w30m: false, w10m: false };
-        console.log(`Activity in room ${roomId}. Inactivity timer reset.`);
+        // console.log(`Activity in room ${roomId}. Inactivity timer reset.`);
         const messageData = { sender, message: cleanMessage };
         io.to(roomId).emit('receive_message', messageData);
         addToHistory(roomId, 'message', messageData);
     }
 }
 function handleDisconnect(socket) {
-    console.log(`User disconnected: ${socket.id}`);
+    // console.log(`User disconnected: ${socket.id}`);
     for (const roomId in rooms) {
         const room = rooms[roomId];
         const participantIndex = room.participants.findIndex(p => p.id === socket.id);
@@ -191,18 +191,18 @@ function handleDisconnect(socket) {
                     // This means they did NOT reconnect successfully within the grace period.
                     // Case 1: The owner left. Close the room.
                     if (rooms[roomId].owner === socket.id) {
-                        console.log(`Owner ${username} (${socket.id}) of room ${roomId} did not reconnect. Closing room.`);
+                        // console.log(`Owner ${username} (${socket.id}) of room ${roomId} did not reconnect. Closing room.`);
                         io.to(roomId).emit('room_closed', 'The host has left the room.');
                         delete rooms[roomId];
                         return; // Stop further processing for this room
                     }
                     // Case 2: A regular participant left.
-                    console.log(`Participant ${username} (${socket.id}) left room ${roomId}.`);
+                    // console.log(`Participant ${username} (${socket.id}) left room ${roomId}.`);
                     rooms[roomId].participants = rooms[roomId].participants.filter(p => p.id !== socket.id);
                     updateParticipants(roomId);
                     broadcastUserEvent(roomId, `${username} left`);
                 } else { // participant is no longer in list with old ID
-                    console.log(`Participant ${username} (${socket.id}) reconnected successfully with a new ID.`);
+                    // console.log(`Participant ${username} (${socket.id}) reconnected successfully with a new ID.`);
                 }
             }, 3000); // 3-second grace period
             break; // found room, no need to check others
@@ -213,7 +213,7 @@ function handleDisconnect(socket) {
 // CONNECTION LOGIC
 
 io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
+  // console.log(`User connected: ${socket.id}`);
   socket.on('create_room',  () => handleCreateRoom(socket));
   socket.on('join_room',    (data) => handleJoinRoom(socket, data));
   socket.on('send_message', (data) => handleSendMessage(socket, data));
@@ -221,5 +221,5 @@ io.on('connection', (socket) => {
 });
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  // console.log(`Server listening on port ${PORT}`);
 });

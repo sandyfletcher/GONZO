@@ -1,7 +1,7 @@
-GONZO — temporary chatrooms
+caecus — temporary chatrooms
 ------------------------
 
-GONZO is a real-time chat application that allows users to create temporary, anonymous chatrooms.
+caecus is a real-time chat application that allows users to create temporary, anonymous chatrooms.
 
 [screenshot of the chat room interface]
 
