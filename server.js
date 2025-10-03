@@ -109,7 +109,7 @@ function handleCreateRoom(socket) {
     socket.emit('room_created', { roomId, token: ownerToken });
     // console.log(`Room created: ${roomId} by ${socket.id}`);
     updateParticipants(roomId);
-    broadcastUserEvent(roomId, 'Room will self-destruct after 2 hours of inactivity.');
+    broadcastUserEvent(roomId, 'room initiated — will self-destruct after 2 hours of inactivity');
 }
 function handleJoinRoom(socket, data) {
     if (typeof data !== 'object' || data === null) return;
