@@ -95,25 +95,22 @@ function setupRoomPage() {
         // console.log('Updating participants:', participants);
         const memberList = ui.memberList; // use cached element
         if (!memberList) return; // safety check
-        memberList.classList.remove('two-columns');
-        memberList.innerHTML = '';
-        participants.forEach((p, index) => {
+        memberList.innerHTML = ''; // reset state completely before checking
+        memberList.classList.remove('two-columns', 'is-scrollable');
+        participants.forEach((p, index) => { // populate list with new participants
             const li = document.createElement('li');
-            let prefix = '';
-            if (index === 0) {
-                prefix = '👑 ';
-            } else {
-                const userEmoji = getEmojiForUser(p.username);
-                prefix = userEmoji + ' ';
-            }
+            let prefix = (index === 0) ? '👑 ' : getEmojiForUser(p.username) + ' '; // owner is at [0]
             if (p.id === socket.id) {
                 li.classList.add('is-me');
             }
             li.textContent = `${prefix}${p.username}`;
             memberList.appendChild(li);
         });
-        if (memberList.scrollHeight > memberList.clientHeight) { // JS-based workaround to handle column overflow
-            memberList.classList.add('two-columns');
+        if (memberList.scrollHeight > memberList.clientHeight) { // two-step overflow check: does content overflow in a single column?
+            memberList.classList.add('two-columns'); // if yes, switch to two
+            if (memberList.scrollHeight > memberList.clientHeight) { // after switching, does it overflow?
+                memberList.classList.add('is-scrollable'); // if yes, allow scrolling
+            }
         }
     });
 }

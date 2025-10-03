@@ -264,12 +264,15 @@ a:hover {
     column-gap: 0.5rem; /* space between columns */
     justify-content: center; /* won't work perfectly with column-count */
     text-align: left;
-    overflow-y: auto;
+    overflow-y: hidden;
     flex: 1;
     min-height: 0;
     align-content: start;
     -ms-overflow-style: none;  /* hide scrollbar in IE and edge */
     scrollbar-width: none;  /* ... in firefox */
+}
+.member-list.is-scrollable {
+    overflow-y: auto;
 }
 .member-list::-webkit-scrollbar {
     display: none; /* ... chrome, safari, and newer edge */
