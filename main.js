@@ -43,11 +43,28 @@ document.addEventListener('DOMContentLoaded', () => {
         setupRoomPage();
     }
 });
+
+// ADDED: Listen for the pageshow event to handle bfcache restores
+window.addEventListener('pageshow', (event) => {
+    // The 'persisted' property is true if the page was restored from the cache
+    if (event.persisted) {
+        // If we are on the index page, reset the button state
+        const startButton = document.getElementById('start-btn');
+        if (startButton) {
+            resetStartButtonState(startButton);
+        }
+    }
+});
+
+function resetStartButtonState(button) {
+    button.disabled = false;
+    button.textContent = '> START ROOM';
+    button.classList.remove('is-loading');
+}
+
 function setupIndexPage() {
     const startButton = document.getElementById('start-btn');
-    startButton.disabled = false;
-    startButton.textContent = '> START ROOM';
-    startButton.classList.remove('is-loading');
+    resetStartButtonState(startButton); // Ensure button is in correct state on initial load
     startButton.addEventListener('click', (e) => {
         e.preventDefault();
         startButton.disabled = true;
