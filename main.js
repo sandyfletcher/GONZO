@@ -112,6 +112,9 @@ function setupRoomPage() {
             li.textContent = `${prefix}${p.username}`;
             memberList.appendChild(li);
         });
+        if (memberList.scrollHeight > memberList.clientHeight) { // JS-based workaround to handle column overflow
+            memberList.classList.add('two-columns');
+        }
     });
 }
 
