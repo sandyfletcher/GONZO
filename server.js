@@ -115,64 +115,60 @@ function handleCreateRoom(socket) {
     updateParticipants(roomId);
     broadcastUserEvent(roomId, 'room initiated — will self-destruct after 2 hours of inactivity');
 }
+
+// **MODIFIED:** Slightly refactored for clarity
 function handleJoinRoom(socket, data) {
-    if (typeof data !== 'object' || data === null) return;
-    if (typeof data.roomId !== 'string' || data.roomId.length > 40) return;
-    if (data.participantToken && (typeof data.participantToken !== 'string' || data.participantToken.length > 40)) return; // validate new token property
+    if (typeof data !== 'object' || data === null || typeof data.roomId !== 'string' || data.roomId.length > 40) return;
+    if (data.participantToken && (typeof data.participantToken !== 'string' || data.participantToken.length > 40)) return;
+
     const { roomId, participantToken } = data;
     const room = rooms[roomId];
     if (!room) {
         return socket.emit('join_error', 'This room does not exist.');
     }
-    const isAlreadyInRoom = room.participants.some(p => p.id === socket.id);
-    if (isAlreadyInRoom) {
-        // This happens for the room creator's initial "join" after creating the room.
-        // Instead of ignoring it, we must send them the history so their UI initializes correctly.
-        const participant = room.participants.find(p => p.id === socket.id);
+
+    // Case 1: User is already in the room (e.g., host's first join, or a reconnect)
+    const existingParticipant = room.participants.find(p => p.id === socket.id || (participantToken && p.token === participantToken));
+
+    if (existingParticipant) {
+        // If they reconnected with a new socket ID, update it
+        const oldId = existingParticipant.id;
+        if (oldId !== socket.id) {
+            existingParticipant.id = socket.id;
+            if (room.owner === oldId) { // Check if the reconnected user was the owner
+                room.owner = socket.id;
+            }
+        }
+        // The client's UI is now ready, so send everything it needs to render
+        socket.join(roomId);
         socket.emit('load_history', {
             history: room.messageHistory,
-            token: participant ? participant.token : null // Send them back their token
+            token: existingParticipant.token // Send them back their token
         });
-        updateParticipants(roomId); // Also send the participant list, as the UI is now ready.
-        return; // Stop further execution
+        updateParticipants(roomId); // Crucial for host and reconnecting clients
+        return;
     }
+
+    // Case 2: A genuinely new user is joining
+    const newUserToken = uuidv4();
+    const newUser = {
+        id: socket.id,
+        username: socket.id.slice(0, 5),
+        token: newUserToken
+    };
+    room.participants.push(newUser);
+    
     socket.join(roomId);
-    let username;
-    let userToken; // to hold the token we'll send back
-    let isNewJoiner = true;
-    const reconnectingParticipant = participantToken ? room.participants.find(p => p.token === participantToken) : null; // find user by their secure token
-    if (reconnectingParticipant) {
-        // console.log(`User rejoining with token as ${socket.id}`);
-    const oldId = reconnectingParticipant.id; // First, store the old ID
-    reconnectingParticipant.id = socket.id;   // THEN, update to the new ID
-    if (room.owner === oldId) { // Now, check against the stored old ID
-        // console.log(`Room owner has reconnected. Updating owner ID.`);
-        room.owner = socket.id; // And update the owner reference
-    }
-    username = reconnectingParticipant.username;
-    userToken = reconnectingParticipant.token;
-    isNewJoiner = false;
-    } else {
-        const newUserToken = uuidv4(); // generate a new token
-        const newUser = {
-            id: socket.id,
-            username: socket.id.slice(0, 5),
-            token: newUserToken // assign new token
-        };
-        room.participants.push(newUser);
-        username = newUser.username;
-        userToken = newUser.token; // this is new token to send back
-    }
-    // console.log(`User ${socket.id} (${username}) joined room ${roomId}`);
     updateParticipants(roomId);
-    if (isNewJoiner && username) { // announce join event only for genuinely new users
-        broadcastUserEvent(roomId, `${username} joined`);
-    }
-    socket.emit('load_history', { // send history and user's personal token back to them
+    broadcastUserEvent(roomId, `${newUser.username} joined`);
+    
+    // Send the history and their new personal token
+    socket.emit('load_history', {
         history: room.messageHistory,
-        token: userToken // this ensures only this user gets their token
+        token: newUserToken
     });
 }
+
 function handleSendMessage(socket, data) {
     if (typeof data.roomId !== 'string' || typeof data.message !== 'string') return;
     const { roomId, message } = data;
@@ -200,16 +196,21 @@ function handleDisconnect(socket) {
             const username = participant.username; // Get username before they are removed
             setTimeout(() => { // set grace period to allow for reconnection
                 if (!rooms[roomId]) return; // Room might have been closed already
-                const participantStillExistsWithOldId = rooms[roomId].participants.some(p => p.id === socket.id); // check if participant is still in list with same old socket.id* — if they reconnected, handleJoinRoom would have updated their id
+                // Check if the participant is still in the list with the *same old socket.id*.
+                // If they reconnected, handleJoinRoom would have updated their id.
+                const participantStillExistsWithOldId = rooms[roomId].participants.some(p => p.id === socket.id);
                 if (participantStillExistsWithOldId) {
-                    if (rooms[roomId].owner === socket.id) { // means they did NOT reconnect successfully within grace period — case 1: owner left, close room
+                    // This means they did NOT reconnect successfully within the grace period.
+                    // Case 1: The owner left. Close the room.
+                    if (rooms[roomId].owner === socket.id) {
                         // console.log(`Owner ${username} (${socket.id}) of room ${roomId} did not reconnect. Closing room.`);
                         io.to(roomId).emit('room_closed', 'Host has left the room; connection terminated.');
                         delete rooms[roomId];
-                        return; // stop further processing for this room
+                        return; // Stop further processing for this room
                     }
+                    // Case 2: A regular participant left.
                     // console.log(`Participant ${username} (${socket.id}) left room ${roomId}.`);
-                    rooms[roomId].participants = rooms[roomId].participants.filter(p => p.id !== socket.id); // case 2: regular participant left
+                    rooms[roomId].participants = rooms[roomId].participants.filter(p => p.id !== socket.id);
                     updateParticipants(roomId);
                     broadcastUserEvent(roomId, `${username} left`);
                 } else { // participant is no longer in list with old ID
