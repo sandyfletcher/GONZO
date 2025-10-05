@@ -133,6 +133,7 @@ function handleJoinRoom(socket, data) {
             history: room.messageHistory,
             token: participant ? participant.token : null // Send them back their token
         });
+        updateParticipants(roomId); // Also send the participant list, as the UI is now ready.
         return; // Stop further execution
     }
     socket.join(roomId);
@@ -199,21 +200,16 @@ function handleDisconnect(socket) {
             const username = participant.username; // Get username before they are removed
             setTimeout(() => { // set grace period to allow for reconnection
                 if (!rooms[roomId]) return; // Room might have been closed already
-                // Check if the participant is still in the list with the *same old socket.id*.
-                // If they reconnected, handleJoinRoom would have updated their id.
-                const participantStillExistsWithOldId = rooms[roomId].participants.some(p => p.id === socket.id);
+                const participantStillExistsWithOldId = rooms[roomId].participants.some(p => p.id === socket.id); // check if participant is still in list with same old socket.id* — if they reconnected, handleJoinRoom would have updated their id
                 if (participantStillExistsWithOldId) {
-                    // This means they did NOT reconnect successfully within the grace period.
-                    // Case 1: The owner left. Close the room.
-                    if (rooms[roomId].owner === socket.id) {
+                    if (rooms[roomId].owner === socket.id) { // means they did NOT reconnect successfully within grace period — case 1: owner left, close room
                         // console.log(`Owner ${username} (${socket.id}) of room ${roomId} did not reconnect. Closing room.`);
                         io.to(roomId).emit('room_closed', 'Host has left the room; connection terminated.');
                         delete rooms[roomId];
-                        return; // Stop further processing for this room
+                        return; // stop further processing for this room
                     }
-                    // Case 2: A regular participant left.
                     // console.log(`Participant ${username} (${socket.id}) left room ${roomId}.`);
-                    rooms[roomId].participants = rooms[roomId].participants.filter(p => p.id !== socket.id);
+                    rooms[roomId].participants = rooms[roomId].participants.filter(p => p.id !== socket.id); // case 2: regular participant left
                     updateParticipants(roomId);
                     broadcastUserEvent(roomId, `${username} left`);
                 } else { // participant is no longer in list with old ID
