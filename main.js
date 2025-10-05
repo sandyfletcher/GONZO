@@ -17,6 +17,7 @@ socket.on('connect', () => { // if on a room page, join room — handles both in
         }
     }
 });
+
 function getUsernameColor(str) { //  use HSL to parse a colour from username string
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -25,6 +26,7 @@ function getUsernameColor(str) { //  use HSL to parse a colour from username str
     const hue = hash % 360; // get hue value 0 to 360
     return `hsl(${hue}, 80%, 55%)`; // fixed saturation/lightness for readability
 }
+
 function getEmojiForUser(username) { // use a simple hash to deterministically assign an emoji
     let hash = 0;
     for (let i = 0; i < username.length; i++) {
@@ -34,21 +36,41 @@ function getEmojiForUser(username) { // use a simple hash to deterministically a
     return PARTICIPANT_EMOJIS[index];
 }
 
-// --- PAGE SETUP ---
+// --- PAGE INITIALIZATION & ROUTING ---
 
-document.addEventListener('DOMContentLoaded', () => { 
-    if (document.getElementById('start-btn')) { // route to correct setup function based on page content
+document.addEventListener('DOMContentLoaded', () => {
+    const roomId = window.location.hash.substring(1);
+    if (roomId) { // user is loading a room link directly — replace landing page content with room content
+        loadRoomContent(roomId);
+    } else { // user is loading landing page
         setupIndexPage();
-    } else if (document.querySelector('.room')) {
-        setupRoomPage();
     }
 });
 
-// ADDED: Listen for the pageshow event to handle bfcache restores
-window.addEventListener('pageshow', (event) => {
-    // The 'persisted' property is true if the page was restored from the cache
+async function loadRoomContent(roomId) {
+    try {
+        const response = await fetch('room.html');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const htmlText = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+        const roomContent = doc.querySelector('.room.terminal-box');
+        const landingContent = document.querySelector('.landing.terminal-box');
+        if (roomContent && landingContent) {
+            landingContent.replaceWith(roomContent); // replace content without animation for direct loads
+            setupRoomPage(); // now that DOM is ready, set up room functionality
+        } else {
+            console.error('Could not find necessary content to initialize room page.');
+        }
+    } catch (error) {
+        console.error('Failed to load room content:', error);
+        alert('Could not load the room. Please try again.');
+        window.location.hash = ''; // clear hash to avoid a loop
+    }
+}
+
+window.addEventListener('pageshow', (event) => { // listen for the pageshow event to handle bfcache restores
     if (event.persisted) {
-        // If we are on the index page, reset the button state
         const startButton = document.getElementById('start-btn');
         if (startButton) {
             resetStartButtonState(startButton);
@@ -64,16 +86,17 @@ function resetStartButtonState(button) {
 
 function setupIndexPage() {
     const startButton = document.getElementById('start-btn');
-    resetStartButtonState(startButton); // Ensure button is in correct state on initial load
+    if (!startButton) return; // guard
+    resetStartButtonState(startButton);
     startButton.addEventListener('click', (e) => {
         e.preventDefault();
         startButton.disabled = true;
         startButton.textContent = '> CONNECTING...';
         startButton.classList.add('is-loading');
-        // console.log("Requesting a new room from server...");
         socket.emit('create_room');
     });
 }
+
 function setupRoomPage() {
     const roomId = window.location.hash.substring(1);
     const ui = { // cache relevant DOM elements into single object
@@ -92,30 +115,30 @@ function setupRoomPage() {
     initializeRoomUI(roomId, ui);
     setupMessageForm(roomId, ui);
     socket.on('update_participants', (participants) => {
-        // console.log('Updating participants:', participants);
-        const memberList = ui.memberList; // use cached element
-        if (!memberList) return; // safety check
-        memberList.innerHTML = ''; // reset state completely before checking
+        const memberList = ui.memberList;
+        if (!memberList) return;
+        memberList.innerHTML = '';
         memberList.classList.remove('two-columns', 'is-scrollable');
-        participants.forEach((p, index) => { // populate list with new participants
+        participants.forEach((p) => {
             const li = document.createElement('li');
-            let prefix = (index === 0) ? '👑 ' : getEmojiForUser(p.username) + ' '; // owner is at [0]
+            let prefix = p.isOwner ? '👑 ' : getEmojiForUser(p.username) + ' ';
             if (p.id === socket.id) {
                 li.classList.add('is-me');
             }
             li.textContent = `${prefix}${p.username}`;
             memberList.appendChild(li);
         });
-        if (memberList.scrollHeight > memberList.clientHeight) { // two-step overflow check: does content overflow in a single column?
-            memberList.classList.add('two-columns'); // if yes, switch to two
-            if (memberList.scrollHeight > memberList.clientHeight) { // after switching, does it overflow?
-                memberList.classList.add('is-scrollable'); // if yes, allow scrolling
+        if (memberList.scrollHeight > memberList.clientHeight) {
+            memberList.classList.add('two-columns');
+            if (memberList.scrollHeight > memberList.clientHeight) {
+                memberList.classList.add('is-scrollable');
             }
         }
     });
+    joinRoom(roomId); // join room now that UI is set up
 }
 
-// --- ROOM PAGE ---
+// --- ROOM PAGE HELPERS ---
 
 function scrollToBottom() {
     const messagesContainer = document.querySelector('.messages');
@@ -123,6 +146,7 @@ function scrollToBottom() {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 }
+
 function addMessageToDOM(element) {
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer || !element) return;
@@ -130,33 +154,35 @@ function addMessageToDOM(element) {
     pruneOldMessages();
     scrollToBottom();
 }
-function showCopyConfirmation(element) { // visual feedback on copy
+
+function showCopyConfirmation(element) {
     element.classList.add('copied');
     setTimeout(() => {
         element.classList.remove('copied');
     }, 1500);
 }
-function initializeRoomUI(roomId, ui) { //  set up click-to-copy functionality
+
+function initializeRoomUI(roomId, ui) {
     document.title = `caecus — [${roomId.substring(0, 6)}]`;
     const roomUrl = window.location.href;
     const linkEl = ui.roomLinkElement;
-    if (linkEl) { // check for element existence
+    if (linkEl) {
         linkEl.textContent = `Room: ${roomId.substring(0, 8)}...`;
-        linkEl.addEventListener('click', () => { // click to copy text link
+        linkEl.addEventListener('click', () => {
             navigator.clipboard.writeText(roomUrl).then(() => {
                 showCopyConfirmation(linkEl);
             }).catch(err => console.error('Failed to copy text: ', err));
         });
     }
-    const qrElement = ui.qrElement; // Use the singular property name
-    if (qrElement) { // Check if the single element exists
-        qrElement.innerHTML = ''; // clear placeholder
+    const qrElement = ui.qrElement;
+    if (qrElement) {
+        qrElement.innerHTML = '';
         const qr = qrcode(0, 'L');
         qr.addData(roomUrl);
         qr.make();
         qrElement.innerHTML = qr.createImgTag(4, 4);
         const qrImg = qrElement.querySelector('img');
-        qrElement.addEventListener('click', () => { // click to copy QR image
+        qrElement.addEventListener('click', () => {
             if (!qrImg || !navigator.clipboard.write) {
                 alert('Image copy not supported in this browser.');
                 return;
@@ -174,6 +200,7 @@ function initializeRoomUI(roomId, ui) { //  set up click-to-copy functionality
         });
     }
 }
+
 function setupMessageForm(roomId, ui) {
     ui.messageForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -185,10 +212,10 @@ function setupMessageForm(roomId, ui) {
         ui.messageInput.focus();
     });
 }
+
 function joinRoom(roomId) {
-    const participantToken = sessionStorage.getItem('participantToken-' + roomId); // read participant token
-    // console.log(`Attempting to join room ${roomId} with token: ${participantToken}`);
-    socket.emit('join_room', { roomId, participantToken }); // send token to server
+    const participantToken = sessionStorage.getItem('participantToken-' + roomId);
+    socket.emit('join_room', { roomId, participantToken });
 }
 
 // --- RENDERING ---
@@ -196,15 +223,16 @@ function joinRoom(roomId) {
 function pruneOldMessages() {
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
-    while (messagesContainer.childElementCount > MAX_DISPLAYED_MESSAGES) { // if greater than limit, remove oldest one / first child
+    while (messagesContainer.childElementCount > MAX_DISPLAYED_MESSAGES) {
         if (messagesContainer.firstChild) {
             messagesContainer.removeChild(messagesContainer.firstChild);
         }
     }
 }
-function renderUserMessage(data) { // returns element instead of adding it to DOM
+
+function renderUserMessage(data) {
     const messageElement = document.createElement('p');
-    if (data.sender.id === lastMessageSenderId) { // check if sender is same as last one
+    if (data.sender.id === lastMessageSenderId) {
         messageElement.classList.add('consecutive-message');
     }
     const sender = data.sender;
@@ -213,48 +241,70 @@ function renderUserMessage(data) { // returns element instead of adding it to DO
     const usernameSpan = document.createElement('span');
     usernameSpan.style.color = userColor;
     usernameSpan.textContent = sender.username;
-    usernameStrong.appendChild(document.createTextNode('<')); // explicitly create text nodes for characters that could be interpreted as HTML
+    usernameStrong.appendChild(document.createTextNode('<'));
     usernameStrong.appendChild(usernameSpan);
     usernameStrong.appendChild(document.createTextNode('>'));
     const messageText = document.createTextNode(` ${data.message}`);
     messageElement.appendChild(usernameStrong);
     messageElement.appendChild(messageText);
-    lastMessageSenderId = data.sender.id; // update last sender ID
+    lastMessageSenderId = data.sender.id;
     return messageElement;
 }
-function renderEventMessage(data) { // This function now returns the element instead of adding it to the DOM
+
+function renderEventMessage(data) {
     const eventElement = document.createElement('p');
     eventElement.classList.add('event-message');
     eventElement.textContent = data.text;
-    lastMessageSenderId = null; // event message breaks chain of consecutive user messages
+    lastMessageSenderId = null;
     return eventElement;
+}
+
+// --- PAGE TRANSITION ---
+
+async function transitionToRoom(roomId) {
+    try {
+        const response = await fetch('room.html');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const htmlText = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+        const roomContent = doc.querySelector('.room.terminal-box');
+        const landingContent = document.querySelector('.landing.terminal-box');
+        if (landingContent && roomContent) {
+            landingContent.style.animation = 'slide-out-left 0.6s ease-out forwards'; // animate out old content
+            setTimeout(() => { // after animation, replace content and set up new page
+                landingContent.replaceWith(roomContent);
+                const newUrl = `#${roomId}`; // update URL without full reload — `replaceState` is used so user can't click "back" to non-existent "creating room" state
+                window.history.replaceState({path: newUrl}, '', newUrl);
+                setupRoomPage(); // initialize the logic for newly added room content
+            }, 600); // must match animation duration in CSS
+        }
+    } catch (error) {
+        console.error('Failed to transition to room:', error);
+        alert('An error occurred while creating the room.');
+        const startButton = document.getElementById('start-btn'); // reset button state if transition fails
+        if (startButton) resetStartButtonState(startButton);
+    }
 }
 
 // --- SOCKET EVENT LISTENERS ---
 
 socket.on('room_created', (payload) => {
     const { roomId, token } = payload;
-    // console.log(`Server created room. ID: ${roomId}`);
-    // 1. Add the shutdown class to the body to trigger the CSS animation
-    document.body.classList.add('is-shutting-down');
-    // 2. Wait for the animation to finish (600ms = 0.6s) before navigating
-    setTimeout(() => {
-        // These two lines are the original logic, now delayed
-        sessionStorage.setItem('participantToken-' + roomId, token);
-        window.location.href = `room.html#${roomId}`;
-    }, 600); 
+    sessionStorage.setItem('participantToken-' + roomId, token);
+    transitionToRoom(roomId);
 });
+
 socket.on('load_history', (payload) => {
-    const { history, token } = payload; // destructure payload to get history and token
+    const { history, token } = payload;
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
     const roomId = window.location.hash.substring(1);
-    if (token) { // if we received a token, store it securely in sessionStorage
-        // console.log(`Received and stored participant token for room ${roomId}.`);
+    if (token) {
         sessionStorage.setItem('participantToken-' + roomId, token);
     }
-    messagesContainer.innerHTML = ''; // clear placeholder text
-    lastMessageSenderId = null; // reset for history load
+    messagesContainer.innerHTML = '';
+    lastMessageSenderId = null;
     history.forEach(item => {
         let element;
         if (item.type === 'message') {
@@ -266,28 +316,26 @@ socket.on('load_history', (payload) => {
             messagesContainer.appendChild(element);
         }
     });
-    scrollToBottom(); // scroll once after loading all history
+    scrollToBottom();
 });
+
 socket.on('user_event', (data) => {
-    // 1. Render the element just like before
     const element = renderEventMessage(data); 
-    // 2. Add our new animation class
     element.classList.add('animate-in');
-    // 3. Add the element to the DOM
     addMessageToDOM(element);
 });
+
 socket.on('receive_message', (data) => {
-    // 1. Render the element
     const element = renderUserMessage(data);
-    // 2. Add our new animation class
     element.classList.add('animate-in');
-    // 3. Add the element to the DOM
     addMessageToDOM(element);
 });
+
 socket.on('room_closed', (message) => {
     alert(message);
     window.location.href = 'index.html';
 });
+
 socket.on('join_error', (message) => {
     alert(message);
     window.location.href = 'index.html';

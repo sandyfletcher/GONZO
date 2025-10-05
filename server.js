@@ -191,7 +191,7 @@ function handleDisconnect(socket) {
                     // Case 1: The owner left. Close the room.
                     if (rooms[roomId].owner === socket.id) {
                         // console.log(`Owner ${username} (${socket.id}) of room ${roomId} did not reconnect. Closing room.`);
-                        io.to(roomId).emit('room_closed', 'The host has left the room.');
+                        io.to(roomId).emit('room_closed', 'Host has left the room; connection terminated.');
                         delete rooms[roomId];
                         return; // Stop further processing for this room
                     }

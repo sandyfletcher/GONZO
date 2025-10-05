@@ -2,15 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>caecus — [UUID]</title>
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <div class="room terminal-box">
+    <div class="room terminal-box"> <!-- main.js extracts only this div -->
         <aside class="info-wrapper">
             <div class="share-panel">
                 <div class="share-info">
@@ -34,6 +30,5 @@
             </form>
         </main>
     </div>
-    <script src="main.js" defer></script>
 </body>
 </html>
