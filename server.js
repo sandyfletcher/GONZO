@@ -126,7 +126,14 @@ function handleJoinRoom(socket, data) {
     }
     const isAlreadyInRoom = room.participants.some(p => p.id === socket.id);
     if (isAlreadyInRoom) {
-        return; // Silently ignore the redundant request.
+        // This happens for the room creator's initial "join" after creating the room.
+        // Instead of ignoring it, we must send them the history so their UI initializes correctly.
+        const participant = room.participants.find(p => p.id === socket.id);
+        socket.emit('load_history', {
+            history: room.messageHistory,
+            token: participant ? participant.token : null // Send them back their token
+        });
+        return; // Stop further execution
     }
     socket.join(roomId);
     let username;
