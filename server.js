@@ -58,7 +58,12 @@ setInterval(() => { // check all rooms once every minute
 
 const updateParticipants = (roomId) => {
     if (rooms[roomId]) {
-        io.to(roomId).emit('update_participants', rooms[roomId].participants);
+        const room = rooms[roomId];
+        const participantsWithOwnership = room.participants.map(p => ({
+            ...p, // copy existing participant properties (id, username, token)
+            isOwner: p.id === room.owner // add the new property
+        }));
+        io.to(roomId).emit('update_participants', participantsWithOwnership);
     }
 };
 const addToHistory = (roomId, type, data) => {
@@ -118,6 +123,10 @@ function handleJoinRoom(socket, data) {
     const room = rooms[roomId];
     if (!room) {
         return socket.emit('join_error', 'This room does not exist.');
+    }
+    const isAlreadyInRoom = room.participants.some(p => p.id === socket.id);
+    if (isAlreadyInRoom) {
+        return; // Silently ignore the redundant request.
     }
     socket.join(roomId);
     let username;

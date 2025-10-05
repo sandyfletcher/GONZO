@@ -1,6 +1,8 @@
 const MAX_DISPLAYED_MESSAGES = 10; // corresponds to MAX_HISTORY on the server
 let lastMessageSenderId = null;
+// Connect to the server. This connection should persist across "page" transitions.
 const socket = io("https://fastchat-0opj.onrender.com/");
+
 const PARTICIPANT_EMOJIS = [
     '👾', '👽', '🤖', '👻', '🎃', '🤡', '🐸', '🐙', '🦖', '🦋', '🚀', '🛰️', '🔭', '🛸', '☄️',
     '🐉', '👹', '👺', '🦄', '🐲', '🧟', '🧛', '🧙', '🧜', '🧞', '🧚', '🗿', '💎', '🔮', '🧿',
@@ -8,69 +10,74 @@ const PARTICIPANT_EMOJIS = [
     '⚙️', '⚛️', '☣️', '☢️', '🌀'
 ];
 
-socket.on('connect', () => { // if on a room page, join room — handles both initial connection and any subsequent reconnections
-    // console.log("Connected to server as", socket.id); 
-    if (document.querySelector('.room')) {
-        const roomId = window.location.hash.substring(1);
-        if (roomId) {
-            joinRoom(roomId);
-        }
-    }
-});
-
-function getUsernameColor(str) { //  use HSL to parse a colour from username string
+// --- HELPER FUNCTIONS ---
+function getUsernameColor(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const hue = hash % 360; // get hue value 0 to 360
-    return `hsl(${hue}, 80%, 55%)`; // fixed saturation/lightness for readability
+    const hue = hash % 360;
+    return `hsl(${hue}, 80%, 55%)`;
 }
 
-function getEmojiForUser(username) { // use a simple hash to deterministically assign an emoji
+function getEmojiForUser(username) {
     let hash = 0;
     for (let i = 0; i < username.length; i++) {
         hash = username.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const index = Math.abs(hash) % PARTICIPANT_EMOJIS.length; // ensure index is non-negative
+    const index = Math.abs(hash) % PARTICIPANT_EMOJIS.length;
     return PARTICIPANT_EMOJIS[index];
 }
 
 // --- PAGE INITIALIZATION & ROUTING ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    const roomId = window.location.hash.substring(1);
-    if (roomId) { // user is loading a room link directly — replace landing page content with room content
-        loadRoomContent(roomId);
-    } else { // user is loading landing page
+    const roomIdFromHash = window.location.hash.substring(1);
+    if (roomIdFromHash) {
+        // User is loading a room link directly.
+        // We must dynamically load room content and set up its logic.
+        loadRoomContentAndSetup(roomIdFromHash);
+    } else {
+        // User is loading the landing page.
         setupIndexPage();
     }
 });
 
-async function loadRoomContent(roomId) {
+// This function loads the room HTML and then sets up the room's specific JS logic.
+async function loadRoomContentAndSetup(roomId) {
     try {
         const response = await fetch('room.html');
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const htmlText = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlText, 'text/html');
         const roomContent = doc.querySelector('.room.terminal-box');
         const landingContent = document.querySelector('.landing.terminal-box');
+
         if (roomContent && landingContent) {
-            landingContent.replaceWith(roomContent); // replace content without animation for direct loads
-            setupRoomPage(); // now that DOM is ready, set up room functionality
+            // Replace landing page content with room content directly (no animation on initial load)
+            landingContent.replaceWith(roomContent);
+
+            // *** THE FIX: ***
+            // After content is replaced, call the setup function for the room page.
+            setupRoomPage();
+
         } else {
             console.error('Could not find necessary content to initialize room page.');
+            window.location.href = 'index.html';
         }
     } catch (error) {
         console.error('Failed to load room content:', error);
         alert('Could not load the room. Please try again.');
-        window.location.hash = ''; // clear hash to avoid a loop
+        window.location.href = 'index.html'; // Redirect to index on error
     }
 }
 
-window.addEventListener('pageshow', (event) => { // listen for the pageshow event to handle bfcache restores
+
+// Listen for the pageshow event to handle bfcache restores (for the landing page button)
+window.addEventListener('pageshow', (event) => {
     if (event.persisted) {
+        // If the page was restored from bfcache, ensure the landing page button is reset.
         const startButton = document.getElementById('start-btn');
         if (startButton) {
             resetStartButtonState(startButton);
@@ -86,7 +93,7 @@ function resetStartButtonState(button) {
 
 function setupIndexPage() {
     const startButton = document.getElementById('start-btn');
-    if (!startButton) return; // guard
+    if (!startButton) return; // Guard if this function is called on room page
     resetStartButtonState(startButton);
     startButton.addEventListener('click', (e) => {
         e.preventDefault();
@@ -97,9 +104,16 @@ function setupIndexPage() {
     });
 }
 
+// This function initializes all the room-specific UI and event listeners.
 function setupRoomPage() {
     const roomId = window.location.hash.substring(1);
-    const ui = { // cache relevant DOM elements into single object
+    if (!roomId) { // Should not happen if loadRoomContentAndSetup is called correctly
+        console.error("setupRoomPage called without a roomId in hash.");
+        window.location.href = 'index.html';
+        return;
+    }
+
+    const ui = {
         messagesContainer: document.querySelector('.messages'),
         messageForm: document.getElementById('message-form'),
         messageInput: document.getElementById('message-form').querySelector('input'),
@@ -107,35 +121,22 @@ function setupRoomPage() {
         qrElement: document.querySelector('.qr-code'),
         memberList: document.querySelector('.member-list'),
     };
-    if (!roomId) {
-        ui.messagesContainer.innerHTML = '<p>ERROR: No room ID specified. Start a new room.</p>';
-        ui.messageForm.style.display = 'none';
-        return; // stop execution
+
+    // Guard against missing elements that might occur if room.html is malformed
+    if (!ui.messagesContainer || !ui.messageForm || !ui.roomLinkElement || !ui.qrElement || !ui.memberList) {
+        console.error("One or more required room page elements not found.");
+        alert("Error loading room details.");
+        window.location.href = 'index.html';
+        return;
     }
+
     initializeRoomUI(roomId, ui);
     setupMessageForm(roomId, ui);
-    socket.on('update_participants', (participants) => {
-        const memberList = ui.memberList;
-        if (!memberList) return;
-        memberList.innerHTML = '';
-        memberList.classList.remove('two-columns', 'is-scrollable');
-        participants.forEach((p) => {
-            const li = document.createElement('li');
-            let prefix = p.isOwner ? '👑 ' : getEmojiForUser(p.username) + ' ';
-            if (p.id === socket.id) {
-                li.classList.add('is-me');
-            }
-            li.textContent = `${prefix}${p.username}`;
-            memberList.appendChild(li);
-        });
-        if (memberList.scrollHeight > memberList.clientHeight) {
-            memberList.classList.add('two-columns');
-            if (memberList.scrollHeight > memberList.clientHeight) {
-                memberList.classList.add('is-scrollable');
-            }
-        }
-    });
-    joinRoom(roomId); // join room now that UI is set up
+    
+    // *** CRITICAL FIX ***
+    // Now that the room page elements are set up, we need to tell the server
+    // that this client wants to join this room.
+    joinRoom(roomId);
 }
 
 // --- ROOM PAGE HELPERS ---
@@ -164,41 +165,40 @@ function showCopyConfirmation(element) {
 
 function initializeRoomUI(roomId, ui) {
     document.title = `caecus — [${roomId.substring(0, 6)}]`;
-    const roomUrl = window.location.href;
+    const roomUrl = `${window.location.origin}${window.location.pathname}#${roomId}`; // Construct full URL
+
     const linkEl = ui.roomLinkElement;
-    if (linkEl) {
-        linkEl.textContent = `Room: ${roomId.substring(0, 8)}...`;
-        linkEl.addEventListener('click', () => {
-            navigator.clipboard.writeText(roomUrl).then(() => {
-                showCopyConfirmation(linkEl);
-            }).catch(err => console.error('Failed to copy text: ', err));
-        });
-    }
+    linkEl.textContent = `Room: ${roomId.substring(0, 8)}...`;
+    linkEl.addEventListener('click', () => {
+        navigator.clipboard.writeText(roomUrl).then(() => {
+            showCopyConfirmation(linkEl);
+        }).catch(err => console.error('Failed to copy text: ', err));
+    });
+
     const qrElement = ui.qrElement;
-    if (qrElement) {
-        qrElement.innerHTML = '';
-        const qr = qrcode(0, 'L');
-        qr.addData(roomUrl);
-        qr.make();
-        qrElement.innerHTML = qr.createImgTag(4, 4);
-        const qrImg = qrElement.querySelector('img');
-        qrElement.addEventListener('click', () => {
-            if (!qrImg || !navigator.clipboard.write) {
-                alert('Image copy not supported in this browser.');
-                return;
-            }
-            const canvas = document.createElement('canvas');
-            canvas.width = qrImg.width;
-            canvas.height = qrImg.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(qrImg, 0, 0);
-            canvas.toBlob((blob) => {
-                navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-                .then(() => showCopyConfirmation(qrElement))
-                .catch(err => console.error('Failed to copy image: ', err));
-            }, 'image/png');
-        });
-    }
+    qrElement.innerHTML = ''; // Clear placeholder
+    const qr = qrcode(0, 'L');
+    qr.addData(roomUrl);
+    qr.make();
+    qrElement.innerHTML = qr.createImgTag(4, 4);
+    const qrImg = qrElement.querySelector('img');
+
+    qrElement.addEventListener('click', () => {
+        if (!qrImg || !navigator.clipboard.write) {
+            alert('Image copy not supported in this browser.');
+            return;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = qrImg.width;
+        canvas.height = qrImg.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(qrImg, 0, 0);
+        canvas.toBlob((blob) => {
+            navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+            .then(() => showCopyConfirmation(qrElement))
+            .catch(err => console.error('Failed to copy image: ', err));
+        }, 'image/png');
+    });
 }
 
 function setupMessageForm(roomId, ui) {
@@ -214,7 +214,10 @@ function setupMessageForm(roomId, ui) {
 }
 
 function joinRoom(roomId) {
+    // Retrieve the participant token from sessionStorage. This is crucial for rejoining a room
+    // or for the server to recognize the user across socket reconnections.
     const participantToken = sessionStorage.getItem('participantToken-' + roomId);
+    console.log(`Attempting to join room ${roomId} with token: ${participantToken}`);
     socket.emit('join_room', { roomId, participantToken });
 }
 
@@ -255,43 +258,84 @@ function renderEventMessage(data) {
     const eventElement = document.createElement('p');
     eventElement.classList.add('event-message');
     eventElement.textContent = data.text;
-    lastMessageSenderId = null;
+    lastMessageSenderId = null; // Event message breaks the chain of consecutive messages
     return eventElement;
 }
 
 // --- PAGE TRANSITION ---
 
+// in main.js
+
 async function transitionToRoom(roomId) {
     try {
         const response = await fetch('room.html');
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const htmlText = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlText, 'text/html');
         const roomContent = doc.querySelector('.room.terminal-box');
         const landingContent = document.querySelector('.landing.terminal-box');
+
         if (landingContent && roomContent) {
-            landingContent.style.animation = 'slide-out-left 0.6s ease-out forwards'; // animate out old content
-            setTimeout(() => { // after animation, replace content and set up new page
+            // Animate out the old content
+            landingContent.style.animation = 'slide-out-left 0.6s ease-out forwards';
+            
+            // After the animation, replace content and set up the new page
+            setTimeout(() => {
                 landingContent.replaceWith(roomContent);
-                const newUrl = `#${roomId}`; // update URL without full reload — `replaceState` is used so user can't click "back" to non-existent "creating room" state
+                // Update URL without a full reload. `replaceState` is used so the user can't
+                // click "back" to the non-existent "creating room" state.
+                const newUrl = `#${roomId}`; // Use fragment identifier for room ID
                 window.history.replaceState({path: newUrl}, '', newUrl);
-                setupRoomPage(); // initialize the logic for newly added room content
-            }, 600); // must match animation duration in CSS
+                
+                // *** THE FIX: ***
+                // After the DOM is updated with room content, call the setup function 
+                // to attach event listeners and join the room.
+                setupRoomPage();
+                
+            }, 600); // Must match animation duration in CSS for slide-out-left
+        } else {
+            console.error("Failed to find landing or room content during transition.");
+            alert("An error occurred during room transition.");
+            const startButton = document.getElementById('start-btn');
+            if (startButton) resetStartButtonState(startButton);
         }
     } catch (error) {
         console.error('Failed to transition to room:', error);
         alert('An error occurred while creating the room.');
-        const startButton = document.getElementById('start-btn'); // reset button state if transition fails
+        const startButton = document.getElementById('start-btn');
         if (startButton) resetStartButtonState(startButton);
     }
 }
 
 // --- SOCKET EVENT LISTENERS ---
 
+// This listener needs to be at the top level so it's active when the socket connects.
+socket.on('connect', () => {
+    console.log("Socket connected. ID:", socket.id);
+    // If we've landed directly on a room page (e.g., via a shared link),
+    // we need to ensure we join the room. This handler covers that.
+    const roomId = window.location.hash.substring(1);
+    if (roomId) {
+        // We only join if the room page's setup has already run and called joinRoom.
+        // If it hasn't (e.g., direct URL load), this will trigger it.
+        // We might need a flag to prevent duplicate joins if setupRoomPage runs first.
+        // For now, let's assume `joinRoom` handles rejoining gracefully.
+        if (!document.querySelector('.room.terminal-box')) {
+             // If we are on the landing page but a room ID is in the hash,
+             // this means we need to transition to the room page.
+             loadRoomContentAndSetup(roomId);
+        } else {
+             // If we are already on the room page and reconnected, ensure we are joined.
+             // `setupRoomPage` will call `joinRoom`, but this ensures a re-connection also tries to join.
+             joinRoom(roomId);
+        }
+    }
+});
+
 socket.on('room_created', (payload) => {
     const { roomId, token } = payload;
-    sessionStorage.setItem('participantToken-' + roomId, token);
+    sessionStorage.setItem('participantToken-' + roomId, token); // Store token for future sessions/reconnects
     transitionToRoom(roomId);
 });
 
@@ -300,11 +344,14 @@ socket.on('load_history', (payload) => {
     const messagesContainer = document.querySelector('.messages');
     if (!messagesContainer) return;
     const roomId = window.location.hash.substring(1);
-    if (token) {
+
+    if (token) { // If a new token was generated (e.g., first join or reconnect with old token)
         sessionStorage.setItem('participantToken-' + roomId, token);
     }
-    messagesContainer.innerHTML = '';
-    lastMessageSenderId = null;
+
+    messagesContainer.innerHTML = ''; // Clear placeholder
+    lastMessageSenderId = null; // Reset for history load
+
     history.forEach(item => {
         let element;
         if (item.type === 'message') {
@@ -316,11 +363,37 @@ socket.on('load_history', (payload) => {
             messagesContainer.appendChild(element);
         }
     });
-    scrollToBottom();
+    scrollToBottom(); // Scroll to bottom once history is loaded
+});
+
+socket.on('update_participants', (participants) => {
+    const memberList = document.querySelector('.member-list');
+    if (!memberList) return;
+
+    memberList.innerHTML = ''; // Clear previous list
+    memberList.classList.remove('two-columns', 'is-scrollable');
+
+    participants.forEach((p) => {
+        const li = document.createElement('li');
+        let prefix = p.isOwner ? '👑 ' : getEmojiForUser(p.username) + ' ';
+        if (p.id === socket.id) {
+            li.classList.add('is-me');
+        }
+        li.textContent = `${prefix}${p.username}`;
+        memberList.appendChild(li);
+    });
+
+    // Adjust columns and scrollability based on content
+    if (memberList.scrollHeight > memberList.clientHeight) {
+        memberList.classList.add('two-columns');
+        if (memberList.scrollHeight > memberList.clientHeight) {
+            memberList.classList.add('is-scrollable');
+        }
+    }
 });
 
 socket.on('user_event', (data) => {
-    const element = renderEventMessage(data); 
+    const element = renderEventMessage(data);
     element.classList.add('animate-in');
     addMessageToDOM(element);
 });
@@ -333,10 +406,12 @@ socket.on('receive_message', (data) => {
 
 socket.on('room_closed', (message) => {
     alert(message);
+    // When a room is closed, we want to go back to the landing page.
     window.location.href = 'index.html';
 });
 
 socket.on('join_error', (message) => {
     alert(message);
+    // If joining a room fails, go back to the landing page.
     window.location.href = 'index.html';
 });
