@@ -85,6 +85,13 @@ const broadcastUserEvent = (roomId, text) => { // broadcast a user event (join/l
 // EVENT HANDLERS
 
 function handleCreateRoom(socket) {
+    // add a global room limit
+    const MAX_ROOMS = 1000; // Choose a reasonable number for your server's memory
+    if (Object.keys(rooms).length >= MAX_ROOMS) {
+        socket.emit('create_error', 'Server is currently at full capacity. Please try again later.');
+        console.log('Max room limit reached. Denying new room creation.');
+        return;
+    }
     const clientIp = socket.handshake.address;
     const ipCount = createRoomIPs.get(clientIp) || 0;
     if (ipCount >= CREATE_ROOM_LIMIT) {
@@ -216,7 +223,7 @@ function handleDisconnect(socket) {
                 } else { // participant is no longer in list with old ID
                     // console.log(`Participant ${username} (${socket.id}) reconnected successfully with a new ID.`);
                 }
-            }, 3000); // 3-second grace period
+            }, 10000); // 10-second grace period
             break; // found room, no need to check others
         }
     }

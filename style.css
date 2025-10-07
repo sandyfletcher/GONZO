@@ -190,6 +190,8 @@ a:hover {
     flex-direction: column;
     flex: 0 0 10rem;
     border-right: 1px solid var(--border-color);
+    -webkit-user-select: none; /* unselectable on safari, chrome on mobile */
+    user-select: none; /* standard */
 }
 .share-panel {
     padding: 0.8rem;
