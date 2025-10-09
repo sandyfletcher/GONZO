@@ -256,7 +256,6 @@ a:hover {
     box-shadow: inset 0 0 0 2px var(--terminal-fg);
     position: relative;
     outline: 2px solid var(--terminal-fg);
-    position: relative;
 }
 .share-info .btn {
     font-size: 0.5rem;

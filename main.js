@@ -291,6 +291,7 @@ socket.on('load_history', (payload) => {
             ui.messagesContainer.appendChild(element);
         }
     });
+    pruneOldMessages(ui);
     scrollToBottom(ui);
 });
 

@@ -95,11 +95,12 @@ function handleCreateRoom(socket) {
         console.log('Max room limit reached. Denying new room creation.');
         return;
     }
-        const clientIp = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
+    const clientIp = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
     const ipCount = createRoomIPs.get(clientIp) || 0;
     if (ipCount >= CREATE_ROOM_LIMIT) {
         console.log(`Rate limit exceeded for IP: ${clientIp}`);
-        return; // stop execution
+        socket.emit('create_error', "You're creating rooms too quickly. Please wait a moment.");
+        return;
     }
     createRoomIPs.set(clientIp, ipCount + 1);
     const roomId = uuidv4();
@@ -227,7 +228,7 @@ function handleDisconnect(socket) {
                     // console.log(`Participant ${username} (${socket.id}) reconnected successfully with a new ID.`);
                 }
             }, 10000); // 10-second grace period
-            break; // found room, no need to check others
+            return; // use return to exit function once room is found
         }
     }
 }
