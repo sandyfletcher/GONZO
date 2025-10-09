@@ -384,6 +384,40 @@ a:hover {
     color: var(--terminal-bg);
 }
 
+/* --- MODAL --- */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: content-fade-in 0.3s ease-out; /* Use existing fade-in */
+}
+.modal-overlay.is-visible {
+    display: flex; /* Shown when active */
+}
+.modal-box {
+    padding: 2rem;
+    max-width: 90%;
+    width: 30rem;
+    text-align: center;
+    /* Inherits .terminal-box border, bg, etc. */
+}
+.modal-message {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+.modal-btn {
+    max-width: 8rem;
+}
+
 /* --- ANIMATIONS --- */
 
 @keyframes blink {

@@ -7,7 +7,7 @@
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/assets/favicon.ico?v=1.1" type="image/x-icon">
 </head>
 <body>
     <div class="landing terminal-box">
@@ -16,9 +16,15 @@
         <ul class="feature-list">
             <li>no accounts, no tracking, no logging</li>
             <li>rooms self-destruct when the host leaves</li>
-            <li>open-source, check the <a href="https://github.com/sandyfletcher/GONZO" target="_blank">README</a> for info</li>
+            <li>open-source, check the <a href="https://github.com/sandyfletcher/caecus" target="_blank">README</a> for info</li>
         </ul>
         <button class="btn" id="start-btn">> START ROOM</button>
+    </div>
+    <div class="modal-overlay">
+        <div class="modal-box terminal-box">
+            <p class="modal-message"></p>
+            <button class="btn modal-btn">> OK</button>
+        </div>
     </div>
     <script src="main.js" defer></script>
 </body>

@@ -7,7 +7,10 @@ const DOMPurify = require('dompurify')(new JSDOM('').window);
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: {
+    origin: ["https://caecus.ca", "https://www.caecus.ca"], // allow both root and www
+    methods: ["GET", "POST"]
+  }
 });
 app.use(express.static(__dirname)); // serve static files (HTML, CSS, JS, images) from current directory
 const rooms = {};
@@ -92,7 +95,7 @@ function handleCreateRoom(socket) {
         console.log('Max room limit reached. Denying new room creation.');
         return;
     }
-    const clientIp = socket.handshake.address;
+        const clientIp = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
     const ipCount = createRoomIPs.get(clientIp) || 0;
     if (ipCount >= CREATE_ROOM_LIMIT) {
         console.log(`Rate limit exceeded for IP: ${clientIp}`);

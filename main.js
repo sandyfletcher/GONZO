@@ -10,6 +10,7 @@ const PARTICIPANT_EMOJIS = [
 ];
 
 // --- HELPER FUNCTIONS ---
+
 function getUsernameColor(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -28,26 +29,45 @@ function getEmojiForUser(username) {
     return PARTICIPANT_EMOJIS[index];
 }
 
+function showModal(message, callback) { // modal to replace browser pop-ups
+    const overlay = document.querySelector('.modal-overlay');
+    const messageEl = document.querySelector('.modal-message');
+    const closeBtn = document.querySelector('.modal-btn');
+    if (!overlay || !messageEl || !closeBtn) {
+        console.error('Modal elements not found!');
+        alert(message); // fallback if modal HTML is missing
+        if (callback) callback();
+        return;
+    }
+    messageEl.textContent = message;
+    overlay.classList.add('is-visible');
+    const closeModal = () => {
+        overlay.classList.remove('is-visible');
+        closeBtn.removeEventListener('click', closeModal); // clean up event listener to prevent multiple firing
+        if (callback) {
+            callback();
+        }
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+}
+
 // --- PAGE INITIALIZATION & ROUTING ---
 
 document.addEventListener('DOMContentLoaded', () => {
     handleRouting();
 });
 
-// Central routing function to decide what to display
-function handleRouting() {
+function handleRouting() { // central routing function to decide what to display
     const roomId = window.location.hash.substring(1);
     if (roomId) {
-        // User is loading a room link directly.
-        loadRoomView(roomId, true); // true for initial load (no animation)
+        loadRoomView(roomId, true); // user loading room link directly — no animation
     } else {
-        // User is loading the landing page.
-        setupIndexPage();
+        setupIndexPage(); // user loading landing page
     }
 }
 
-// Single function to load and set up the room view
-async function loadRoomView(roomId, isInitialLoad = false) {
+async function loadRoomView(roomId, isInitialLoad = false) { // single function to load and set up the room view
     try {
         const response = await fetch('room.html');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -65,26 +85,24 @@ async function loadRoomView(roomId, isInitialLoad = false) {
             currentContent.replaceWith(roomContent);
             setupRoomPage(roomId);
         } else {
-            // Animate out the old content
-            currentContent.style.animation = 'slide-out-left 0.6s ease-out forwards';
-            
-            // After the animation, replace content and set up the new page
-            setTimeout(() => {
+            currentContent.style.animation = 'slide-out-left 0.6s ease-out forwards'; // animate out old content
+            setTimeout(() => { // after animation, replace content and set up new page
                 currentContent.replaceWith(roomContent);
                 const newUrl = `#${roomId}`;
                 window.history.replaceState({path: newUrl}, '', newUrl);
                 setupRoomPage(roomId);
-            }, 600); // Must match animation duration
+            }, 600); // must match animation duration
         }
     } catch (error) {
         console.error('Failed to load room view:', error);
-        alert('Could not load the room. Please try again.');
-        window.location.href = 'index.html';
+        showModal('Could not load the room. Please try again.', () => {
+            window.location.href = 'index.html';
+        });
     }
 }
 
 window.addEventListener('pageshow', (event) => {
-    if (event.persisted) { // Handle bfcache restores
+    if (event.persisted) { // handle bfcache restores
         const startButton = document.getElementById('start-btn');
         if (startButton) {
             resetStartButtonState(startButton);
@@ -111,8 +129,7 @@ function setupIndexPage() {
     });
 }
 
-// This function initializes all the room-specific UI and event listeners.
-function setupRoomPage(roomId) {
+function setupRoomPage(roomId) { // initializes all room-specific UI and event listeners
     const ui = {
         messagesContainer: document.querySelector('.messages'),
         messageForm: document.getElementById('message-form'),
@@ -121,27 +138,24 @@ function setupRoomPage(roomId) {
         qrElement: document.querySelector('.qr-code'),
         memberList: document.querySelector('.member-list'),
     };
-
     if (Object.values(ui).some(el => !el)) {
         console.error("One or more required room page elements not found.");
-        alert("Error loading room details.");
-        window.location.href = 'index.html';
+        showModal("Error loading room details. Returning to the main page.", () => {
+            window.location.href = 'index.html';
+        });
         return;
     }
-
     initializeRoomUI(roomId, ui);
     setupMessageForm(roomId, ui);
-    joinRoom(roomId); // Tell server we are ready
+    joinRoom(roomId); // tell server we're ready
 }
 
 // --- ROOM PAGE HELPERS ---
 
-// **MODIFIED:** Now accepts the `ui` object
-function scrollToBottom(ui) {
+function scrollToBottom(ui) { // accepts the `ui` object
     ui.messagesContainer.scrollTop = ui.messagesContainer.scrollHeight;
 }
 
-// **MODIFIED:** Now accepts the `ui` object
 function addMessageToDOM(ui, element) {
     ui.messagesContainer.appendChild(element);
     pruneOldMessages(ui);
@@ -158,24 +172,21 @@ function showCopyConfirmation(element) {
 function initializeRoomUI(roomId, ui) {
     document.title = `caecus — [${roomId.substring(0, 6)}]`;
     const roomUrl = `${window.location.origin}${window.location.pathname}#${roomId}`;
-
     ui.roomLinkElement.textContent = `Room: ${roomId.substring(0, 8)}...`;
     ui.roomLinkElement.addEventListener('click', () => {
         navigator.clipboard.writeText(roomUrl).then(() => {
             showCopyConfirmation(ui.roomLinkElement);
         }).catch(err => console.error('Failed to copy text: ', err));
     });
-
     ui.qrElement.innerHTML = '';
     const qr = qrcode(0, 'L');
     qr.addData(roomUrl);
     qr.make();
     ui.qrElement.innerHTML = qr.createImgTag(4, 4);
     const qrImg = ui.qrElement.querySelector('img');
-
     ui.qrElement.addEventListener('click', () => {
         if (!qrImg || !navigator.clipboard.write) {
-            alert('Image copy not supported in this browser.');
+            showModal('Image copy not supported in this browser.');
             return;
         }
         const canvas = document.createElement('canvas');
@@ -211,7 +222,6 @@ function joinRoom(roomId) {
 
 // --- RENDERING ---
 
-// **MODIFIED:** Now accepts the `ui` object
 function pruneOldMessages(ui) {
     while (ui.messagesContainer.childElementCount > MAX_DISPLAYED_MESSAGES) {
         if (ui.messagesContainer.firstChild) {
@@ -254,8 +264,7 @@ function renderEventMessage(data) {
 socket.on('connect', () => {
     console.log("Socket connected. ID:", socket.id);
     const roomId = window.location.hash.substring(1);
-    // If we are on a room page (or should be) and we reconnect, rejoin the room.
-    if (roomId) {
+    if (roomId) { // if we're on a room page (or should be) and we reconnect, rejoin the room.
         joinRoom(roomId);
     }
 });
@@ -268,17 +277,14 @@ socket.on('room_created', (payload) => {
 
 socket.on('load_history', (payload) => {
     const { history, token } = payload;
-    const ui = { messagesContainer: document.querySelector('.messages') }; // Quick query for this handler
+    const ui = { messagesContainer: document.querySelector('.messages') }; // query for this handler
     if (!ui.messagesContainer) return;
-
     const roomId = window.location.hash.substring(1);
     if (token) {
         sessionStorage.setItem('participantToken-' + roomId, token);
     }
-
-    ui.messagesContainer.innerHTML = ''; // Clear "Connecting..."
+    ui.messagesContainer.innerHTML = ''; // clear "Connecting..."
     lastMessageSenderId = null;
-
     history.forEach(item => {
         let element = (item.type === 'message') ? renderUserMessage(item.data) : renderEventMessage(item.data);
         if (element) {
@@ -291,10 +297,8 @@ socket.on('load_history', (payload) => {
 socket.on('update_participants', (participants) => {
     const memberList = document.querySelector('.member-list');
     if (!memberList) return;
-
     memberList.innerHTML = '';
     memberList.classList.remove('two-columns', 'is-scrollable');
-
     participants.forEach((p) => {
         const li = document.createElement('li');
         const prefix = p.isOwner ? '👑 ' : getEmojiForUser(p.username) + ' ';
@@ -304,7 +308,6 @@ socket.on('update_participants', (participants) => {
         li.textContent = `${prefix}${p.username}`;
         memberList.appendChild(li);
     });
-
     if (memberList.scrollHeight > memberList.clientHeight) {
         memberList.classList.add('two-columns');
         if (memberList.scrollHeight > memberList.clientHeight) {
@@ -313,24 +316,34 @@ socket.on('update_participants', (participants) => {
     }
 });
 
-// Generic handler for adding new animated messages/events
-function handleNewItem(renderFunction, data) {
-    const ui = { messagesContainer: document.querySelector('.messages') }; // Quick query for this handler
+function handleNewItem(renderFunction, data) { // generic handler for adding new animated messages/events
+    const ui = { messagesContainer: document.querySelector('.messages') }; // quick query for this handler
     if (!ui.messagesContainer) return;
     const element = renderFunction(data);
     element.classList.add('animate-in');
     addMessageToDOM(ui, element);
 }
 
-socket.on('user_event',      (data) => handleNewItem(renderEventMessage, data));
+socket.on('user_event', (data) => handleNewItem(renderEventMessage, data));
+
 socket.on('receive_message', (data) => handleNewItem(renderUserMessage, data));
 
 socket.on('room_closed', (message) => {
-    alert(message);
-    window.location.href = 'index.html';
+    showModal(message, () => { // instead of the browser alert we replace with modal and a callback for redirection
+        window.location.href = 'index.html';
+    });
 });
 
 socket.on('join_error', (message) => {
-    alert(message);
-    window.location.href = 'index.html';
+    showModal(message, () => {
+        window.location.href = 'index.html';
+    });
+});
+
+socket.on('create_error', (message) => { // server is too busy to create a room
+    showModal(message); // just show message, no redirect needed
+    const startButton = document.getElementById('start-btn');
+    if (startButton) {
+        resetStartButtonState(startButton); // reset button to initial state
+    }
 });

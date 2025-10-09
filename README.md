@@ -7,9 +7,9 @@ caecus is a real-time chat application that allows users to create temporary, an
 
 FEATURES
 ------------------------
-✨  ANONYMOUS: No accounts or identifying info — users are assigned a randomized username, which is used to generate a unique colour to make conversations easier to follow
+✨  ANONYMOUS: No accounts or identifying info — users are assigned a randomized username, which is truncated and deterministically assigned a unique colour to make conversations easier to follow
 
-✨  EPHEMERAL: The chatroom and its entire history are completely purged from the server 3 seconds after the host disconnects (the grace period is for users with inconsistent  internet connections)
+✨  EPHEMERAL: The chatroom and its entire history are completely purged from the server 10 seconds after the host disconnects (a grace period for users with inconsistent internet connections)
 
 ✨  SHAREABLE: Room codes are unique enough to be impossible to guess, but can be easily accessed with the clickable URL or QR codes
 
@@ -21,6 +21,8 @@ TECH STACK
 
 🛠️  SOCKET.IO: library for bidirectional communication
 
+🛠️  DOMPURIFY: library preventing code injection on transmitted messages
+
 🛠️  QRCODE-GENERATOR: library that's appropriately named
 
 🛠️  UUID: library for unique room identifiers
@@ -31,14 +33,16 @@ TECH STACK
 
 CODEBASE
 ------------------------
-📁<br>
-├── index.html&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# landing page<br>
-├── room.html&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# chat room page template<br>
-├── style.css&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# retro terminal styling and responsive layout parameters<br>
-├── server.js&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# node.js, express, and socket.io backend logic<br>
-├── main.js&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# client-side javascript for handling ui and websocket events<br>
-└── assets/<br>
-&nbsp;&nbsp;&nbsp;&nbsp;└── favicon.ico     # site favicon
+
+caecus/
+├── index.html          # Landing page
+├── room.html           # Chat room page template
+├── style.css           # Retro terminal styling and layout
+├── server.js           # Node.js, Express, and Socket.IO backend
+├── main.js             # Client-side UI and WebSocket logic
+└── assets/
+    ├── favicon.ico     # Site favicon
+    └── ...             # Fonts, etc.
 
 MECHANICAL FLOW
 ------------------------
@@ -53,18 +57,14 @@ MECHANICAL FLOW
 ⚙️  When a user sends a message, the server broadcasts that message to all other clients in the same room and adds it to the message history<br>
 ⚙️  Clickable share buttons offer text- and image-based ways to share the room with others<br>
 ⚙️  When others join, the server repeats the process of assigning pseudonymous identifiers, broadcasts their arrival to the chatroom, and provides them the stored conversation context<br>
-⚙️  If the room's owner disconnects, the server allows a grace period of 3 seconds to reconnect for users with poor internet connections<br>
+⚙️  If the room's owner disconnects, the server allows a grace period of 10 seconds to reconnect for users with poor internet connections<br>
 ⚙️  If the owner doesn't return, the server emits a emits a room_closed event, boots all room participants, and deletes the room and its message history from memory
 
 GETTING STARTED
 ------------------------
-Just use the [site](https://gonzo.sandyfletcher.ca/)!
-
-Since I'm currently the only user, I'm using a free server, which means it goes down when inactive.
-
-Just make sure you've clicked the START button and it now shows as "CONNECTING...", and it should be ready in a minute or two.
+Just use the [site](https://caecus.ca/)!
 
 📜 License
 ------------------------
 
-This project is open-source until I figure out whether the MIT or GPLv3 License is correct for this application.
+See [MIT License](https://opensource.org/license/mit) or project directory's LICENSE.md file.
