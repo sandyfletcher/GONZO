@@ -76,22 +76,20 @@ async function loadRoomView(roomId, isInitialLoad = false) { // single function 
         const doc = parser.parseFromString(htmlText, 'text/html');
         const roomContent = doc.querySelector('.room.terminal-box');
         const currentContent = document.querySelector('.terminal-box');
-
         if (!roomContent || !currentContent) {
             throw new Error('Could not find necessary content to display room page.');
         }
-
         if (isInitialLoad) {
             currentContent.replaceWith(roomContent);
             setupRoomPage(roomId);
         } else {
-            currentContent.style.animation = 'slide-out-left 0.6s ease-out forwards'; // animate out old content
-            setTimeout(() => { // after animation, replace content and set up new page
+            currentContent.style.animation = 'slide-out-left 0.6s ease-out forwards';
+            currentContent.addEventListener('animationend', () => {
                 currentContent.replaceWith(roomContent);
                 const newUrl = `#${roomId}`;
                 window.history.replaceState({path: newUrl}, '', newUrl);
                 setupRoomPage(roomId);
-            }, 600); // must match animation duration
+            }, { once: true }); // automatically removes the listener after it fires
         }
     } catch (error) {
         console.error('Failed to load room view:', error);
