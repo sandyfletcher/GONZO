@@ -41,17 +41,11 @@ body::after {
     left: 0;
     width: 100%;
     height: 100%;
-    background: 
-        repeating-linear-gradient( /* scanlines */
-            to bottom,
-            rgba(0,0,0,0) 0,
-            rgba(0,0,0,0) 2px,
-            rgba(0,0,0,0.2) 3px
-        ),
+    background:
         radial-gradient( /* vignette */
             ellipse at center,
             rgba(0,0,0,0) 50%,
-            rgba(0,0,0,0.6) 100% 
+            rgba(0,0,0,0.6) 100%
         );
     pointer-events: none; /* Allows clicks to pass through the overlay */
     z-index: 10;
@@ -67,6 +61,24 @@ body.is-shutting-down .terminal-box {
     flex-direction: column;
     overflow: hidden;
     text-align: center;
+    position: relative; /* For positioning the ::before scanlines */
+}
+.terminal-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        repeating-linear-gradient( /* scanlines */
+            to bottom,
+            rgba(0,0,0,0) 0,
+            rgba(0,0,0,0) 2px,
+            rgba(0,0,0,0.2) 3px
+        );
+    pointer-events: none;
+    z-index: 0; /* Position behind the terminal's content */
 }
 .landing.terminal-box {
     animation: crt-warm-up 1s ease-out forwards;
@@ -137,7 +149,7 @@ a:hover {
 /* --- LANDING  --- */
 
 .landing {
-    padding: 2rem 1rem; 
+    padding: 2rem 1rem;
     min-width: 365px;
     max-width: 35rem;
     justify-content: center;
@@ -182,7 +194,7 @@ a:hover {
     min-width: 20rem;
     max-width: 60rem;
     display: flex;
-    flex-direction: row; 
+    flex-direction: row;
 }
 .info-wrapper {
     max-width: 10rem;
@@ -204,7 +216,7 @@ a:hover {
 .share-info {
     display: flex;
     flex-direction: column;
-    max-width: 15rem; 
+    max-width: 15rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -225,12 +237,12 @@ a:hover {
     border: 1px dotted var(--border-color);
     display: inline-block;
     color: var(--terminal-bg);
-    padding: 0.2rem; 
+    padding: 0.2rem;
     cursor: pointer;
     transition: outline 0.2s ease-out;
     max-width: 6rem;
     position: relative; /* enable z-index */
-    z-index: 11; /* one above scanlines */
+    z-index: 1; /* Sits above the parent's ::before pseudo-element */
 }
 .qr-code img {
     display: block;
@@ -253,6 +265,7 @@ a:hover {
     overflow: visible;
     outline: 2px solid var(--terminal-fg);
     position: relative;
+    z-index: 2; /* One level above the QR code to ensure ::after is visible */
 }
 .copied::after {
     content: 'COPIED!';
@@ -307,7 +320,7 @@ a:hover {
     white-space: nowrap;
     break-inside: avoid; /* prevents names from splitting across two columns */
     padding: 0.1rem 0.2rem; /* for borders */
-    overflow: hidden; 
+    overflow: hidden;
     text-overflow: ellipsis;
 }
 .member-list li.is-me {
@@ -500,7 +513,7 @@ a:hover {
         border-right: none;
         border-bottom: 1px solid var(--border-color);
         max-height: 12rem;
-        max-width: none; 
+        max-width: none;
     }
     .share-panel {
         flex: 1;
