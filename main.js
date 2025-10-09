@@ -1,7 +1,6 @@
 const MAX_DISPLAYED_MESSAGES = 10; // corresponds to MAX_HISTORY on the server
 let lastMessageSenderId = null;
-// Connect to the server. This connection should persist across "page" transitions.
-const socket = io("https://fastchat-0opj.onrender.com/");
+const socket = io();
 
 const PARTICIPANT_EMOJIS = [
     '👾', '👽', '🤖', '👻', '🎃', '🤡', '🐸', '🐙', '🦖', '🦋', '🚀', '🛰️', '🔭', '🛸', '☄️',
