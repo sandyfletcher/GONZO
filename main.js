@@ -48,7 +48,6 @@ function showModal(message, callback) { // modal to replace browser pop-ups
             callback();
         }
     };
-
     closeBtn.addEventListener('click', closeModal);
 }
 
@@ -262,7 +261,7 @@ function renderEventMessage(data) {
 socket.on('connect', () => {
     console.log("Socket connected. ID:", socket.id);
     const roomId = window.location.hash.substring(1);
-    if (roomId) { // if we're on a room page (or should be) and we reconnect, rejoin the room.
+    if (roomId) { // rejoin if we should be on a room page and we reconnect
         joinRoom(roomId);
     }
 });
@@ -328,7 +327,7 @@ socket.on('user_event', (data) => handleNewItem(renderEventMessage, data));
 socket.on('receive_message', (data) => handleNewItem(renderUserMessage, data));
 
 socket.on('room_closed', (message) => {
-    showModal(message, () => { // instead of the browser alert we replace with modal and a callback for redirection
+    showModal(message, () => { // instead of browser alert we replace with modal and a callback for redirection
         window.location.href = 'index.html';
     });
 });

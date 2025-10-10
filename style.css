@@ -3,6 +3,7 @@
 @font-face { font-family: 'Sixtyfour'; src: url('assets/Sixtyfour.ttf') format('truetype'); font-display: block}
 @font-face { font-family: 'RussoOne'; src: url('assets/RussoOne.ttf') format('truetype'); font-display: block}
 @font-face { font-family: 'Offside'; src: url('assets/Offside.ttf') format('truetype'); font-display: block}
+@font-face { font-family: 'Wallpoet'; src: url('assets/Wallpoet.ttf') format('truetype'); font-display: block}
 
 /* --- DEFAULT  --- */
 
@@ -47,7 +48,7 @@ body::after {
             rgba(0,0,0,0) 50%,
             rgba(0,0,0,0.6) 100%
         );
-    pointer-events: none; /* Allows clicks to pass through the overlay */
+    pointer-events: none; /* allow clicks to pass through overlay */
     z-index: 10;
 }
 body.is-shutting-down .terminal-box {
@@ -154,16 +155,19 @@ a:hover {
     max-width: 35rem;
     justify-content: center;
 }
+ .landing h1 {
+    font-family: 'Wallpoet', Courier, monospace;
+        letter-spacing: 0.6rem;    
+ }
 .cursor {
     display: inline-block;
     background-color: var(--terminal-fg);
-    width: 0.2em;
-    height: 1.1em;
+    width: 0.1em;
+    height: 0.8em;
     animation: blink 1s step-end infinite;
     margin-left: 0.2em;
     vertical-align: bottom;
 }
-
 .feature-list {
     list-style: none;
     margin: 1.1rem auto 0.7rem;
@@ -264,7 +268,7 @@ a:hover {
     overflow: visible;
     outline: 2px solid var(--terminal-fg);
     position: relative;
-    z-index: 2; /* One level above the QR code to ensure ::after is visible */
+    z-index: 2; /* one level above QR code to ensure ::after is visible */
 }
 .copied::after {
     content: 'COPIED!';
